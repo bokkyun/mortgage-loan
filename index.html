@@ -319,6 +319,14 @@
             </div>
           </div>
           <p class="field-hint" style="margin-top: 0.5rem">우대금리 적용 후 최종금리가 1.5% 미만이면 1.5% 적용, 우대 상한은 0.5%p(다자녀 가구는 0.7%p)</p>
+
+          <section class="card results hidden" id="did-results" style="margin-top: 1rem">
+            <h2>디딤돌 금리 결과</h2>
+            <div class="result-row"><span>기본금리(표 기준)</span><span id="did-base">—</span></div>
+            <div class="result-row"><span>우대 합계(적용)</span><span id="did-discount-out">—</span></div>
+            <div class="result-row"><span>최종금리</span><span id="did-final" class="big-number">—</span></div>
+            <p class="reason-text" id="did-reason"></p>
+          </section>
         </div>
 
         <div id="rate-tab-newborn" class="hidden" style="margin-top: 0.5rem">
@@ -380,8 +388,6 @@
             <label class="check-item"><input type="checkbox" id="nb-early40" /> 1년 경과 후 원금 40% 이상 중도상환 (0.2%p)</label>
             <label class="check-item"><input type="checkbox" id="nb-local-unsold" /> 지방 준공후 미분양주택 가구 (0.2%p)</label>
           </div>
-          <button type="button" class="btn-primary" id="btn-nb-calc">신생아 디딤돌 금리 계산</button>
-
           <section class="card results hidden" id="nb-results" style="margin-top: 1rem">
             <h2>신생아 디딤돌 금리 결과</h2>
             <div class="result-block">
@@ -454,7 +460,6 @@
               </select>
             </div>
           </div>
-          <button type="button" class="btn-primary" id="btn-fh-calc">생애최초·신혼가구 금리 계산</button>
           <p class="field-hint" style="margin-top: 0.5rem">우대 상한은 0.5%p(다자녀 0.7%p), 최종금리 하한은 1.2% 적용</p>
 
           <section class="card results hidden" id="fh-results" style="margin-top: 1rem">
@@ -466,6 +471,10 @@
           </section>
         </div>
       </section>
+
+      <button type="button" class="btn-primary" id="btn-rate-calc">금리 계산</button>
+
+      <div style="height: 1rem"></div>
 
       <section class="card">
         <h2>4. DTI (대출금액 기반 자동계산)</h2>

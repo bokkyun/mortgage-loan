@@ -349,6 +349,42 @@
     alert(`부부합산 연소득 ${fmtNum(incomeTotal)}원이 3번 탭에 반영됐습니다.`);
   }
 
+  function runRateCalc() {
+    const didVisible = !$("rate-tab-didimdol")?.classList.contains("hidden");
+    const nbVisible  = !$("rate-tab-newborn")?.classList.contains("hidden");
+
+    if (didVisible) {
+      const income = num($("did-income"));
+      const term   = parseInt($("did-term")?.value || "30", 10);
+      if (income <= 0) { alert("부부합산 연소득을 입력해 주세요."); return; }
+      const childDiscount = parseFloat($("did-child-tier")?.value || "0") || 0;
+      const result = calcDidimdolLikeRate({
+        income,
+        term,
+        rateTypeAdd: parseFloat($("did-rate-type")?.value || "0") || 0,
+        localHome: $("did-local-home")?.checked,
+        specialBaseDiscount: 0,
+        childDiscount,
+        savingsDiscount: parseFloat($("subsidy")?.value || "0") || 0,
+        hasChild: childDiscount > 0,
+        checkboxDiscounts: Array.from(document.querySelectorAll("#rate-tab-didimdol input[type=checkbox][data-rate]"))
+          .filter((c) => c.checked)
+          .map((c) => parseFloat(c.getAttribute("data-rate") || "0")),
+      });
+      if (result.error) { alert("디딤돌 금리: " + result.error); return; }
+      $("did-base").textContent = `${result.base.toFixed(2)}%`;
+      $("did-discount-out").textContent = `-${result.applied.toFixed(2)}%p (원우대 ${result.discountRaw.toFixed(2)}%p)`;
+      $("did-final").textContent = `${result.finalRate.toFixed(2)}%`;
+      $("did-reason").textContent = `소득 ${fmtNum(income)}원, 만기 ${term}년 기준. 우대 상한 ${result.cap.toFixed(1)}%p, 최저금리 1.5% 적용.`;
+      $("did-results")?.classList.remove("hidden");
+      $("did-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (nbVisible) {
+      runNewbornCalc();
+    } else {
+      runFirstHomeCalc();
+    }
+  }
+
   function runCalc() {
     const resSelf = calcPerson("self");
     if (resSelf.error) {
@@ -636,13 +672,12 @@
     $("schedule-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  $("btn-rate-calc")?.addEventListener("click", runRateCalc);
   $("btn-income-calc")?.addEventListener("click", runIncomeCalc);
   $("btn-calc")?.addEventListener("click", runCalc);
   $("sched-btn-ep")?.addEventListener("click", () => runSchedule("ep"));
   $("sched-btn-ei")?.addEventListener("click", () => runSchedule("ei"));
   $("sched-btn-gp")?.addEventListener("click", () => runSchedule("gp"));
-  $("btn-nb-calc")?.addEventListener("click", runNewbornCalc);
-  $("btn-fh-calc")?.addEventListener("click", runFirstHomeCalc);
   initDefaults();
   wireMoneyInputs();
   updatePanels("self", document.querySelector('input[name="emp-self"]:checked')?.value || "A");
