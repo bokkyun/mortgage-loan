@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>디딤돌 소득·금리·DTI·DSR 계산기 (참고용)</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>디딤돌 소득 인정 · 금리 · DTI · DSR</h1>
+      <p>재직·휴직·복직에 따른 연소득 추정 후, 우대 반영 금리와 부채비율을 함께 확인합니다.</p>
+      <div class="disclaimer">
+        본 페이지는 공개된 원리를 바탕으로 한 <strong>참고용 추정치</strong>입니다. 보금자리론·디딤돌 실제 심사
+        소득·금리·DTI/DSR은 HUG·취급 금융기관 기준과 다를 수 있으며, 법적 효력이 없습니다.
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. 본인 <span class="badge">필수</span></h2>
+        <div class="grid">
+          <div>
+            <label>재직 유형</label>
+            <div class="radio-row" id="type-self">
+              <label class="radio-pill"><input type="radio" name="emp-self" value="A" checked /><span>일반 재직</span></label>
+              <label class="radio-pill"><input type="radio" name="emp-self" value="B" /><span>2025년 신규 입사</span></label>
+              <label class="radio-pill"><input type="radio" name="emp-self" value="C" /><span>휴직</span></label>
+              <label class="radio-pill"><input type="radio" name="emp-self" value="D" /><span>복직 후 근무</span></label>
+            </div>
+          </div>
+          <div>
+            <label class="check-item">
+              <input type="checkbox" id="proof-self" />
+              상시소득 입증 가능(변동률·10% 차감 등 완화 적용)
+            </label>
+          </div>
+        </div>
+
+        <div id="panel-self-A" class="emp-panel">
+          <div class="subsection-title">일반 재직 — 직전 2개년 소득 (원)</div>
+          <div>
+            <label for="self-a-start">재직 시작일</label>
+            <input type="date" id="self-a-start" />
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <label for="self-a-2023">전전연도 근로소득 등</label>
+              <input type="number" id="self-a-2023" min="0" step="10000" placeholder="예: 45000000" />
+            </div>
+            <div>
+              <label for="self-a-2024">전연도 근로소득 등</label>
+              <input type="number" id="self-a-2024" min="0" step="10000" placeholder="예: 48000000" />
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-self-B" class="emp-panel hidden">
+          <div class="subsection-title">2025년 신규 입사 — 연환산</div>
+          <div class="grid grid-2">
+            <div>
+              <label for="self-b-start">현 직장 재직 시작일</label>
+              <input type="date" id="self-b-start" />
+            </div>
+            <div>
+              <label for="self-b-end">소득 합산 종료일 (기본: 오늘)</label>
+              <input type="date" id="self-b-end" />
+            </div>
+            <div class="grid-span-2">
+              <label for="self-b-sum">위 기간 실수령(또는 과세) 소득 합계 (원)</label>
+              <input type="number" id="self-b-sum" min="0" step="10000" />
+            </div>
+            <div>
+              <label class="check-item">
+                <input type="checkbox" id="self-b-skip10" />
+                10% 차감 미적용 (상시소득 입증)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-self-C" class="emp-panel hidden">
+          <div class="subsection-title">휴직 — 휴직 직전 2개년 소득 (원)</div>
+          <div>
+            <label for="self-c-start">재직 시작일</label>
+            <input type="date" id="self-c-start" />
+          </div>
+          <div>
+            <label for="self-c-leave">휴직 시작일</label>
+            <input type="date" id="self-c-leave" />
+            <p class="field-hint" id="self-c-hint">휴직일을 입력하면 아래 연도 라벨이 맞춰집니다.</p>
+          </div>
+          <div class="grid grid-2">
+            <div>
+              <label for="self-c-old" id="self-c-lbl-old">전전연도 소득</label>
+              <input type="number" id="self-c-old" min="0" step="10000" />
+            </div>
+            <div>
+              <label for="self-c-new" id="self-c-lbl-new">전연도 소득</label>
+              <input type="number" id="self-c-new" min="0" step="10000" />
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-self-D" class="emp-panel hidden">
+          <div class="subsection-title">복직 — 일자 및 소득</div>
+          <div class="grid grid-2">
+            <div>
+              <label for="self-d-start">재직 시작일</label>
+              <input type="date" id="self-d-start" />
+            </div>
+            <div>
+              <label for="self-d-leave">휴직 시작일</label>
+              <input type="date" id="self-d-leave" />
+            </div>
+            <div>
+              <label for="self-d-return">복직일</label>
+              <input type="date" id="self-d-return" />
+            </div>
+            <div>
+              <label for="self-d-end">기준일 (소득·기간 산정, 기본: 오늘)</label>
+              <input type="date" id="self-d-end" />
+            </div>
+          </div>
+          <div class="subsection-title">휴직 직전 2개년 (3개월 미만 복직 시 사용)</div>
+          <div class="grid grid-2">
+            <div>
+              <label for="self-d-y2" id="self-d-lbl-y2">전전연도 소득</label>
+              <input type="number" id="self-d-y2" min="0" step="10000" />
+            </div>
+            <div>
+              <label for="self-d-y1" id="self-d-lbl-y1">전연도 소득</label>
+              <input type="number" id="self-d-y1" min="0" step="10000" />
+            </div>
+          </div>
+          <div class="subsection-title">복직 후 3개월 이상</div>
+          <div id="self-d-partial-fields" class="grid grid-2">
+            <div>
+              <label for="self-d-p-sum">복직 후 기간 소득 합계 (월별 합산)</label>
+              <input type="number" id="self-d-p-sum" min="0" step="10000" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>2. 배우자</h2>
+        <label class="check-item">
+          <input type="checkbox" id="has-spouse" />
+          배우자 소득 합산 (각자 동일 규칙으로 산출 후 합산)
+        </label>
+        <div id="spouse-wrap" class="hidden" style="margin-top: 1rem">
+          <div class="radio-row" id="type-spouse">
+            <label class="radio-pill"><input type="radio" name="emp-spouse" value="A" checked /><span>일반 재직</span></label>
+            <label class="radio-pill"><input type="radio" name="emp-spouse" value="B" /><span>2025년 신규 입사</span></label>
+            <label class="radio-pill"><input type="radio" name="emp-spouse" value="C" /><span>휴직</span></label>
+            <label class="radio-pill"><input type="radio" name="emp-spouse" value="D" /><span>복직 후 근무</span></label>
+          </div>
+          <label class="check-item" style="margin-top: 0.75rem">
+            <input type="checkbox" id="proof-spouse" />
+            배우자 상시소득 입증
+          </label>
+
+          <div id="panel-spouse-A" class="emp-panel-sp" style="margin-top: 1rem">
+            <div>
+              <label for="sp-a-start">재직 시작일</label>
+              <input type="date" id="sp-a-start" />
+            </div>
+            <div class="grid grid-2">
+              <div>
+                <label for="sp-a-2023">전전연도 소득</label>
+                <input type="number" id="sp-a-2023" min="0" step="10000" />
+              </div>
+              <div>
+                <label for="sp-a-2024">전연도 소득</label>
+                <input type="number" id="sp-a-2024" min="0" step="10000" />
+              </div>
+            </div>
+          </div>
+          <div id="panel-spouse-B" class="emp-panel-sp hidden">
+            <div class="grid grid-2">
+              <div>
+                <label for="sp-b-start">재직 시작일</label>
+                <input type="date" id="sp-b-start" />
+              </div>
+              <div>
+                <label for="sp-b-end">소득 합산 종료일</label>
+                <input type="date" id="sp-b-end" />
+              </div>
+              <div style="grid-column: 1 / -1">
+                <label for="sp-b-sum">기간 소득 합계</label>
+                <input type="number" id="sp-b-sum" min="0" step="10000" />
+              </div>
+              <label class="check-item">
+                <input type="checkbox" id="sp-b-skip10" />
+                10% 차감 미적용
+              </label>
+            </div>
+          </div>
+          <div id="panel-spouse-C" class="emp-panel-sp hidden">
+            <div>
+              <label for="sp-c-start">재직 시작일</label>
+              <input type="date" id="sp-c-start" />
+            </div>
+            <div>
+              <label for="sp-c-leave">휴직 시작일</label>
+              <input type="date" id="sp-c-leave" />
+            </div>
+            <div class="grid grid-2">
+              <div>
+                <label for="sp-c-old" id="sp-c-lbl-old">전전연도 소득</label>
+                <input type="number" id="sp-c-old" min="0" step="10000" />
+              </div>
+              <div>
+                <label for="sp-c-new" id="sp-c-lbl-new">전연도 소득</label>
+                <input type="number" id="sp-c-new" min="0" step="10000" />
+              </div>
+            </div>
+          </div>
+          <div id="panel-spouse-D" class="emp-panel-sp hidden">
+            <div class="grid grid-2">
+              <div>
+                <label for="sp-d-start">재직 시작일</label>
+                <input type="date" id="sp-d-start" />
+              </div>
+              <div>
+                <label for="sp-d-leave">휴직 시작일</label>
+                <input type="date" id="sp-d-leave" />
+              </div>
+              <div>
+                <label for="sp-d-return">복직일</label>
+                <input type="date" id="sp-d-return" />
+              </div>
+              <div>
+                <label for="sp-d-end">기준일</label>
+                <input type="date" id="sp-d-end" />
+              </div>
+            </div>
+            <div class="grid grid-2">
+              <div>
+                <label for="sp-d-y2" id="sp-d-lbl-y2">전전연도 소득</label>
+                <input type="number" id="sp-d-y2" min="0" step="10000" />
+              </div>
+              <div>
+                <label for="sp-d-y1" id="sp-d-lbl-y1">전연도 소득</label>
+                <input type="number" id="sp-d-y1" min="0" step="10000" />
+              </div>
+            </div>
+            <div id="sp-d-partial-fields" class="grid grid-2">
+              <div>
+                <label for="sp-d-p-sum">복직 후 기간 소득 합계 (월별 합산)</label>
+                <input type="number" id="sp-d-p-sum" min="0" step="10000" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>3. 금리 계산 탭</h2>
+        <div class="person-tabs">
+          <button type="button" id="rate-tab-btn-didimdol" class="active">디딤돌</button>
+          <button type="button" id="rate-tab-btn-newborn">신생아 디딤돌</button>
+          <button type="button" id="rate-tab-btn-firsthome">생애최초·신혼가구</button>
+        </div>
+
+        <div id="rate-tab-didimdol">
+          <div class="grid grid-2">
+            <div>
+              <label for="did-income">부부합산 연소득 (원)</label>
+              <input type="text" id="did-income" inputmode="numeric" />
+            </div>
+            <div>
+              <label for="did-term">대출기간</label>
+              <select id="did-term">
+                <option value="10">10년</option>
+                <option value="15">15년</option>
+                <option value="20">20년</option>
+                <option value="30" selected>30년</option>
+              </select>
+            </div>
+            <div>
+              <label for="did-rate-type">금리 유형(가산)</label>
+              <select id="did-rate-type">
+                <option value="0">5년단위 변동/변동 (가산 없음)</option>
+                <option value="0.2">10년 고정 후 변동 (+0.2%p)</option>
+                <option value="0.3">고정금리 (+0.3%p)</option>
+              </select>
+            </div>
+            <div>
+              <label class="check-item"><input type="checkbox" id="did-local-home" /> 지방 소재 주택 (−0.2%p)</label>
+            </div>
+          </div>
+          <div class="check-grid" style="margin-top: 0.75rem">
+            <label class="check-item"><input type="checkbox" data-rate="0.5" id="did-single-parent" /> 한부모가구(연소득 6천만원 이하) −0.5%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.2" id="did-special" /> 장애인·다문화·생애최초·신혼가구 −0.2%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.1" id="did-electronic" /> 전자계약 시스템 이용 −0.1%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.1" id="did-under30" /> 산정 대출금액의 30% 이내 대출 −0.1%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.2" id="did-prepay40" /> 1년 경과 후 원금 40% 이상 중도상환 −0.2%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.2" id="did-local-unsold" /> 지방 준공후 미분양주택 가구 −0.2%p</label>
+          </div>
+          <div class="grid grid-2" style="margin-top: 0.75rem">
+            <div>
+              <label for="subsidy">청약저축·납입 우대 (%p 합산)</label>
+              <select id="subsidy">
+                <option value="0">해당 없음</option>
+                <option value="0.3">5년 (60회차) −0.3%p</option>
+                <option value="0.4">10년 (120회차) −0.4%p</option>
+                <option value="0.5">15년 (180회차) −0.5%p</option>
+              </select>
+            </div>
+            <div>
+              <label for="did-child-tier">다자녀 우대</label>
+              <select id="did-child-tier">
+                <option value="0">해당 없음</option>
+                <option value="0.3">1자녀 −0.3%p</option>
+                <option value="0.5">2자녀 −0.5%p</option>
+                <option value="0.7">3자녀 이상 −0.7%p</option>
+              </select>
+            </div>
+          </div>
+          <p class="field-hint" style="margin-top: 0.5rem">우대금리 적용 후 최종금리가 1.5% 미만이면 1.5% 적용, 우대 상한은 0.5%p(다자녀 가구는 0.7%p)</p>
+        </div>
+
+        <div id="rate-tab-newborn" class="hidden" style="margin-top: 0.5rem">
+          <p class="field-hint" style="margin: 0 0 0.75rem">
+            사진 기준표를 반영한 참고용 계산입니다. 실제 심사·적용 금리는 접수일/은행 내규에 따라 달라질 수 있습니다.
+          </p>
+          <div class="grid grid-2">
+            <div>
+              <label for="nb-income">부부합산 연소득 (원)</label>
+              <input type="text" id="nb-income" inputmode="numeric" />
+            </div>
+            <div>
+              <label for="nb-term">대출기간</label>
+              <select id="nb-term">
+                <option value="10">10년</option>
+                <option value="15">15년</option>
+                <option value="20">20년</option>
+                <option value="30" selected>30년</option>
+              </select>
+            </div>
+            <div>
+              <label class="check-item"><input type="checkbox" id="nb-local-home" /> 지방 소재 주택 (기본금리 0.2%p 인하)</label>
+            </div>
+          </div>
+
+          <h2 style="margin-top: 1rem">우대금리 (중복 적용 가능)</h2>
+          <p class="field-hint" style="margin: 0 0 0.75rem">우대금리 총합은 최대 0.5%p, 최종금리는 1.2% 미만이면 1.2%로 적용</p>
+          <div class="grid grid-2">
+            <div>
+              <label for="nb-savings">청약(종합)저축 가입기간 우대</label>
+              <select id="nb-savings">
+                <option value="0">해당 없음</option>
+                <option value="0.3">5년 (60회차) 0.3%p</option>
+                <option value="0.4">10년 (120회차) 0.4%p</option>
+                <option value="0.5">15년 (180회차) 0.5%p</option>
+              </select>
+            </div>
+            <div>
+              <label for="nb-child-newborn">신생아 출생자녀 수 우대</label>
+              <select id="nb-child-newborn">
+                <option value="0">해당 없음</option>
+                <option value="0.2">2자녀 (0.2%p)</option>
+                <option value="0.4">3자녀 (0.4%p)</option>
+                <option value="0.6">4자녀 이상 (0.6%p)</option>
+              </select>
+            </div>
+            <div>
+              <label for="nb-child-minor">신생아 외 미성년 자녀 우대</label>
+              <select id="nb-child-minor">
+                <option value="0">해당 없음</option>
+                <option value="0.1">1명 (0.1%p)</option>
+                <option value="0.2">2명 (0.2%p)</option>
+                <option value="0.3">3명 이상 (0.3%p)</option>
+              </select>
+            </div>
+          </div>
+          <div class="check-grid" style="margin-top: 0.75rem">
+            <label class="check-item"><input type="checkbox" id="nb-electronic" /> 부동산 전자계약 시스템 이용 (0.1%p)</label>
+            <label class="check-item"><input type="checkbox" id="nb-early40" /> 1년 경과 후 원금 40% 이상 중도상환 (0.2%p)</label>
+            <label class="check-item"><input type="checkbox" id="nb-local-unsold" /> 지방 준공후 미분양주택 가구 (0.2%p)</label>
+          </div>
+          <button type="button" class="btn-primary" id="btn-nb-calc">신생아 디딤돌 금리 계산</button>
+
+          <section class="card results hidden" id="nb-results" style="margin-top: 1rem">
+            <h2>신생아 디딤돌 금리 결과</h2>
+            <div class="result-block">
+              <div class="result-row"><span>특례 적용 기본금리(5년)</span><span id="nb-base-special">—</span></div>
+              <div class="result-row"><span>우대 합계(적용)</span><span id="nb-discount-applied">—</span></div>
+              <div class="result-row"><span>특례 적용 최종금리(5년)</span><span id="nb-final-special" class="big-number">—</span></div>
+            </div>
+            <div class="result-block">
+              <div class="result-row"><span>특례 종료 후 기본금리(참고)</span><span id="nb-base-post">—</span></div>
+              <div class="result-row"><span>특례 종료 후 최종금리(참고)</span><span id="nb-final-post">—</span></div>
+            </div>
+            <p class="reason-text" id="nb-reason"></p>
+          </section>
+        </div>
+
+        <div id="rate-tab-firsthome" class="hidden" style="margin-top: 0.5rem">
+          <p class="field-hint" style="margin: 0 0 0.75rem">
+            생애최초·신혼부부 전용 금리표(25.03.24 이후) 기준 참고용 계산입니다.
+          </p>
+          <div class="grid grid-2">
+            <div>
+              <label for="fh-income">부부합산 연소득 (원)</label>
+              <input type="text" id="fh-income" inputmode="numeric" />
+            </div>
+            <div>
+              <label for="fh-term">대출기간</label>
+              <select id="fh-term">
+                <option value="10">10년</option>
+                <option value="15">15년</option>
+                <option value="20">20년</option>
+                <option value="30" selected>30년</option>
+              </select>
+            </div>
+            <div>
+              <label for="fh-rate-type">금리 유형(가산)</label>
+              <select id="fh-rate-type">
+                <option value="0">5년단위 변동/변동 (가산 없음)</option>
+                <option value="0.2">10년 고정 후 변동 (+0.2%p)</option>
+                <option value="0.3">고정금리 (+0.3%p)</option>
+              </select>
+            </div>
+            <div>
+              <label class="check-item"><input type="checkbox" id="fh-local-home" /> 지방 소재 주택 (−0.2%p)</label>
+            </div>
+          </div>
+          <div class="check-grid" style="margin-top: 0.75rem">
+            <label class="check-item"><input type="checkbox" data-rate="0.1" id="fh-electronic" /> 전자계약 시스템 이용 −0.1%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.1" id="fh-newsale" /> 신규분양주택 가구 −0.1%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.1" id="fh-under30" /> 산정 대출금액의 30% 이내 대출 −0.1%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.2" id="fh-prepay40" /> 1년 경과 후 원금 40% 이상 중도상환 −0.2%p</label>
+            <label class="check-item"><input type="checkbox" data-rate="0.2" id="fh-local-unsold" /> 지방 준공후 미분양주택 가구 −0.2%p</label>
+          </div>
+          <div class="grid grid-2" style="margin-top: 0.75rem">
+            <div>
+              <label for="fh-subsidy">청약저축·납입 우대</label>
+              <select id="fh-subsidy">
+                <option value="0">해당 없음</option>
+                <option value="0.3">5년 (60회차) −0.3%p</option>
+                <option value="0.4">10년 (120회차) −0.4%p</option>
+                <option value="0.5">15년 (180회차) −0.5%p</option>
+              </select>
+            </div>
+            <div>
+              <label for="fh-child-tier">다자녀 우대</label>
+              <select id="fh-child-tier">
+                <option value="0">해당 없음</option>
+                <option value="0.3">1자녀 −0.3%p</option>
+                <option value="0.5">2자녀 −0.5%p</option>
+                <option value="0.7">3자녀 이상 −0.7%p</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn-primary" id="btn-fh-calc">생애최초·신혼가구 금리 계산</button>
+          <p class="field-hint" style="margin-top: 0.5rem">우대 상한은 0.5%p(다자녀 0.7%p), 최종금리 하한은 1.2% 적용</p>
+
+          <section class="card results hidden" id="fh-results" style="margin-top: 1rem">
+            <h2>생애최초·신혼가구 금리 결과</h2>
+            <div class="result-row"><span>기본금리(표 기준)</span><span id="fh-base">—</span></div>
+            <div class="result-row"><span>우대 합계(적용)</span><span id="fh-discount">—</span></div>
+            <div class="result-row"><span>최종금리</span><span id="fh-final" class="big-number">—</span></div>
+            <p class="reason-text" id="fh-reason"></p>
+          </section>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. DTI · DSR (대출금액 기반 자동계산)</h2>
+        <p class="field-hint" style="margin: 0 0 0.75rem">
+          DTI: 주담대 연간 원리금 + 기타대출 연간 이자 / 연소득 · DSR: 주담대+기타대출 연간 원리금 / 연소득
+        </p>
+        <div class="subsection-title">주택담보대출(디딤돌) 입력</div>
+        <div class="grid grid-2">
+          <div>
+            <label for="loan-amt">대출금액 (원)</label>
+            <input type="number" id="loan-amt" min="0" step="100000" placeholder="예: 250000000" />
+          </div>
+          <div>
+            <label for="loan-years">대출 기간 (년)</label>
+            <input type="number" id="loan-years" value="30" min="1" max="50" step="1" />
+          </div>
+          <div>
+            <label for="loan-rate">주담대 금리(%)</label>
+            <input type="number" id="loan-rate" min="0" max="20" step="0.01" placeholder="미입력시 3번 계산금리 사용" />
+          </div>
+          <div>
+            <label for="dti-cap">DTI 기준 (규제지역 여부)</label>
+            <select id="dti-cap">
+              <option value="60">일반 60%</option>
+              <option value="50">규제지역 등 50%</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="subsection-title">기타 대출 입력</div>
+        <div class="grid grid-2">
+          <div>
+            <label for="other-amt">기타대출 원금 합계 (원)</label>
+            <input type="number" id="other-amt" min="0" step="100000" placeholder="없으면 0" />
+          </div>
+          <div>
+            <label for="other-rate">기타대출 평균 금리(%)</label>
+            <input type="number" id="other-rate" min="0" max="30" step="0.01" placeholder="예: 6.5" />
+          </div>
+          <div>
+            <label for="other-years">기타대출 평균 잔여기간 (년)</label>
+            <input type="number" id="other-years" value="5" min="1" max="50" step="1" />
+          </div>
+        </div>
+      </section>
+
+      <button type="button" class="btn-primary" id="btn-calc">소득 · 금리 · DTI/DSR 계산</button>
+
+      <section class="card results hidden" id="results">
+        <h2>결과</h2>
+        <div class="result-block">
+          <h3>인정 연소득 (추정)</h3>
+          <div class="result-row"><span>본인</span><span id="out-self">—</span></div>
+          <div class="result-row"><span>배우자</span><span id="out-spouse">—</span></div>
+          <div class="result-row"><span>합산</span><span id="out-sum" class="big-number">—</span></div>
+          <p class="reason-text" id="out-reason-self"></p>
+          <p class="reason-text hidden" id="out-reason-spouse"></p>
+        </div>
+        <div class="result-block">
+          <h3>예상 금리 (가정 기본금리 기준)</h3>
+          <div class="result-row"><span>총 우대</span><span id="out-discount">—</span></div>
+          <div class="result-row"><span>최종(가정)</span><span id="out-final-rate">—</span></div>
+        </div>
+        <div class="result-block">
+          <h3>DTI · DSR</h3>
+          <div class="result-row"><span>DTI</span><span id="out-dti">—</span></div>
+          <div class="result-row"><span>DSR</span><span id="out-dsr">—</span></div>
+          <div class="result-row"><span>DTI vs 기준</span><span id="out-dti-judge">—</span></div>
+        </div>
+        <div class="result-block">
+          <h3>월 상환액 (원리금균등·가정 금리)</h3>
+          <div class="result-row"><span>월 납입 추정</span><span id="out-pmt">—</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>© 참고용 계산기 · 입력값은 서버로 전송되지 않습니다 (브라우저 내 계산).</footer>
+
+    <script src="js/income.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
