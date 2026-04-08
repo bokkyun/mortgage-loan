@@ -1,5 +1,6 @@
 (function () {
   const $ = (id) => document.getElementById(id);
+  let lastLoanParams = null;
 
   function todayStr() {
     const d = new Date();
@@ -395,7 +396,10 @@
     const loanYears = num($("loan-years")) || 30;
     const loanRateInput = num($("loan-rate"));
     const loanRateForCalc = loanRateInput > 0 ? loanRateInput : finalRate;
-    const pmt = monthlyPMT(loanAmt, loanRateForCalc, loanYears);
+    const graceMonths = Math.max(0, parseInt($("grace-months")?.value || "0", 10) || 0);
+    const totalMonths = loanYears * 12;
+    const repayMonths = Math.max(1, totalMonths - graceMonths);
+    const pmt = monthlyPMT(loanAmt, loanRateForCalc, repayMonths / 12);
     const piM = pmt * 12;
 
     const otherAmt = num($("other-amt"));
@@ -412,11 +416,22 @@
     judge.textContent = ok ? `기준 ${cap}% 이내` : `기준 ${cap}% 초과`;
     judge.className = ok ? "pill-ok" : "pill-bad";
 
-    $("out-pmt").textContent =
-      loanAmt > 0 ? `${fmtNum(pmt)}원/월 (원리금균등·적용 금리 ${loanRateForCalc.toFixed(2)}%)` : "(대출원금 미입력)";
+    $("out-pmt").textContent = loanAmt > 0
+      ? `${fmtNum(pmt)}원/월 (원리금균등·적용 금리 ${loanRateForCalc.toFixed(2)}%${graceMonths > 0 ? `·거치 ${graceMonths}개월` : ""})`
+      : "(대출원금 미입력)";
 
     $("results").classList.remove("hidden");
     $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+
+    lastLoanParams = loanAmt > 0
+      ? { principal: loanAmt, annualRate: loanRateForCalc, totalMonths, graceMonths }
+      : null;
+    if (lastLoanParams) {
+      $("schedule-section")?.classList.remove("hidden");
+    } else {
+      $("schedule-section")?.classList.add("hidden");
+      $("schedule-wrap").innerHTML = "";
+    }
   }
 
   function initDefaults() {
@@ -468,7 +483,147 @@
     $("rate-tab-newborn").classList.add("hidden");
   });
 
+  function genScheduleEqualInstallment(principal, annualRatePct, totalMonths, graceMonths) {
+    const r = annualRatePct / 100 / 12;
+    const repayMonths = totalMonths - graceMonths;
+    const pmt = repayMonths > 0
+      ? r > 0
+        ? (principal * r * Math.pow(1 + r, repayMonths)) / (Math.pow(1 + r, repayMonths) - 1)
+        : principal / repayMonths
+      : 0;
+    const rows = [];
+    let balance = principal;
+    for (let i = 1; i <= totalMonths; i++) {
+      const interest = balance * r;
+      let principalPaid, payment;
+      if (i <= graceMonths) {
+        principalPaid = 0;
+        payment = interest;
+      } else {
+        principalPaid = Math.max(0, pmt - interest);
+        payment = pmt;
+      }
+      balance = Math.max(0, balance - principalPaid);
+      rows.push({ month: i, principal: principalPaid, interest, payment, balance });
+    }
+    return rows;
+  }
+
+  function genScheduleEqualPrincipal(principal, annualRatePct, totalMonths, graceMonths) {
+    const r = annualRatePct / 100 / 12;
+    const repayMonths = totalMonths - graceMonths;
+    const monthlyPrincipal = repayMonths > 0 ? principal / repayMonths : 0;
+    const rows = [];
+    let balance = principal;
+    for (let i = 1; i <= totalMonths; i++) {
+      const interest = balance * r;
+      let principalPaid, payment;
+      if (i <= graceMonths) {
+        principalPaid = 0;
+        payment = interest;
+      } else {
+        principalPaid = Math.min(monthlyPrincipal, balance);
+        payment = principalPaid + interest;
+      }
+      balance = Math.max(0, balance - principalPaid);
+      rows.push({ month: i, principal: principalPaid, interest, payment, balance });
+    }
+    return rows;
+  }
+
+  function genScheduleGraduated(principal, annualRatePct, totalMonths, graceMonths, annualIncreasePct) {
+    const r = annualRatePct / 100 / 12;
+    const g = annualIncreasePct / 100;
+    const repayMonths = totalMonths - graceMonths;
+    if (repayMonths <= 0) return genScheduleEqualInstallment(principal, annualRatePct, totalMonths, graceMonths);
+
+    function trialBalance(p0) {
+      let bal = principal;
+      for (let i = 1; i <= totalMonths; i++) {
+        if (i > graceMonths) {
+          const interest = bal * r;
+          const yr = Math.floor((i - graceMonths - 1) / 12);
+          const payment = p0 * Math.pow(1 + g, yr);
+          bal -= Math.max(0, payment - interest);
+        }
+        if (bal < 0) return bal;
+      }
+      return bal;
+    }
+
+    const eiPmt = r > 0
+      ? (principal * r * Math.pow(1 + r, repayMonths)) / (Math.pow(1 + r, repayMonths) - 1)
+      : principal / repayMonths;
+    let lo = 0, hi = eiPmt * 2;
+    while (trialBalance(hi) > 0 && hi < principal) hi *= 2;
+    for (let iter = 0; iter < 80; iter++) {
+      const mid = (lo + hi) / 2;
+      if (trialBalance(mid) > 0) lo = mid; else hi = mid;
+    }
+    const p0 = (lo + hi) / 2;
+
+    const rows = [];
+    let balance = principal;
+    for (let i = 1; i <= totalMonths; i++) {
+      const interest = balance * r;
+      let principalPaid, payment;
+      if (i <= graceMonths) {
+        principalPaid = 0;
+        payment = interest;
+      } else {
+        const yr = Math.floor((i - graceMonths - 1) / 12);
+        payment = p0 * Math.pow(1 + g, yr);
+        principalPaid = Math.min(balance, Math.max(0, payment - interest));
+        if (balance <= principalPaid) payment = principalPaid + interest;
+      }
+      balance = Math.max(0, balance - principalPaid);
+      rows.push({ month: i, principal: principalPaid, interest, payment, balance });
+    }
+    return rows;
+  }
+
+  function renderScheduleTable(rows, graceMonths) {
+    let html = '<div class="schedule-wrap"><table class="schedule-table">';
+    html += '<thead><tr><th>회차</th><th>납입원금</th><th>이자</th><th>월납입금</th><th>잔여원금</th></tr></thead><tbody>';
+    for (const row of rows) {
+      const cls = [];
+      if (row.month <= graceMonths) cls.push("grace-row");
+      if (row.month % 12 === 0) cls.push("year-end");
+      html += `<tr${cls.length ? ` class="${cls.join(" ")}"` : ""}>`;
+      html += `<td>${row.month}</td>`;
+      html += `<td>${fmtNum(Math.round(row.principal))}</td>`;
+      html += `<td>${fmtNum(Math.round(row.interest))}</td>`;
+      html += `<td>${fmtNum(Math.round(row.payment))}</td>`;
+      html += `<td>${fmtNum(Math.round(row.balance))}</td>`;
+      html += "</tr>";
+    }
+    html += "</tbody></table></div>";
+    return html;
+  }
+
+  function runSchedule(type) {
+    if (!lastLoanParams) return;
+    const { principal, annualRate, totalMonths, graceMonths } = lastLoanParams;
+    let rows;
+    if (type === "ep") {
+      rows = genScheduleEqualPrincipal(principal, annualRate, totalMonths, graceMonths);
+    } else if (type === "ei") {
+      rows = genScheduleEqualInstallment(principal, annualRate, totalMonths, graceMonths);
+    } else {
+      const g = parseFloat($("graduated-rate")?.value || "2") || 2;
+      rows = genScheduleGraduated(principal, annualRate, totalMonths, graceMonths, g);
+    }
+    ["ep", "ei", "gp"].forEach((t) => $(`sched-btn-${t}`)?.classList.toggle("active", t === type));
+    $("graduated-opts")?.classList.toggle("hidden", type !== "gp");
+    const wrap = $("schedule-wrap");
+    if (wrap) wrap.innerHTML = renderScheduleTable(rows, graceMonths);
+    $("schedule-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   $("btn-calc")?.addEventListener("click", runCalc);
+  $("sched-btn-ep")?.addEventListener("click", () => runSchedule("ep"));
+  $("sched-btn-ei")?.addEventListener("click", () => runSchedule("ei"));
+  $("sched-btn-gp")?.addEventListener("click", () => runSchedule("gp"));
   $("btn-nb-calc")?.addEventListener("click", runNewbornCalc);
   $("btn-fh-calc")?.addEventListener("click", runFirstHomeCalc);
   initDefaults();

@@ -313,6 +313,51 @@ select:focus {
   border-left: 3px solid var(--accent);
 }
 
+.schedule-wrap {
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.schedule-table th,
+.schedule-table td {
+  padding: 0.4rem 0.65rem;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.schedule-table th:first-child,
+.schedule-table td:first-child {
+  text-align: center;
+}
+
+.schedule-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.schedule-table tr.grace-row td {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.schedule-table tr.year-end td {
+  border-bottom: 2px solid var(--accent);
+}
+
 footer {
   max-width: 920px;
   margin: 0 auto;

@@ -489,6 +489,10 @@
               <option value="50">규제지역 등 50%</option>
             </select>
           </div>
+          <div>
+            <label for="grace-months">거치기간 (개월, 0이면 없음)</label>
+            <input type="number" id="grace-months" value="0" min="0" max="120" step="1" />
+          </div>
         </div>
 
         <div class="subsection-title">기타 대출 입력</div>
@@ -530,6 +534,21 @@
           <h3>월 상환액 (원리금균등·가정 금리)</h3>
           <div class="result-row"><span>월 납입 추정</span><span id="out-pmt">—</span></div>
         </div>
+      </section>
+
+      <section class="card hidden" id="schedule-section">
+        <h2>상환 스케줄</h2>
+        <div class="person-tabs">
+          <button type="button" class="sched-btn" id="sched-btn-ep">원금균등</button>
+          <button type="button" class="sched-btn" id="sched-btn-ei">원리금균등</button>
+          <button type="button" class="sched-btn" id="sched-btn-gp">체증식상환</button>
+        </div>
+        <div id="graduated-opts" class="hidden" style="margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem">
+          <label for="graduated-rate" style="margin: 0; white-space: nowrap; font-size: 0.85rem; color: var(--muted)">연간 증가율</label>
+          <input type="number" id="graduated-rate" value="2" min="0.1" max="20" step="0.1" style="width: 5rem" />
+          <span style="font-size: 0.85rem; color: var(--muted)">%</span>
+        </div>
+        <div id="schedule-wrap"></div>
       </section>
     </main>
 
