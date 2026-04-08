@@ -333,6 +333,22 @@
     $("fh-results").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function runIncomeCalc() {
+    const resSelf = calcPerson("self");
+    if (resSelf.error) { alert(resSelf.error); return; }
+
+    let incomeSpouse = 0;
+    if ($("has-spouse")?.checked) {
+      const resSpouse = calcPerson("spouse");
+      if (resSpouse.error) { alert("배우자: " + resSpouse.error); return; }
+      incomeSpouse = resSpouse.income;
+    }
+
+    const incomeTotal = resSelf.income + incomeSpouse;
+    syncHouseholdIncomeToRateTabs(incomeTotal);
+    alert(`부부합산 연소득 ${fmtNum(incomeTotal)}원이 3번 탭에 반영됐습니다.`);
+  }
+
   function runCalc() {
     const resSelf = calcPerson("self");
     if (resSelf.error) {
@@ -620,6 +636,7 @@
     $("schedule-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  $("btn-income-calc")?.addEventListener("click", runIncomeCalc);
   $("btn-calc")?.addEventListener("click", runCalc);
   $("sched-btn-ep")?.addEventListener("click", () => runSchedule("ep"));
   $("sched-btn-ei")?.addEventListener("click", () => runSchedule("ei"));
