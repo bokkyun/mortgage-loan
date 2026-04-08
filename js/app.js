@@ -107,9 +107,9 @@
     if (b) b.textContent = `전연도 소득 (${yNew}년, 원)`;
   }
 
-  function calcPerson(prefix, proofEl) {
+  function calcPerson(prefix) {
     const type = document.querySelector(`input[name="emp-${prefix}"]:checked`)?.value || "A";
-    const hasProof = proofEl && proofEl.checked;
+    const hasProof = true;
 
     if (type === "A") {
       const start = prefix === "self" ? "self-a-start" : "sp-a-start";
@@ -126,9 +126,8 @@
       const start = prefix === "self" ? "self-b-start" : "sp-b-start";
       const end = prefix === "self" ? "self-b-end" : "sp-b-end";
       const sum = prefix === "self" ? "self-b-sum" : "sp-b-sum";
-      const skip = prefix === "self" ? "self-b-skip10" : "sp-b-skip10";
       const endVal = $(end)?.value || todayStr();
-      return calcNewHire2025($(start)?.value, num($(sum)), endVal, $(skip)?.checked);
+      return calcNewHire2025($(start)?.value, num($(sum)), endVal, true);
     }
 
     if (type === "C") {
@@ -334,8 +333,7 @@
   }
 
   function runCalc() {
-    const proofSelf = $("proof-self");
-    const resSelf = calcPerson("self", proofSelf);
+    const resSelf = calcPerson("self");
     if (resSelf.error) {
       alert(resSelf.error);
       return;
@@ -344,8 +342,7 @@
     let incomeSpouse = 0;
     let resSpouse = null;
     if ($("has-spouse")?.checked) {
-      const proofSp = $("proof-spouse");
-      resSpouse = calcPerson("spouse", proofSp);
+      resSpouse = calcPerson("spouse");
       if (resSpouse.error) {
         alert("배우자: " + resSpouse.error);
         return;
@@ -403,19 +400,12 @@
 
     const otherAmt = num($("other-amt"));
     const otherRate = num($("other-rate"));
-    const otherYears = num($("other-years")) || 5;
-    const otherPmt = monthlyPMT(otherAmt, otherRate, otherYears);
-    const piO = otherPmt * 12;
     const intO = otherAmt * (otherRate / 100);
     const cap = parseFloat($("dti-cap")?.value || "60");
 
     const dti = incomeTotal > 0 ? ((piM + intO) / incomeTotal) * 100 : 0;
-    const dsr = incomeTotal > 0 ? ((piM + piO) / incomeTotal) * 100 : 0;
 
-    const dtiEl = $("out-dti");
-    const dsrEl = $("out-dsr");
-    dtiEl.textContent = `${dti.toFixed(2)}%`;
-    dsrEl.textContent = `${dsr.toFixed(2)}%`;
+    $("out-dti").textContent = `${dti.toFixed(2)}%`;
 
     const judge = $("out-dti-judge");
     const ok = dti <= cap;
