@@ -52,7 +52,7 @@ function calcNewHire2025(employmentStart, incomeInPeriod, periodEnd, skipTenPct)
 
   const yearStart2025 = new Date(2025, 0, 1, 12, 0, 0);
   if (start < yearStart2025) {
-    return { error: "신규 입사(2025년) 유형은 재직 시작일이 2025-01-01 이후여야 합니다." };
+    return { error: "신규입사(연환산) 유형은 재직 시작일이 2025-01-01 이후여야 합니다." };
   }
 
   const workDays = daysBetween(start, end);
