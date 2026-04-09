@@ -560,6 +560,27 @@ select:focus {
   font-size: 0.86rem;
 }
 
+.guide-links {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.guide-links a {
+  display: block;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.guide-links a:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
 .schedule-table tr.year-end td {
   border-bottom: 2px solid var(--accent);
 }
@@ -569,5 +590,33 @@ footer {
   margin: 0 auto;
   padding: 0 1.25rem 2rem;
   font-size: 0.78rem;
+  color: var(--muted);
+}
+
+footer .footer-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.35rem;
+}
+
+footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+footer a {
+  color: #c2d1e4;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+footer a:hover {
+  color: #ffffff;
+}
+
+footer .footer-note {
   color: var(--muted);
 }
