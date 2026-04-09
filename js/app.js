@@ -23,26 +23,62 @@
     return Number(digits).toLocaleString("ko-KR");
   }
 
+  function trySyncMiniPair(p, { silent } = { silent: true }) {
+    const s = num($(p.sumMini));
+    const m = parseInt(String($(p.moMini)?.value || "").replace(/\D/g, ""), 10);
+    if (!s || s <= 0) {
+      if (!silent) alert("수령 급여 합계를 입력해 주세요.");
+      return;
+    }
+    if (!m || m < 1) {
+      if (!silent) alert("수령 개월 수를 1 이상으로 입력해 주세요.");
+      return;
+    }
+    const sumEl = $(p.sumTgt);
+    const moEl = $(p.moTgt);
+    if (sumEl) sumEl.value = formatMoneyValue(String(Math.round(s)));
+    if (moEl) moEl.value = String(m);
+  }
+
+  function wireMiniApply() {
+    const pairs = [
+      { btn: "self-b-apply-mini", sumMini: "self-b-mini-sum", moMini: "self-b-mini-months", sumTgt: "self-b-sum", moTgt: "self-b-months" },
+      { btn: "sp-b-apply-mini", sumMini: "sp-b-mini-sum", moMini: "sp-b-mini-months", sumTgt: "sp-b-sum", moTgt: "sp-b-months" },
+      { btn: "self-d-apply-mini", sumMini: "self-d-mini-sum", moMini: "self-d-mini-months", sumTgt: "self-d-p-sum", moTgt: "self-d-p-months" },
+      { btn: "sp-d-apply-mini", sumMini: "sp-d-mini-sum", moMini: "sp-d-mini-months", sumTgt: "sp-d-p-sum", moTgt: "sp-d-p-months" },
+    ];
+    pairs.forEach((p) => {
+      const onMiniInput = () => trySyncMiniPair(p, { silent: true });
+      $(p.sumMini)?.addEventListener("input", onMiniInput);
+      $(p.moMini)?.addEventListener("input", onMiniInput);
+      $(p.btn)?.addEventListener("click", () => trySyncMiniPair(p, { silent: false }));
+    });
+  }
+
   function wireMoneyInputs() {
     const moneyIds = [
       "self-a-2023",
       "self-a-2024",
       "self-b-sum",
+      "self-b-mini-sum",
       "self-c-old",
       "self-c-new",
       "self-d-y2",
       "self-d-y1",
       "self-d-p-sum",
+      "self-d-mini-sum",
       "did-income",
       "fh-income",
       "sp-a-2023",
       "sp-a-2024",
       "sp-b-sum",
+      "sp-b-mini-sum",
       "sp-c-old",
       "sp-c-new",
       "sp-d-y2",
       "sp-d-y1",
       "sp-d-p-sum",
+      "sp-d-mini-sum",
       "loan-amt",
       "other-amt",
       "nb-income",
@@ -125,10 +161,9 @@
 
     if (type === "B") {
       const start = prefix === "self" ? "self-b-start" : "sp-b-start";
-      const end = prefix === "self" ? "self-b-end" : "sp-b-end";
       const sum = prefix === "self" ? "self-b-sum" : "sp-b-sum";
-      const endVal = $(end)?.value || todayStr();
-      return calcNewHire2025($(start)?.value, num($(sum)), endVal, true);
+      const months = prefix === "self" ? "self-b-months" : "sp-b-months";
+      return calcNewHire2025($(start)?.value, num($(sum)), num($(months)));
     }
 
     if (type === "C") {
@@ -156,7 +191,8 @@
       if (empDate > leaveDate) return { error: "재직 시작일은 휴직 시작일보다 빠르거나 같아야 합니다." };
 
       const psum = num(prefix === "self" ? $("self-d-p-sum") : $("sp-d-p-sum"));
-      return calcReturned($(leave)?.value, $(ret)?.value, y2, y1, "partial", 0, psum, endVal, hasProof);
+      const pm = num(prefix === "self" ? $("self-d-p-months") : $("sp-d-p-months"));
+      return calcReturned($(leave)?.value, $(ret)?.value, y2, y1, "partial", 0, psum, endVal, pm, hasProof);
     }
 
     return { error: "유형을 선택해 주세요." };
@@ -488,9 +524,7 @@
 
   function initDefaults() {
     const t = todayStr();
-    if ($("self-b-end")) $("self-b-end").value = t;
     if ($("self-d-end")) $("self-d-end").value = t;
-    if ($("sp-b-end")) $("sp-b-end").value = t;
     if ($("sp-d-end")) $("sp-d-end").value = t;
   }
 
@@ -680,6 +714,7 @@
   $("sched-btn-gp")?.addEventListener("click", () => runSchedule("gp"));
   initDefaults();
   wireMoneyInputs();
+  wireMiniApply();
   updatePanels("self", document.querySelector('input[name="emp-self"]:checked')?.value || "A");
   updatePanels("spouse", document.querySelector('input[name="emp-spouse"]:checked')?.value || "A");
 })();

@@ -65,19 +65,36 @@
         </div>
 
         <div id="panel-self-B" class="emp-panel hidden">
-          <div class="subsection-title">신규입사(연환산)</div>
+          <div class="subsection-title">신규입사(연환산) — 월환산</div>
+          <p class="field-hint">연소득 = 수령 소득 합계 ÷ 수령 개월 수 × 12 (일수 기준 자동계산 없음)</p>
           <div class="grid grid-2">
-            <div>
+            <div class="grid-span-2">
               <label for="self-b-start">현 직장 재직 시작일</label>
               <input type="date" id="self-b-start" />
             </div>
-            <div>
-              <label for="self-b-end">소득 합산 종료일 (기본: 오늘)</label>
-              <input type="date" id="self-b-end" />
+          </div>
+          <div class="micro-calc">
+            <p class="micro-calc-title">위에서 합계·개월 수 입력 시 아래 소득란에 자동 반영</p>
+            <div class="grid grid-2">
+              <div>
+                <label for="self-b-mini-sum">수령 급여 합계 (원)</label>
+                <input type="text" id="self-b-mini-sum" inputmode="numeric" placeholder="급여 합계" />
+              </div>
+              <div>
+                <label for="self-b-mini-months">수령 개월 수</label>
+                <input type="number" id="self-b-mini-months" min="1" step="1" placeholder="예: 5" />
+              </div>
+            </div>
+            <button type="button" class="btn-secondary" id="self-b-apply-mini">다시 반영 (자동과 동일)</button>
+          </div>
+          <div class="grid grid-2">
+            <div class="grid-span-2">
+              <label for="self-b-sum">수령 소득 합계 (원)</label>
+              <input type="text" id="self-b-sum" inputmode="numeric" />
             </div>
             <div class="grid-span-2">
-              <label for="self-b-sum">위 기간 실수령(또는 과세) 소득 합계 (원)</label>
-              <input type="number" id="self-b-sum" min="0" step="10000" />
+              <label for="self-b-months">수령 개월 수 (연환산용)</label>
+              <input type="number" id="self-b-months" min="1" step="1" />
             </div>
           </div>
         </div>
@@ -136,11 +153,30 @@
               <input type="number" id="self-d-y2" min="0" step="10000" />
             </div>
           </div>
-          <div class="subsection-title">복직 후 3개월 이상</div>
+          <div class="subsection-title">복직 후 3개월 이상 — 월환산</div>
+          <p class="field-hint">연소득 = 복직 후 수령 합계 ÷ 수령 개월 수 × 12 (일수 기준 자동계산 없음)</p>
+          <div class="micro-calc">
+            <p class="micro-calc-title">위에서 합계·개월 수 입력 시 아래 소득란에 자동 반영</p>
+            <div class="grid grid-2">
+              <div>
+                <label for="self-d-mini-sum">복직 후 수령 급여 합계 (원)</label>
+                <input type="text" id="self-d-mini-sum" inputmode="numeric" placeholder="급여 합계" />
+              </div>
+              <div>
+                <label for="self-d-mini-months">수령 개월 수</label>
+                <input type="number" id="self-d-mini-months" min="1" step="1" placeholder="예: 4" />
+              </div>
+            </div>
+            <button type="button" class="btn-secondary" id="self-d-apply-mini">다시 반영 (자동과 동일)</button>
+          </div>
           <div id="self-d-partial-fields" class="grid grid-2">
-            <div>
-              <label for="self-d-p-sum">복직 후 기간 소득 합계 (월별 합산)</label>
-              <input type="number" id="self-d-p-sum" min="0" step="10000" />
+            <div class="grid-span-2">
+              <label for="self-d-p-sum">복직 후 수령 소득 합계 (원)</label>
+              <input type="text" id="self-d-p-sum" inputmode="numeric" />
+            </div>
+            <div class="grid-span-2">
+              <label for="self-d-p-months">복직 후 수령 개월 수 (연환산용)</label>
+              <input type="number" id="self-d-p-months" min="1" step="1" />
             </div>
           </div>
         </div>
@@ -177,18 +213,35 @@
             </div>
           </div>
           <div id="panel-spouse-B" class="emp-panel-sp hidden">
+            <p class="field-hint">연소득 = 수령 합계 ÷ 수령 개월 수 × 12</p>
             <div class="grid grid-2">
-              <div>
+              <div style="grid-column: 1 / -1">
                 <label for="sp-b-start">재직 시작일</label>
                 <input type="date" id="sp-b-start" />
               </div>
-              <div>
-                <label for="sp-b-end">소득 합산 종료일</label>
-                <input type="date" id="sp-b-end" />
+            </div>
+            <div class="micro-calc">
+              <p class="micro-calc-title">위에서 합계·개월 수 입력 시 아래 소득란에 자동 반영</p>
+              <div class="grid grid-2">
+                <div>
+                  <label for="sp-b-mini-sum">수령 급여 합계 (원)</label>
+                  <input type="text" id="sp-b-mini-sum" inputmode="numeric" />
+                </div>
+                <div>
+                  <label for="sp-b-mini-months">수령 개월 수</label>
+                  <input type="number" id="sp-b-mini-months" min="1" step="1" />
+                </div>
+              </div>
+              <button type="button" class="btn-secondary" id="sp-b-apply-mini">다시 반영 (자동과 동일)</button>
+            </div>
+            <div class="grid grid-2">
+              <div style="grid-column: 1 / -1">
+                <label for="sp-b-sum">수령 소득 합계 (원)</label>
+                <input type="text" id="sp-b-sum" inputmode="numeric" />
               </div>
               <div style="grid-column: 1 / -1">
-                <label for="sp-b-sum">기간 소득 합계</label>
-                <input type="number" id="sp-b-sum" min="0" step="10000" />
+                <label for="sp-b-months">수령 개월 수 (연환산용)</label>
+                <input type="number" id="sp-b-months" min="1" step="1" />
               </div>
             </div>
           </div>
@@ -241,10 +294,30 @@
                 <input type="number" id="sp-d-y2" min="0" step="10000" />
               </div>
             </div>
+            <div class="subsection-title" style="margin-top: 0.75rem">복직 후 3개월 이상 — 월환산</div>
+            <p class="field-hint">연소득 = 수령 합계 ÷ 수령 개월 수 × 12</p>
+            <div class="micro-calc">
+              <p class="micro-calc-title">위에서 합계·개월 수 입력 시 아래 소득란에 자동 반영</p>
+              <div class="grid grid-2">
+                <div>
+                  <label for="sp-d-mini-sum">복직 후 수령 급여 합계 (원)</label>
+                  <input type="text" id="sp-d-mini-sum" inputmode="numeric" />
+                </div>
+                <div>
+                  <label for="sp-d-mini-months">수령 개월 수</label>
+                  <input type="number" id="sp-d-mini-months" min="1" step="1" />
+                </div>
+              </div>
+              <button type="button" class="btn-secondary" id="sp-d-apply-mini">다시 반영 (자동과 동일)</button>
+            </div>
             <div id="sp-d-partial-fields" class="grid grid-2">
-              <div>
-                <label for="sp-d-p-sum">복직 후 기간 소득 합계 (월별 합산)</label>
-                <input type="number" id="sp-d-p-sum" min="0" step="10000" />
+              <div style="grid-column: 1 / -1">
+                <label for="sp-d-p-sum">복직 후 수령 소득 합계 (원)</label>
+                <input type="text" id="sp-d-p-sum" inputmode="numeric" />
+              </div>
+              <div style="grid-column: 1 / -1">
+                <label for="sp-d-p-months">복직 후 수령 개월 수 (연환산용)</label>
+                <input type="number" id="sp-d-p-months" min="1" step="1" />
               </div>
             </div>
           </div>

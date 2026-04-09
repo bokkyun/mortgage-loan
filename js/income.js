@@ -43,11 +43,10 @@ function calcGeneral(inc2023, inc2024, hasProofStable) {
 }
 
 /**
- * B. 2025년 해당 직장 신규 입사 — 연환산 + 10% 차감(선택)
+ * B. 신규 입사 — 월환산: 수령 합계 ÷ 수령 개월 수 × 12
  */
-function calcNewHire2025(employmentStart, incomeInPeriod, periodEnd, skipTenPct) {
+function calcNewHire2025(employmentStart, totalReceived, months) {
   const start = parseDate(employmentStart);
-  const end = parseDate(periodEnd) || new Date();
   if (!start) return { error: "재직 시작일을 입력해 주세요." };
 
   const yearStart2025 = new Date(2025, 0, 1, 12, 0, 0);
@@ -55,18 +54,19 @@ function calcNewHire2025(employmentStart, incomeInPeriod, periodEnd, skipTenPct)
     return { error: "신규입사(연환산) 유형은 재직 시작일이 2025-01-01 이후여야 합니다." };
   }
 
-  const workDays = daysBetween(start, end);
-  if (workDays < 28) {
-    return { error: "재직 기간이 1개월(약 28일) 미만이면 연환산이 어렵습니다." };
+  const m = Number(months);
+  if (!Number.isFinite(m) || m < 1) {
+    return { error: "수령 개월 수를 1 이상으로 입력해 주세요." };
+  }
+  if (totalReceived <= 0) {
+    return { error: "수령 소득 합계를 입력해 주세요." };
   }
 
-  const annualized = (incomeInPeriod / workDays) * 365;
-  const income = skipTenPct ? annualized : annualized * 0.9;
-  const reason = skipTenPct
-    ? `연환산: 기간 소득 ${fmtNum(incomeInPeriod)}원 ÷ 근무 ${workDays}일 × 365일 (상시소득 입증으로 10% 차감 미적용)`
-    : `연환산: 기간 소득 ${fmtNum(incomeInPeriod)}원 ÷ 근무 ${workDays}일 × 365일 후, 2개년 비교 불가에 따른 10% 차감 적용`;
+  const annualized = (totalReceived / m) * 12;
+  const income = annualized;
+  const reason = `월환산: 수령 ${fmtNum(totalReceived)}원 ÷ ${m}개월 × 12개월`;
 
-  return { income, annualizedRaw: annualized, workDays, reason };
+  return { income, annualizedRaw: annualized, months: m, reason };
 }
 
 /**
@@ -115,6 +115,7 @@ function calcReturned(
   incPrevYearCompare,
   incReturnOrPeriod,
   periodEnd,
+  incomeMonthsPartial,
   hasProofStable
 ) {
   const leave = parseDate(leaveStart);
@@ -157,26 +158,29 @@ function calcReturned(
     return { income, variationPct: v, reason: detail, mode: "returned_full_year" };
   }
 
-  const workDays = daysBetween(ret, end);
-  if (workDays < 28) {
-    return { error: "복직 후 근무일수가 너무 짧습니다." };
+  const mo = Number(incomeMonthsPartial);
+  if (!Number.isFinite(mo) || mo < 1) {
+    return { error: "복직 후 수령 개월 수를 1 이상으로 입력해 주세요." };
+  }
+  if (incReturnOrPeriod <= 0) {
+    return { error: "복직 후 수령 소득 합계를 입력해 주세요." };
   }
 
-  const annualized = (incReturnOrPeriod / workDays) * 365;
+  const annualized = (incReturnOrPeriod / mo) * 12;
   let income;
   let detail;
   if (hasProofStable) {
     income = annualized;
-    detail = "복직 후 기간 소득을 연환산하여 적용 (상시소득 입증으로 10% 차감 미적용)";
+    detail = `복직 후 월환산: 수령 ${fmtNum(incReturnOrPeriod)}원 ÷ ${mo}개월 × 12개월`;
   } else {
     income = annualized * 0.9;
-    detail = "복직 후 기간 소득 연환산 후, 비교기준 소득 부재에 따라 10% 차감 적용";
+    detail = `복직 후 월환산 후 10% 차감: 수령 ${fmtNum(incReturnOrPeriod)}원 ÷ ${mo}개월 × 12개월`;
   }
 
   return {
     income,
     annualizedRaw: annualized,
-    workDays,
+    months: mo,
     variationPct: null,
     reason: detail,
     mode: "returned_partial",
