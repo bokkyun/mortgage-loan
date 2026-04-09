@@ -293,8 +293,9 @@
       { max: 70000000, rates: { 10: 3.55, 15: 3.65, 20: 3.75, 30: 3.8 } },
       { max: 85000000, rates: { 10: 3.9, 15: 4.0, 20: 4.1, 30: 4.15 } },
     ];
+    const top = rows[rows.length - 1].rates[termYears];
     const row = rows.find((r) => income <= r.max);
-    return row ? row.rates[termYears] : null;
+    return row ? row.rates[termYears] : top;
   }
 
   function getFirstHomeBaseRate(income, termYears) {
@@ -304,13 +305,13 @@
       { max: 70000000, rates: { 10: 3.25, 15: 3.35, 20: 3.45, 30: 3.5 } },
       { max: 85000000, rates: { 10: 3.6, 15: 3.7, 20: 3.8, 30: 3.85 } },
     ];
+    const top = rows[rows.length - 1].rates[termYears];
     const row = rows.find((r) => income <= r.max);
-    return row ? row.rates[termYears] : null;
+    return row ? row.rates[termYears] : top;
   }
 
   function calcDidimdolLikeRate(opts) {
     let base = getDidimdolBaseRate(opts.income, opts.term);
-    if (base == null) return { error: "소득 구간(8,500만원 이하) 및 대출기간을 확인해 주세요." };
 
     base += opts.rateTypeAdd || 0;
     if (opts.localHome) base -= 0.2;
@@ -414,10 +415,6 @@
 
     const childDiscount = parseFloat($("fh-child-tier")?.value || "0") || 0;
     let base = getFirstHomeBaseRate(income, term);
-    if (base == null) {
-      alert("생애최초·신혼가구 탭: 소득 구간(8,500만원 이하) 및 대출기간을 확인해 주세요.");
-      return;
-    }
 
     base += parseFloat($("fh-rate-type")?.value || "0") || 0;
     if ($("fh-local-home")?.checked) base -= 0.2;
