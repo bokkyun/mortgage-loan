@@ -12,7 +12,7 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>디딤돌 소득·금리·DTI 계산기 (참고용)</title>
+    <title>디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기</title>
     <link rel="stylesheet" href="css/styles.css" />
     <link
       rel="stylesheet"
@@ -23,8 +23,8 @@
   </head>
   <body>
     <header>
-      <h1>디딤돌 소득 인정 · 금리 · DTI</h1>
-      <p>재직·휴직·복직에 따른 연소득 추정 후, 우대 반영 금리와 부채비율을 함께 확인합니다.</p>
+      <h1>디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기</h1>
+      <p>소득 산정부터 금리, DTI, 월상환액, 상환방식 비교까지 한 번에 확인하는 참고용 계산기입니다.</p>
       <div class="disclaimer">
         본 페이지는 공개된 원리를 바탕으로 한 <strong>참고용 추정치</strong>입니다. 보금자리론·디딤돌 실제 심사
         소득·금리·DTI는 HUG·취급 금융기관 기준과 다를 수 있으며, 법적 효력이 없습니다.
@@ -364,12 +364,12 @@
 
         <div id="rate-tab-newborn" class="hidden" style="margin-top: 0.5rem">
           <p class="field-hint" style="margin: 0 0 0.75rem">
-            사진 기준표를 반영한 참고용 계산입니다. 실제 심사·적용 금리는 접수일/은행 내규에 따라 달라질 수 있습니다.
+            사진 기준표를 반영한 참고용 계산입니다. 신생아 특례는 소득·대출한도 심사와 별도로 금리만 참고 산출합니다(미입력·고소득은 표 최고 구간 금리 적용). 실제 적용은 접수일·은행 기준입니다.
           </p>
           <div class="grid grid-2">
             <div>
-              <label for="nb-income">부부합산 연소득 (원)</label>
-              <input type="text" id="nb-income" inputmode="numeric" />
+              <label for="nb-income">부부합산 연소득 (원, 선택)</label>
+              <input type="text" id="nb-income" inputmode="numeric" placeholder="미입력 시 표 최고 구간" />
             </div>
             <div>
               <label for="nb-term">대출기간</label>

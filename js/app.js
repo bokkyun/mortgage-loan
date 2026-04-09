@@ -341,15 +341,18 @@
       { max: 170000000, rates: { 10: 3.85, 15: 3.95, 20: 4.05, 30: 4.15 } },
       { max: 200000000, rates: { 10: 4.2, 15: 4.3, 20: 4.4, 30: 4.5 } },
     ];
+    const top = brackets[brackets.length - 1].rates[termYears];
+    if (!Number.isFinite(income) || income <= 0) return top;
     const row = brackets.find((b) => income <= b.max);
-    return row ? row.rates[termYears] : null;
+    return row ? row.rates[termYears] : top;
   }
 
   function getNewbornPostBaseRate(income, termYears, specialBase) {
     // 사진 기준: <=8.5천은 특례금리에 0.75 가산.
     // 그 외 구간은 화면 내 각주 기준의 참고 규칙으로 계산.
-    if (income <= 85000000) return specialBase + 0.75;
-    if (income <= 130000000) return Math.max(3.45, specialBase + 0.2);
+    const eff = !Number.isFinite(income) || income <= 0 ? 200000000 : income;
+    if (eff <= 85000000) return specialBase + 0.75;
+    if (eff <= 130000000) return Math.max(3.45, specialBase + 0.2);
     return specialBase + 0.2;
   }
 
@@ -358,16 +361,7 @@
     const term = parseInt($("nb-term")?.value || "30", 10);
     const local = $("nb-local-home")?.checked;
 
-    if (income <= 0) {
-      alert("신생아 탭: 부부합산 연소득을 입력해 주세요.");
-      return;
-    }
-
     let specialBase = getNewbornSpecialBaseRate(income, term);
-    if (specialBase == null) {
-      alert("신생아 탭: 소득 구간이 표 범위를 벗어났습니다. (2억원 이하 기준)");
-      return;
-    }
     if (local) specialBase -= 0.2;
 
     let discountRaw = 0;
@@ -394,8 +388,17 @@
     $("nb-final-special").textContent = `${specialFinal.toFixed(2)}%`;
     $("nb-base-post").textContent = `${postBase.toFixed(2)}%`;
     $("nb-final-post").textContent = `${postFinal.toFixed(2)}%`;
+
+    let incomeNote = "";
+    if (!Number.isFinite(income) || income <= 0) {
+      incomeNote = "소득 미입력 시 표 최고 구간(2억 초과 구간) 금리로 참고 계산했습니다. ";
+    } else if (income > 200000000) {
+      incomeNote = `입력 소득 ${fmtNum(income)}원은 표 상한(2억)을 넘어 최고 구간 금리를 적용한 참고 계산입니다. `;
+    } else {
+      incomeNote = `소득 ${fmtNum(income)}원 기준. `;
+    }
     $("nb-reason").textContent =
-      `소득 ${fmtNum(income)}원, 만기 ${term}년 기준. 특례금리 우대는 최대 0.5%p까지만 적용했으며, 최저금리는 1.2%로 제한했습니다.`;
+      `${incomeNote}만기 ${term}년, 신생아 특례는 실제 소득·한도와 무관하게 참고용으로만 산출합니다. 우대는 최대 0.5%p, 최저금리 1.2%로 제한했습니다.`;
 
     $("nb-results").classList.remove("hidden");
     $("nb-results").scrollIntoView({ behavior: "smooth", block: "start" });
