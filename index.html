@@ -13,6 +13,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기</title>
+    <meta
+      name="description"
+      content="디딤돌대출 계산기: 소득인정(신규입사·휴직·복직), 금리 우대, DTI, 월 상환액, 원리금균등·원금균등·체증식 상환을 한 번에 계산합니다."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <link rel="canonical" href="https://bokkyun.github.io/mortgage-loan/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="디딤돌대출 계산기" />
+    <meta property="og:title" content="디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기" />
+    <meta
+      property="og:description"
+      content="소득 산정부터 금리, DTI, 월상환액, 상환방식 비교까지 한 번에 확인하는 디딤돌대출 참고용 계산기입니다."
+    />
+    <meta property="og:url" content="https://bokkyun.github.io/mortgage-loan/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기" />
+    <meta
+      name="twitter:description"
+      content="디딤돌대출 소득·금리·DTI·상환방식(원리금균등/원금균등/체증식)을 한 페이지에서 계산합니다."
+    />
     <link rel="stylesheet" href="css/styles.css" />
     <link
       rel="stylesheet"
@@ -20,11 +41,82 @@
       crossorigin
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기",
+        "url": "https://bokkyun.github.io/mortgage-loan/",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "inLanguage": "ko-KR",
+        "description": "디딤돌대출 소득인정, 금리 우대, DTI, 월상환액, 원리금균등/원금균등/체증식 상환을 계산하는 웹 계산기",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "디딤돌대출 계산기에 어떤 항목을 입력하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "재직 유형별 소득 정보, 금리 탭의 우대 조건, 대출금액과 기간을 입력하면 소득·금리·DTI·월상환액을 함께 확인할 수 있습니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "신규입사자·복직자는 소득을 어떻게 환산하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "수령 소득 합계와 수령 개월 수를 입력해 월환산 방식으로 연소득을 계산합니다. 공식은 수령 합계 ÷ 개월 수 × 12입니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "신생아 디딤돌 탭은 소득 제한 없이 계산되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "네. 참고 계산 용도로 소득 미입력 또는 고소득에서도 계산되며, 표 상한을 넘는 경우 최고 구간 금리를 적용해 보여줍니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "원리금균등, 원금균등, 체증식 차이는 무엇인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "원리금균등은 매달 납입액이 유사하고, 원금균등은 초반 부담이 크지만 총이자가 적어지는 편이며, 체증식은 초반 부담을 낮추는 대신 후반 납입액이 증가합니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "이 계산 결과를 실제 심사 결과로 봐도 되나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "아니요. 본 페이지는 참고용 추정치이며 실제 소득 인정, 금리, DTI는 접수일 및 금융기관 심사 기준에 따라 달라질 수 있습니다."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <header>
       <h1>디딤돌대출 금리, DTI, 원리금, 원금균등, 체증식 계산기</h1>
       <p>소득 산정부터 금리, DTI, 월상환액, 상환방식 비교까지 한 번에 확인하는 참고용 계산기입니다.</p>
+      <nav class="quick-nav" aria-label="빠른 이동">
+        <a href="#income-section">소득 계산</a>
+        <a href="#rate-section">금리 계산</a>
+        <a href="#dti-section">DTI 계산</a>
+        <a href="#faq-section">자주 묻는 질문</a>
+      </nav>
       <div class="disclaimer">
         본 페이지는 공개된 원리를 바탕으로 한 <strong>참고용 추정치</strong>입니다. 보금자리론·디딤돌 실제 심사
         소득·금리·DTI는 HUG·취급 금융기관 기준과 다를 수 있으며, 법적 효력이 없습니다.
@@ -32,7 +124,7 @@
     </header>
 
     <main>
-      <section class="card">
+      <section class="card" id="income-section">
         <h2>1. 본인 <span class="badge">필수</span></h2>
         <div class="grid">
           <div>
@@ -162,7 +254,7 @@
         </div>
       </section>
 
-      <section class="card">
+      <section class="card" id="spouse-section">
         <h2>2. 배우자</h2>
         <label class="check-item">
           <input type="checkbox" id="has-spouse" />
@@ -288,7 +380,7 @@
 
       <div style="height: 1rem"></div>
 
-      <section class="card">
+      <section class="card" id="rate-section">
         <h2>3. 금리 계산 탭</h2>
         <div class="person-tabs">
           <button type="button" id="rate-tab-btn-didimdol" class="active">디딤돌</button>
@@ -509,7 +601,7 @@
 
       <div style="height: 1rem"></div>
 
-      <section class="card">
+      <section class="card" id="dti-section">
         <h2>4. DTI (대출금액 기반 자동계산)</h2>
         <p class="field-hint" style="margin: 0 0 0.75rem">
           DTI: 주담대 연간 원리금 + 기타대출 연간 이자 / 연소득
@@ -595,6 +687,32 @@
           <span style="font-size: 0.85rem; color: var(--muted)">%</span>
         </div>
         <div id="schedule-wrap"></div>
+      </section>
+
+      <section class="card seo-faq" id="faq-section">
+        <h2>자주 묻는 질문 (FAQ)</h2>
+        <div class="faq-list">
+          <details>
+            <summary>디딤돌대출 계산기에 어떤 항목을 입력하면 되나요?</summary>
+            <p>재직 유형에 맞는 소득 정보, 금리 탭의 우대 조건, 대출금액·기간을 입력하면 소득·금리·DTI·월상환액을 함께 확인할 수 있습니다.</p>
+          </details>
+          <details>
+            <summary>신규입사자와 복직자 소득은 어떻게 계산하나요?</summary>
+            <p>수령 소득 합계와 수령 개월 수로 월환산합니다. 공식은 <strong>수령 합계 ÷ 개월 수 × 12</strong>입니다.</p>
+          </details>
+          <details>
+            <summary>신생아 디딤돌 탭은 소득 제한 없이 계산되나요?</summary>
+            <p>참고 계산 기준으로 소득 미입력·고소득에서도 계산됩니다. 표 상한을 넘으면 최고 구간 금리를 적용해 결과를 보여줍니다.</p>
+          </details>
+          <details>
+            <summary>원리금균등, 원금균등, 체증식은 어떤 차이가 있나요?</summary>
+            <p>원리금균등은 매달 납입액이 유사하고, 원금균등은 초반 부담이 크지만 총이자가 줄어드는 편이며, 체증식은 초반 부담을 낮추고 후반 부담이 증가합니다.</p>
+          </details>
+          <details>
+            <summary>계산 결과를 실제 심사 결과로 봐도 되나요?</summary>
+            <p>아니요. 본 계산기는 참고용이며 실제 소득 인정, 금리, DTI는 접수 시점과 금융기관 심사 기준에 따라 달라질 수 있습니다.</p>
+          </details>
+        </div>
       </section>
     </main>
 
