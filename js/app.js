@@ -23,35 +23,110 @@
     return Number(digits).toLocaleString("ko-KR");
   }
 
-  function trySyncMiniPair(p, { silent } = { silent: true }) {
-    const s = num($(p.sumMini));
-    const m = parseInt(String($(p.moMini)?.value || "").replace(/\D/g, ""), 10);
-    if (!s || s <= 0) {
-      if (!silent) alert("수령 급여 합계를 입력해 주세요.");
+  const SALARY_CALC_GROUPS = [
+    { openId: "self-b-calc-open", sumId: "self-b-sum", monthsId: "self-b-months", previewId: "self-b-annual-preview" },
+    { openId: "sp-b-calc-open", sumId: "sp-b-sum", monthsId: "sp-b-months", previewId: "sp-b-annual-preview" },
+    { openId: "self-d-calc-open", sumId: "self-d-p-sum", monthsId: "self-d-p-months", previewId: "self-d-annual-preview" },
+    { openId: "sp-d-calc-open", sumId: "sp-d-p-sum", monthsId: "sp-d-p-months", previewId: "sp-d-annual-preview" },
+  ];
+
+  function updateAnnualPreviewLine(sumId, monthsId, previewId) {
+    const s = num($(sumId));
+    const moRaw = $(monthsId)?.value;
+    const m = moRaw != null && moRaw !== "" ? parseInt(String(moRaw).replace(/\D/g, ""), 10) : NaN;
+    const out = $(previewId);
+    if (!out) return;
+    if (!s || s <= 0 || !Number.isFinite(m) || m < 1) {
+      out.textContent = "";
       return;
     }
-    if (!m || m < 1) {
-      if (!silent) alert("수령 개월 수를 1 이상으로 입력해 주세요.");
-      return;
-    }
-    const sumEl = $(p.sumTgt);
-    const moEl = $(p.moTgt);
-    if (sumEl) sumEl.value = formatMoneyValue(String(Math.round(s)));
-    if (moEl) moEl.value = String(m);
+    const annual = (s / m) * 12;
+    out.textContent = `연환산 연소득: ${fmtNum(annual)}원`;
   }
 
-  function wireMiniApply() {
-    const pairs = [
-      { btn: "self-b-apply-mini", sumMini: "self-b-mini-sum", moMini: "self-b-mini-months", sumTgt: "self-b-sum", moTgt: "self-b-months" },
-      { btn: "sp-b-apply-mini", sumMini: "sp-b-mini-sum", moMini: "sp-b-mini-months", sumTgt: "sp-b-sum", moTgt: "sp-b-months" },
-      { btn: "self-d-apply-mini", sumMini: "self-d-mini-sum", moMini: "self-d-mini-months", sumTgt: "self-d-p-sum", moTgt: "self-d-p-months" },
-      { btn: "sp-d-apply-mini", sumMini: "sp-d-mini-sum", moMini: "sp-d-mini-months", sumTgt: "sp-d-p-sum", moTgt: "sp-d-p-months" },
-    ];
-    pairs.forEach((p) => {
-      const onMiniInput = () => trySyncMiniPair(p, { silent: true });
-      $(p.sumMini)?.addEventListener("input", onMiniInput);
-      $(p.moMini)?.addEventListener("input", onMiniInput);
-      $(p.btn)?.addEventListener("click", () => trySyncMiniPair(p, { silent: false }));
+  function wireAnnualPreviews() {
+    SALARY_CALC_GROUPS.forEach((g) => {
+      const upd = () => updateAnnualPreviewLine(g.sumId, g.monthsId, g.previewId);
+      $(g.sumId)?.addEventListener("input", upd);
+      $(g.monthsId)?.addEventListener("input", upd);
+    });
+  }
+
+  function wireSalaryCalcModal() {
+    const overlay = $("salary-calc-overlay");
+    const inp = $("salary-calc-input");
+    const totalEl = $("salary-calc-total");
+    if (!overlay || !inp || !totalEl) return;
+
+    let activeSumId = null;
+    let activePreview = null;
+    let running = 0;
+
+    function renderRunning() {
+      totalEl.textContent = Math.round(running).toLocaleString("ko-KR");
+    }
+
+    function openModal(cfg) {
+      activeSumId = cfg.sumId;
+      activePreview = cfg;
+      running = Math.round(num($(cfg.sumId)));
+      inp.value = "";
+      renderRunning();
+      overlay.classList.remove("hidden");
+      setTimeout(() => inp.focus(), 10);
+    }
+
+    function closeModal() {
+      overlay.classList.add("hidden");
+      activeSumId = null;
+      activePreview = null;
+    }
+
+    function addInputToRunning() {
+      const v = num(inp);
+      if (v > 0) {
+        running += v;
+        inp.value = "";
+        renderRunning();
+      }
+    }
+
+    function commitAndClose() {
+      const v = num(inp);
+      if (v > 0) running += v;
+      inp.value = "";
+      if (!activeSumId) {
+        closeModal();
+        return;
+      }
+      const sumEl = $(activeSumId);
+      if (sumEl) sumEl.value = formatMoneyValue(String(Math.round(running)));
+      if (activePreview) {
+        updateAnnualPreviewLine(activePreview.sumId, activePreview.monthsId, activePreview.previewId);
+      }
+      closeModal();
+    }
+
+    SALARY_CALC_GROUPS.forEach((g) => {
+      $(g.openId)?.addEventListener("click", () => openModal(g));
+    });
+
+    $("salary-calc-add")?.addEventListener("click", () => {
+      addInputToRunning();
+      inp.focus();
+    });
+
+    $("salary-calc-done")?.addEventListener("click", () => commitAndClose());
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
+        e.preventDefault();
+        closeModal();
+      }
     });
   }
 
@@ -60,25 +135,22 @@
       "self-a-2023",
       "self-a-2024",
       "self-b-sum",
-      "self-b-mini-sum",
+      "salary-calc-input",
       "self-c-old",
       "self-c-new",
       "self-d-y2",
       "self-d-y1",
       "self-d-p-sum",
-      "self-d-mini-sum",
       "did-income",
       "fh-income",
       "sp-a-2023",
       "sp-a-2024",
       "sp-b-sum",
-      "sp-b-mini-sum",
       "sp-c-old",
       "sp-c-new",
       "sp-d-y2",
       "sp-d-y1",
       "sp-d-p-sum",
-      "sp-d-mini-sum",
       "loan-amt",
       "other-amt",
       "nb-income",
@@ -714,7 +786,8 @@
   $("sched-btn-gp")?.addEventListener("click", () => runSchedule("gp"));
   initDefaults();
   wireMoneyInputs();
-  wireMiniApply();
+  wireSalaryCalcModal();
+  wireAnnualPreviews();
   updatePanels("self", document.querySelector('input[name="emp-self"]:checked')?.value || "A");
   updatePanels("spouse", document.querySelector('input[name="emp-spouse"]:checked')?.value || "A");
 })();
