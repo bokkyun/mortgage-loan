@@ -387,9 +387,6 @@
     $("nb-base-special").textContent = `${specialBase.toFixed(2)}%`;
     $("nb-discount-applied").textContent = `-${discountApplied.toFixed(2)}%p (원우대 ${discountRaw.toFixed(2)}%p)`;
     $("nb-final-special").textContent = `${specialFinal.toFixed(2)}%`;
-    $("nb-base-post").textContent = `${postBase.toFixed(2)}%`;
-    $("nb-final-post").textContent = `${postFinal.toFixed(2)}%`;
-
     let incomeNote = "";
     if (!Number.isFinite(income) || income <= 0) {
       incomeNote = "소득 미입력 시 표 최고 구간(2억 초과 구간) 금리로 참고 계산했습니다. ";
@@ -399,7 +396,7 @@
       incomeNote = `소득 ${fmtNum(income)}원 기준. `;
     }
     $("nb-reason").textContent =
-      `${incomeNote}만기 ${term}년, 신생아 특례는 실제 소득·한도와 무관하게 참고용으로만 산출합니다. 우대는 최대 0.5%p, 최저금리 1.2%로 제한했습니다.`;
+      `${incomeNote}만기 ${term}년, 신생아 특례금리 기준으로 참고 산출합니다. 우대는 최대 0.5%p, 최저금리 1.2%로 제한했습니다.`;
 
     $("nb-results").classList.remove("hidden");
     $("nb-results").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -527,30 +524,76 @@
       rsp.classList.add("hidden");
     }
 
-    const didIncome = num($("did-income"));
-    const didTerm = parseInt($("did-term")?.value || "30", 10);
-    const childDiscount = parseFloat($("did-child-tier")?.value || "0") || 0;
-    const result = calcDidimdolLikeRate({
-      income: didIncome,
-      term: didTerm,
-      rateTypeAdd: parseFloat($("did-rate-type")?.value || "0") || 0,
-      localHome: $("did-local-home")?.checked,
-      specialBaseDiscount: 0,
-      childDiscount,
-      savingsDiscount: parseFloat($("subsidy")?.value || "0") || 0,
-      hasChild: childDiscount > 0,
-      checkboxDiscounts: Array.from(document.querySelectorAll("#rate-tab-didimdol input[type=checkbox][data-rate]"))
-        .filter((c) => c.checked)
-        .map((c) => parseFloat(c.getAttribute("data-rate") || "0")),
-    });
-    if (result.error) {
-      alert("디딤돌 금리: " + result.error);
-      return;
-    }
+    const didVisible = !$("rate-tab-didimdol")?.classList.contains("hidden");
+    const nbVisible = !$("rate-tab-newborn")?.classList.contains("hidden");
+    let finalRate = 0;
 
-    const finalRate = result.finalRate;
-    $("out-discount").textContent = `−${result.applied.toFixed(2)}%p (원우대 ${result.discountRaw.toFixed(2)}%p)`;
-    $("out-final-rate").textContent = `${finalRate.toFixed(2)}% (기본 ${result.base.toFixed(2)}%)`;
+    if (didVisible) {
+      const didIncome = num($("did-income"));
+      const didTerm = parseInt($("did-term")?.value || "30", 10);
+      const childDiscount = parseFloat($("did-child-tier")?.value || "0") || 0;
+      const result = calcDidimdolLikeRate({
+        income: didIncome,
+        term: didTerm,
+        rateTypeAdd: parseFloat($("did-rate-type")?.value || "0") || 0,
+        localHome: $("did-local-home")?.checked,
+        specialBaseDiscount: 0,
+        childDiscount,
+        savingsDiscount: parseFloat($("subsidy")?.value || "0") || 0,
+        hasChild: childDiscount > 0,
+        checkboxDiscounts: Array.from(document.querySelectorAll("#rate-tab-didimdol input[type=checkbox][data-rate]"))
+          .filter((c) => c.checked)
+          .map((c) => parseFloat(c.getAttribute("data-rate") || "0")),
+      });
+      if (result.error) {
+        alert("디딤돌 금리: " + result.error);
+        return;
+      }
+      finalRate = result.finalRate;
+      $("out-discount").textContent = `−${result.applied.toFixed(2)}%p (원우대 ${result.discountRaw.toFixed(2)}%p)`;
+      $("out-final-rate").textContent = `${finalRate.toFixed(2)}% (디딤돌 기준, 기본 ${result.base.toFixed(2)}%)`;
+    } else if (nbVisible) {
+      const income = num($("nb-income"));
+      const term = parseInt($("nb-term")?.value || "30", 10);
+      const local = $("nb-local-home")?.checked;
+      let specialBase = getNewbornSpecialBaseRate(income, term);
+      if (local) specialBase -= 0.2;
+      let discountRaw = 0;
+      discountRaw += parseFloat($("nb-savings")?.value || "0") || 0;
+      discountRaw += parseFloat($("nb-child-newborn")?.value || "0") || 0;
+      discountRaw += parseFloat($("nb-child-minor")?.value || "0") || 0;
+      if ($("nb-electronic")?.checked) discountRaw += 0.1;
+      if ($("nb-early40")?.checked) discountRaw += 0.2;
+      if ($("nb-local-unsold")?.checked) discountRaw += 0.2;
+      const discountApplied = Math.min(discountRaw, 0.5);
+      finalRate = Math.max(1.2, specialBase - discountApplied);
+      $("out-discount").textContent = `−${discountApplied.toFixed(2)}%p (원우대 ${discountRaw.toFixed(2)}%p)`;
+      $("out-final-rate").textContent = `${finalRate.toFixed(2)}% (신생아 특례 기준, 기본 ${specialBase.toFixed(2)}%)`;
+    } else {
+      const income = num($("fh-income"));
+      const term = parseInt($("fh-term")?.value || "30", 10);
+      if (income <= 0) {
+        alert("생애최초·신혼가구 탭: 부부합산 연소득을 입력해 주세요.");
+        return;
+      }
+      const childDiscount = parseFloat($("fh-child-tier")?.value || "0") || 0;
+      let base = getFirstHomeBaseRate(income, term);
+      base += parseFloat($("fh-rate-type")?.value || "0") || 0;
+      if ($("fh-local-home")?.checked) base -= 0.2;
+      let discountRaw = 0;
+      discountRaw += childDiscount;
+      discountRaw += parseFloat($("fh-subsidy")?.value || "0") || 0;
+      discountRaw += $("fh-electronic")?.checked ? 0.1 : 0;
+      discountRaw += $("fh-newsale")?.checked ? 0.1 : 0;
+      discountRaw += $("fh-under30")?.checked ? 0.1 : 0;
+      discountRaw += $("fh-prepay40")?.checked ? 0.2 : 0;
+      discountRaw += $("fh-local-unsold")?.checked ? 0.2 : 0;
+      const cap = childDiscount > 0 ? 0.7 : 0.5;
+      const applied = Math.min(discountRaw, cap);
+      finalRate = Math.max(1.2, base - applied);
+      $("out-discount").textContent = `−${applied.toFixed(2)}%p (원우대 ${discountRaw.toFixed(2)}%p)`;
+      $("out-final-rate").textContent = `${finalRate.toFixed(2)}% (생애최초·신혼 기준, 기본 ${base.toFixed(2)}%)`;
+    }
 
     const loanAmt = num($("loan-amt"));
     const loanYears = num($("loan-years")) || 30;
