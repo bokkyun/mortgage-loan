@@ -286,6 +286,61 @@
     });
   }
 
+  function getActiveRateKind() {
+    if (!$("rate-tab-didimdol")?.classList.contains("hidden")) return "did";
+    if (!$("rate-tab-newborn")?.classList.contains("hidden")) return "nb";
+    return "fh";
+  }
+
+  function getIncomeFromActiveRateTab() {
+    const k = getActiveRateKind();
+    if (k === "did") return num($("did-income"));
+    if (k === "nb") return num($("nb-income"));
+    return num($("fh-income"));
+  }
+
+  /**
+   * 3번 탭 연소득이 있으면 우선(수기·1·2 연동 반영값 모두 포함).
+   * 없으면 1·2번 산출. 신생아 탭만 소득 0도 허용(금리는 표 상한 참고).
+   */
+  function resolveAnnualIncomeForCalc() {
+    const tabInc = getIncomeFromActiveRateTab();
+    if (tabInc > 0) {
+      return { total: tabInc, source: "tab" };
+    }
+
+    const resSelf = calcPerson("self");
+    if (!resSelf.error) {
+      let incomeSpouse = 0;
+      if ($("has-spouse")?.checked) {
+        const resSpouse = calcPerson("spouse");
+        if (resSpouse.error) return { error: "배우자: " + resSpouse.error };
+        incomeSpouse = resSpouse.income;
+      }
+      return {
+        total: resSelf.income + incomeSpouse,
+        source: "steps12",
+        resSelf,
+        resSpouse,
+        incomeSpouse,
+      };
+    }
+
+    if (getActiveRateKind() === "nb") {
+      return { total: 0, source: "nb-no-income" };
+    }
+
+    return {
+      error: "1·2번에서 소득을 산출하거나, 3번 탭에 부부합산 연소득을 입력해 주세요.",
+    };
+  }
+
+  function syncFinalRateToLoanRate(finalRatePct) {
+    const el = $("loan-rate");
+    if (!el || !Number.isFinite(finalRatePct)) return;
+    el.value = String(Number(finalRatePct.toFixed(4)));
+  }
+
   function getDidimdolBaseRate(income, termYears) {
     const rows = [
       { max: 20000000, rates: { 10: 2.85, 15: 2.95, 20: 3.05, 30: 3.1 } },
@@ -400,6 +455,7 @@
 
     $("nb-results").classList.remove("hidden");
     $("nb-results").scrollIntoView({ behavior: "smooth", block: "start" });
+    syncFinalRateToLoanRate(specialFinal);
   }
 
   function runFirstHomeCalc() {
@@ -436,6 +492,7 @@
       `생애최초·신혼부부 전용 금리표 기준. 우대 상한 ${cap.toFixed(1)}%p, 최종금리 하한 1.2%를 적용했습니다.`;
     $("fh-results").classList.remove("hidden");
     $("fh-results").scrollIntoView({ behavior: "smooth", block: "start" });
+    syncFinalRateToLoanRate(finalRate);
   }
 
   function runIncomeCalc() {
@@ -483,6 +540,7 @@
       $("did-reason").textContent = `소득 ${fmtNum(income)}원, 만기 ${term}년 기준. 우대 상한 ${result.cap.toFixed(1)}%p, 최저금리 1.5% 적용.`;
       $("did-results")?.classList.remove("hidden");
       $("did-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      syncFinalRateToLoanRate(result.finalRate);
     } else if (nbVisible) {
       runNewbornCalc();
     } else {
@@ -491,37 +549,40 @@
   }
 
   function runCalc() {
-    const resSelf = calcPerson("self");
-    if (resSelf.error) {
-      alert(resSelf.error);
+    const resolved = resolveAnnualIncomeForCalc();
+    if (resolved.error) {
+      alert(resolved.error);
       return;
     }
 
-    let incomeSpouse = 0;
-    let resSpouse = null;
-    if ($("has-spouse")?.checked) {
-      resSpouse = calcPerson("spouse");
-      if (resSpouse.error) {
-        alert("배우자: " + resSpouse.error);
-        return;
+    const incomeTotal = resolved.total;
+
+    if (resolved.source === "steps12") {
+      syncHouseholdIncomeToRateTabs(incomeTotal);
+      $("out-self").textContent = `${fmtNum(resolved.resSelf.income)}원`;
+      $("out-spouse").textContent = $("has-spouse")?.checked ? `${fmtNum(resolved.incomeSpouse)}원` : "(미합산)";
+      $("out-sum").textContent = `${fmtNum(incomeTotal)}원`;
+      $("out-reason-self").textContent = "본인: " + resolved.resSelf.reason;
+      const rsp = $("out-reason-spouse");
+      if (resolved.resSpouse && $("has-spouse")?.checked) {
+        rsp.classList.remove("hidden");
+        rsp.textContent = "배우자: " + resolved.resSpouse.reason;
+      } else {
+        rsp.classList.add("hidden");
       }
-      incomeSpouse = resSpouse.income;
-    }
-
-    const incomeSelf = resSelf.income;
-    const incomeTotal = incomeSelf + incomeSpouse;
-    syncHouseholdIncomeToRateTabs(incomeTotal);
-
-    $("out-self").textContent = `${fmtNum(incomeSelf)}원`;
-    $("out-spouse").textContent = $("has-spouse")?.checked ? `${fmtNum(incomeSpouse)}원` : "(미합산)";
-    $("out-sum").textContent = `${fmtNum(incomeTotal)}원`;
-    $("out-reason-self").textContent = "본인: " + resSelf.reason;
-    const rsp = $("out-reason-spouse");
-    if (resSpouse && $("has-spouse")?.checked) {
-      rsp.classList.remove("hidden");
-      rsp.textContent = "배우자: " + resSpouse.reason;
+    } else if (resolved.source === "tab") {
+      $("out-self").textContent = "(3번 탭 입력)";
+      $("out-spouse").textContent = "(참고)";
+      $("out-sum").textContent = `${fmtNum(incomeTotal)}원`;
+      $("out-reason-self").textContent = "1·2번 산출 없이 3번 탭에 입력한 부부합산 연소득을 사용했습니다.";
+      $("out-reason-spouse").classList.add("hidden");
     } else {
-      rsp.classList.add("hidden");
+      $("out-self").textContent = "—";
+      $("out-spouse").textContent = "—";
+      $("out-sum").textContent = "미입력";
+      $("out-reason-self").textContent =
+        "신생아 탭에서 소득 미입력 시 표 최고 구간 금리로 계산합니다. DTI·합산 소득은 3번 또는 1·2번 입력이 필요합니다.";
+      $("out-reason-spouse").classList.add("hidden");
     }
 
     const didVisible = !$("rate-tab-didimdol")?.classList.contains("hidden");
@@ -608,16 +669,20 @@
     const otherAmt = num($("other-amt"));
     const otherRate = num($("other-rate"));
     const intO = otherAmt * (otherRate / 100);
-    const cap = parseFloat($("dti-cap")?.value || "60");
-
-    const dti = incomeTotal > 0 ? ((piM + intO) / incomeTotal) * 100 : 0;
-
-    $("out-dti").textContent = `${dti.toFixed(2)}%`;
+    const dtiCapPct = parseFloat($("dti-cap")?.value || "60");
 
     const judge = $("out-dti-judge");
-    const ok = dti <= cap;
-    judge.textContent = ok ? `기준 ${cap}% 이내` : `기준 ${cap}% 초과`;
-    judge.className = ok ? "pill-ok" : "pill-bad";
+    if (incomeTotal > 0) {
+      const dti = ((piM + intO) / incomeTotal) * 100;
+      $("out-dti").textContent = `${dti.toFixed(2)}%`;
+      const ok = dti <= dtiCapPct;
+      judge.textContent = ok ? `기준 ${dtiCapPct}% 이내` : `기준 ${dtiCapPct}% 초과`;
+      judge.className = ok ? "pill-ok" : "pill-bad";
+    } else {
+      $("out-dti").textContent = "—";
+      judge.textContent = "DTI는 연소득이 필요합니다 (3번 또는 1·2번).";
+      judge.className = "";
+    }
 
     $("out-pmt").textContent = loanAmt > 0
       ? `${fmtNum(pmt)}원/월 (원리금균등·적용 금리 ${loanRateForCalc.toFixed(2)}%${graceMonths > 0 ? `·거치 ${graceMonths}개월` : ""})`
