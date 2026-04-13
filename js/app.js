@@ -476,7 +476,6 @@
     discountRaw += childDiscount;
     discountRaw += parseFloat($("fh-subsidy")?.value || "0") || 0;
     discountRaw += $("fh-electronic")?.checked ? 0.1 : 0;
-    discountRaw += $("fh-newsale")?.checked ? 0.1 : 0;
     discountRaw += $("fh-under30")?.checked ? 0.1 : 0;
     discountRaw += $("fh-prepay40")?.checked ? 0.2 : 0;
     discountRaw += $("fh-local-unsold")?.checked ? 0.2 : 0;
@@ -645,7 +644,6 @@
       discountRaw += childDiscount;
       discountRaw += parseFloat($("fh-subsidy")?.value || "0") || 0;
       discountRaw += $("fh-electronic")?.checked ? 0.1 : 0;
-      discountRaw += $("fh-newsale")?.checked ? 0.1 : 0;
       discountRaw += $("fh-under30")?.checked ? 0.1 : 0;
       discountRaw += $("fh-prepay40")?.checked ? 0.2 : 0;
       discountRaw += $("fh-local-unsold")?.checked ? 0.2 : 0;
