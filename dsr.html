@@ -112,6 +112,9 @@
       outline: none;
       transition: border-color .15s;
     }
+    .row input.input-money, .sub-row input.input-money {
+      font-variant-numeric: tabular-nums;
+    }
     .row input:focus, .row select:focus { border-color: #1d9e75; }
     .row .unit {
       font-size: 12px;
@@ -286,7 +289,7 @@
     </div>
     <div class="row">
       <label>연간 소득</label>
-      <input type="number" id="income" placeholder="5000" min="0" />
+      <input type="text" id="income" class="input-money" inputmode="numeric" autocomplete="off" placeholder="5,000" />
       <span class="unit">만원</span>
     </div>
   </div>
@@ -298,7 +301,7 @@
     </div>
     <div class="row">
       <label>대출금액</label>
-      <input type="number" id="main_amount" placeholder="30000" min="0" />
+      <input type="text" id="main_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="30,000" />
       <span class="unit">만원</span>
     </div>
     <div class="row">
@@ -336,7 +339,7 @@
     <div id="credit_body" class="collapsible">
       <div class="row">
         <label>대출잔액</label>
-        <input type="number" id="credit_amount" placeholder="3000" min="0" />
+        <input type="text" id="credit_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="3,000" />
         <span class="unit">만원</span>
       </div>
       <div class="row">
@@ -375,7 +378,7 @@
     <div id="jeonse_body" class="collapsible">
       <div class="row">
         <label>대출잔액</label>
-        <input type="number" id="jeonse_amount" placeholder="0" min="0" />
+        <input type="text" id="jeonse_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
         <span class="unit">만원</span>
       </div>
       <div class="row">
@@ -399,7 +402,7 @@
     <div id="card_body" class="collapsible">
       <div class="row">
         <label>대출잔액</label>
-        <input type="number" id="card_amount" placeholder="0" min="0" />
+        <input type="text" id="card_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
         <span class="unit">만원</span>
       </div>
       <div class="row">
@@ -432,28 +435,28 @@
     <div id="other_body" class="collapsible">
       <div class="sub-section-title">오피스텔 外 비주택담보대출 (원금 ÷ 8년 + 이자)</div>
       <div class="sub-row">
-        <input type="number" id="nh_amount" placeholder="대출잔액 (만원)" min="0" />
+        <input type="text" id="nh_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
         <input type="number" id="nh_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
         <span class="unit">%</span>
       </div>
 
       <div class="sub-section-title">기타담보대출 — 지급보증담보 등 (원금 ÷ 10년 + 이자)</div>
       <div class="sub-row">
-        <input type="number" id="os_amount" placeholder="대출잔액 (만원)" min="0" />
+        <input type="text" id="os_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
         <input type="number" id="os_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
         <span class="unit">%</span>
       </div>
 
       <div class="sub-section-title">유가증권담보대출 (원금 ÷ 8년 + 이자)</div>
       <div class="sub-row">
-        <input type="number" id="sec_amount" placeholder="대출잔액 (만원)" min="0" />
+        <input type="text" id="sec_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
         <input type="number" id="sec_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
         <span class="unit">%</span>
       </div>
 
       <div class="sub-section-title">기타대출 (할부·리스·학자금 등) — 향후 1년간 실제 상환액 직접 입력</div>
       <div class="sub-row">
-        <input type="number" id="other_annual" placeholder="연간 상환액 (만원)" min="0" />
+        <input type="text" id="other_annual" class="input-money" inputmode="numeric" autocomplete="off" placeholder="연간 상환액 (만원)" />
         <span class="unit">만원/년</span>
       </div>
 
@@ -530,6 +533,28 @@
     return Math.round(v).toLocaleString("ko-KR") + "만원";
   }
 
+  const MONEY_FIELD_IDS = [
+    "income", "main_amount", "credit_amount", "jeonse_amount", "card_amount",
+    "nh_amount", "os_amount", "sec_amount", "other_annual"
+  ];
+
+  function formatMoneyValue(value) {
+    const digits = String(value || "").replace(/[^\d]/g, "");
+    if (!digits) return "";
+    return Number(digits).toLocaleString("ko-KR");
+  }
+
+  function wireMoneyInputs() {
+    MONEY_FIELD_IDS.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", () => {
+        el.value = formatMoneyValue(el.value);
+      });
+      if (el.value) el.value = formatMoneyValue(el.value);
+    });
+  }
+
   function pmt(principal, annualRate, years) {
     const r = annualRate / 100 / 12;
     const n = years * 12;
@@ -537,7 +562,14 @@
     return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
   }
 
-  function num(id) { return parseFloat(document.getElementById(id).value) || 0; }
+  function num(id) {
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    const raw = String(el.value ?? "").replace(/,/g, "").replace(/\s/g, "").trim();
+    if (raw === "") return 0;
+    const v = parseFloat(raw);
+    return Number.isFinite(v) ? v : 0;
+  }
   function sel(id) { return document.getElementById(id).value; }
 
   function calculate() {
@@ -685,6 +717,8 @@
 
     resultArea.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
+
+  wireMoneyInputs();
 </script>
 
 </body>
