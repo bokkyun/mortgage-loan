@@ -333,9 +333,9 @@
     <div class="section-title">
       신용대출
       <span class="badge badge-optional">선택</span>
-      <button class="toggle-btn" onclick="toggleSection('credit_body', this)">접기 ▲</button>
+      <button type="button" class="toggle-btn" onclick="toggleSection('credit_body', this)">펼치기 ▼</button>
     </div>
-    <div id="credit_body" class="collapsible">
+    <div id="credit_body" class="collapsible hidden">
       <div class="row">
         <label>대출잔액</label>
         <input type="text" id="credit_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="3,000" />
@@ -372,9 +372,9 @@
     <div class="section-title">
       전세보증금담보대출
       <span class="badge badge-optional">선택</span>
-      <button class="toggle-btn" onclick="toggleSection('jeonse_body', this)">접기 ▲</button>
+      <button type="button" class="toggle-btn" onclick="toggleSection('jeonse_body', this)">펼치기 ▼</button>
     </div>
-    <div id="jeonse_body" class="collapsible">
+    <div id="jeonse_body" class="collapsible hidden">
       <div class="row">
         <label>대출잔액</label>
         <input type="text" id="jeonse_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
@@ -396,9 +396,9 @@
     <div class="section-title">
       카드론 (장기카드대출)
       <span class="badge badge-optional">선택</span>
-      <button class="toggle-btn" onclick="toggleSection('card_body', this)">접기 ▲</button>
+      <button type="button" class="toggle-btn" onclick="toggleSection('card_body', this)">펼치기 ▼</button>
     </div>
-    <div id="card_body" class="collapsible">
+    <div id="card_body" class="collapsible hidden">
       <div class="row">
         <label>대출잔액</label>
         <input type="text" id="card_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
@@ -429,9 +429,9 @@
     <div class="section-title">
       기타 대출
       <span class="badge badge-optional">선택</span>
-      <button class="toggle-btn" onclick="toggleSection('other_body', this)">접기 ▲</button>
+      <button type="button" class="toggle-btn" onclick="toggleSection('other_body', this)">펼치기 ▼</button>
     </div>
-    <div id="other_body" class="collapsible">
+    <div id="other_body" class="collapsible hidden">
       <div class="sub-section-title">오피스텔 外 비주택담보대출 (원금 ÷ 8년 + 이자)</div>
       <div class="sub-row">
         <input type="text" id="nh_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
