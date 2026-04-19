@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bokkyun.github.io/mortgage-loan/sitemap.xml
+Sitemap: https://mortgage-loan-5oz.pages.dev/sitemap.xml

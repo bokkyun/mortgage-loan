@@ -654,3 +654,86 @@ footer .footer-cta-link:hover {
 footer .footer-note {
   color: var(--muted);
 }
+
+/* —— Hub (service selection) —— */
+.hub-main {
+  padding-bottom: 2.5rem;
+}
+
+.hub-lead {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 40rem;
+}
+
+.hub-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .hub-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 100%;
+}
+
+.hub-card-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #114533;
+  letter-spacing: -0.02em;
+}
+
+.hub-card-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.55;
+  flex: 1;
+}
+
+.hub-card-actions {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+a.hub-btn-primary {
+  display: inline-block;
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #2db287, var(--accent));
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  border: 1px solid #168767;
+  box-shadow: 0 6px 16px rgba(29, 158, 117, 0.25);
+}
+
+a.hub-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+span.hub-soon {
+  display: inline-block;
+  padding: 0.55rem 0.95rem;
+  border-radius: 10px;
+  border: 1px dashed var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}

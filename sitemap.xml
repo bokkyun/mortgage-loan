@@ -1,42 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/privacy/</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/didimdol/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://mortgage-loan-5oz.pages.dev/dsr/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://mortgage-loan-5oz.pages.dev/privacy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/privacy-policy/</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/privacy-policy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/disclaimer/</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/disclaimer/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/about/</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/about/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/guides/didimdol-overview.html</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/guides/didimdol-overview.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/guides/apply-conditions.html</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/guides/apply-conditions.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://bokkyun.github.io/mortgage-loan/guides/repayment-methods.html</loc>
+    <loc>https://mortgage-loan-5oz.pages.dev/guides/repayment-methods.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
