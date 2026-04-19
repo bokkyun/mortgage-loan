@@ -4,28 +4,103 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>디딤돌대출 신청 조건 총정리 | Mortgage Loan Lab</title>
-    <meta name="description" content="소득, 주택, 대출한도, 우대요건 등 디딤돌대출 신청 전 확인할 조건 정리" />
+    <meta
+      name="description"
+      content="소득 산정, 주택·세대 요건, 금리 우대와 상한, DTI 등 디딤돌대출 신청 전에 점검할 조건을 정리했습니다."
+    />
     <link rel="canonical" href="https://bokkyun.github.io/mortgage-loan/guides/apply-conditions.html" />
     <meta property="og:type" content="article" />
     <meta property="og:title" content="디딤돌대출 신청 조건 총정리" />
-    <meta property="og:description" content="소득·주택·한도 요건을 한눈에 확인하세요." />
+    <meta property="og:description" content="소득·주택·한도·우대 요건을 신청 전에 한 번에 점검하세요." />
     <meta property="og:url" content="https://bokkyun.github.io/mortgage-loan/guides/apply-conditions.html" />
     <link rel="stylesheet" href="../css/styles.css" />
   </head>
   <body>
+    <header>
+      <p style="margin: 0; font-size: 0.85rem">
+        <a href="../" style="color: inherit; text-decoration: none">Mortgage Loan Lab</a>
+      </p>
+      <nav class="quick-nav" aria-label="사이트 주요 페이지">
+        <a href="../">디딤돌 계산기</a>
+        <a href="didimdol-overview.html">디딤돌이란</a>
+        <a href="apply-conditions.html" aria-current="page">신청 조건</a>
+        <a href="repayment-methods.html">상환 방식</a>
+        <a href="../dsr.html">DSR 계산기</a>
+        <a href="../about/">About</a>
+      </nav>
+    </header>
     <main>
       <section class="card" style="margin-top: 1.25rem">
         <h1 style="margin: 0 0 1rem; font-size: 1.3rem">디딤돌대출 신청 조건 총정리</h1>
-        <p>신청 전 아래 항목을 확인하면 상담·심사 준비가 훨씬 쉬워집니다.</p>
-        <h2 class="subsection-title">1) 소득 관련</h2>
-        <p>재직 유형(일반/신규/휴직/복직)에 따라 인정 방식이 달라집니다. 본 계산기는 월환산 방식 입력을 지원합니다.</p>
-        <h2 class="subsection-title">2) 주택 및 세대 요건</h2>
-        <p>무주택 여부, 대상 주택 기준, 세대 구성 조건 등을 확인해야 합니다.</p>
-        <h2 class="subsection-title">3) 금리 우대와 상한</h2>
-        <p>자녀 수, 청약저축, 전자계약, 지방 여부 등에 따라 우대가 달라지며 적용 상한이 존재합니다.</p>
-        <p class="field-hint">정확한 적용 기준은 최신 공고 및 금융기관 안내를 반드시 확인하세요.</p>
+        <p>
+          아래는 신청·상담 전에 사용자가 스스로 점검하기 좋도록 <strong>일반적인 틀</strong>을 정리한 것입니다. 연도·지역·규제
+          여부에 따라 숫자 기준이 바뀔 수 있으므로, 최종 판단은 항상 당해 공고와 취급 기관 안내에 따릅니다.
+        </p>
+
+        <h2 class="subsection-title">1) 소득과 재직 형태</h2>
+        <p>
+          소득 인정은 “직전 두 과세연도 근로소득”처럼 고정된 패턴만 있는 것이 아니라, 신규 입사·휴직·복직처럼
+          <strong>연도 단위 자료가 불충분한 경우</strong> 월 환산 등 별도 기준이 적용되기도 합니다. 이 때 필요한 것은
+          급여명세·소득금액증명 등 실제 수령 내역과 재직 기간을 맞춰 설명할 수 있는지입니다.
+        </p>
+        <p>
+          본 사이트 계산기는 일반 재직, 신규입사(연환산), 휴직, 복직 후 근무 등 시나리오별 입력란을 나누어,
+          상담 전에 <em>대략적인</em> 인정 소득 수준을 가늠하는 데 도움을 줍니다.
+        </p>
+
+        <h2 class="subsection-title">2) 주택·세대 관련 요건</h2>
+        <p>
+          무주택 요건, 대상 주택의 가격·면적·지역, 세대원 범위 등은 정책의 핵심입니다. 특히 “세대”의 정의와 주택 수,
+          분양권·조합 입주권 등이 어떻게 취급되는지는 공고마다 세부 규정이 있으므로, 본인 케이스가 예외에 해당하는지
+          반드시 확인해야 합니다.
+        </p>
+
+        <h2 class="subsection-title">3) 대출 한도와 담보</h2>
+        <p>
+          LTV(담보인정비율)와 대출 한도 상한은 주택 가격대·지역·규제 여부와 함께 움직입니다. 같은 소득이라도
+          담봴 가치와 기존 부채에 따라 실제 승인 가능 금액이 달라질 수 있으니, “한도 계산기 숫자”와 “실제 승인 한도”를
+          구분해서 생각하는 것이 좋습니다.
+        </p>
+
+        <h2 class="subsection-title">4) 금리 우대와 중복 한도</h2>
+        <p>
+          자녀 수, 청약저축 납입, 전자계약, 지방 소재 주택, 중도상환 등 조건형 우대가 겹칠 수 있습니다. 다만 우대폭은
+          합산 상한이 있거나, 특정 항목만 중복 가능한 식으로 설계되는 경우가 많습니다. 본 계산기의 금리 탭은 이런 구조를
+          반영해 <strong>가정 기본금리</strong> 위에서 우대를 더하고 상한을 적용하는 방식으로 참고값을 보여 줍니다.
+        </p>
+
+        <h2 class="subsection-title">5) DTI·DSR과 기존 부채</h2>
+        <p>
+          DTI(총부채원리금상환비율)는 주담대 원리금과 기타 대출 이자 등을 연소득으로 나눈 비율로, 규제지역 여부 등에 따라
+          허용 상한이 달라질 수 있습니다. DSR(총부채원리금상환비율)은 다른 정책성·은행 내부 기준과 연동되므로,
+          본 사이트의 DTI 결과와 함께 <a href="../dsr.html">DSR 계산기</a>로 전체 부채 부담을 점검하는 흐름을 권장합니다.
+        </p>
+
+        <h2 class="subsection-title">6) 서류와 일정을 미리 준비할 때</h2>
+        <p>
+          재직증명, 소득증빙, 주민등록 관련 서류, 매매·전세 계약 관련 자료 등은 기관별로 요구 목록이 조금씩 다릅니다.
+          복직·휴직처럼 설명이 필요한 구간은 한 페이지짜리 메모보다, 날짜와 금액이 맞아떨어지는 타임라인으로 정리해 두면
+          상담 효율이 좋아집니다.
+        </p>
+
+        <p class="field-hint">
+          정확한 적용 기준은 접수 시점의 HUG·금융기관 공식 안내를 따릅니다. 본 문서는 참고용 요약입니다.
+        </p>
+        <p class="field-hint" style="margin-top: 1rem">
+          이어서 읽기: <a href="repayment-methods.html">원리금균등·원금균등·체증식 비교</a>
+        </p>
         <p style="margin-top: 1rem"><a href="../">계산기로 돌아가기</a></p>
       </section>
     </main>
+    <footer>
+      <div class="footer-main">
+        <span>© Mortgage Loan Lab</span>
+      </div>
+      <div class="footer-links">
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../disclaimer/">면책 조항</a>
+        <a href="../">홈</a>
+      </div>
+    </footer>
   </body>
 </html>
