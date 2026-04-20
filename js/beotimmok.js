@@ -422,6 +422,131 @@
     return 0.5;
   }
 
+  // —— 예상 필요서류 렌더링 ——
+  function incomeDocForType(type) {
+    if (type === "A") {
+      return "근로소득원천징수영수증 (전년도) — 4대보험 근로자";
+    }
+    if (type === "B") {
+      return "갑종근로소득원천징수영수증 (입사일 ~ 현재) — 전년도 또는 금년 입사자";
+    }
+    if (type === "C") {
+      return "근로소득원천징수영수증 (휴직 직전 2개년) — 휴직자";
+    }
+    if (type === "D") {
+      return "근로소득원천징수영수증 (휴직 직전 2개년) + 복직 후 갑종근로소득원천징수영수증 — 복직자";
+    }
+    return "근로소득원천징수영수증 (전년도)";
+  }
+
+  function buildCommonDocs(selfType, spouseType, hasSpouse) {
+    const list = [];
+    list.push("확정일자부 전세계약서 <span class=\"muted\">(필요시 임대차계약 신고필증)</span>");
+    list.push("주민등록등본 <span class=\"muted\">(최근 1개월 이내)</span>");
+    list.push("가족관계증명서");
+
+    const incomeDocs = [];
+    incomeDocs.push(`본인: ${incomeDocForType(selfType)}`);
+    if (hasSpouse) incomeDocs.push(`배우자: ${incomeDocForType(spouseType)}`);
+    incomeDocs.push(
+      "<span class=\"muted\">사업자인 경우 소득금액증명원 (전년도 기준, 7월 이전에는 전전년도 소득금액증명원 제출)</span>"
+    );
+    list.push(
+      "소득확인서류" +
+        "<ul class=\"doc-sublist\">" +
+        incomeDocs.map((d) => `<li>${d}</li>`).join("") +
+        "</ul>"
+    );
+
+    list.push("재직증명서 <span class=\"muted\">(사업자의 경우 사업자등록증)</span>");
+    list.push("4대보험 가입확인서 <span class=\"muted\">(정부24에서 발급)</span>");
+    list.push("건강보험자격득실확인서");
+    list.push("건강보험납부내역서 <span class=\"muted\">(최근 6개월)</span>");
+    return list;
+  }
+
+  function buildPreferentialDocs(g1Val, g1Kind) {
+    const list = [];
+    if (g1Kind === "basic") {
+      list.push("수급자증명서 / 차상위계층확인서 / 한부모가족 증명서 <span class=\"muted\">(해당 자격 1종)</span>");
+    }
+    if (g1Kind === "child3") {
+      list.push("자녀수 확인 — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+    }
+    if (!g1Kind && g1Val === 0.5) {
+      list.push("자녀수 확인(2자녀) — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+    }
+    if (!g1Kind && g1Val === 0.3) {
+      list.push("자녀수 확인(1자녀) — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+    }
+    if (!g1Kind && g1Val === 0.2) {
+      list.push(
+        "해당 자격 증빙 1종 — 장애인증명서 / 노인부양 관계 확인(주민등록등본) / 다문화가구 확인서류(혼인관계증명서 등) / 고령자 연령 확인(주민등록등본)"
+      );
+    }
+    return list;
+  }
+
+  function renderDocs({ tab, selfType, spouseType, hasSpouse, g1Val, g1Kind, smbYouth }) {
+    const wrap = $("bt-docs-results");
+    if (!wrap) return;
+
+    const summaryParts = [];
+    if (tab === "general") summaryParts.push("일반 버팀목");
+    if (tab === "newlywed") summaryParts.push("신혼가구 버팀목");
+    if (tab === "youth") summaryParts.push("청년 전용 버팀목");
+    if (tab === "youth" && smbYouth) summaryParts.push("중소기업 취업·창업 청년 우대");
+    if (hasSpouse) summaryParts.push("부부합산");
+
+    const summaryEl = $("bt-docs-summary");
+    if (summaryEl) {
+      summaryEl.textContent = `${summaryParts.join(" · ")} 기준으로 필요한 서류를 정리했습니다.`;
+    }
+
+    const commonUl = $("bt-docs-common");
+    if (commonUl) {
+      commonUl.innerHTML = buildCommonDocs(selfType, spouseType, hasSpouse)
+        .map((d) => `<li>${d}</li>`)
+        .join("");
+    }
+
+    const extraWrap = $("bt-docs-extra-wrap");
+    const extraTitle = $("bt-docs-extra-title");
+    const extraUl = $("bt-docs-extra");
+    const extra = [];
+    if (tab === "newlywed") {
+      if (extraTitle) extraTitle.textContent = "신혼가구 추가 서류";
+      extra.push("혼인관계증명서");
+    }
+    if (tab === "youth" && smbYouth) {
+      if (extraTitle) extraTitle.textContent = "중소기업 취업·창업 청년 추가 서류";
+      extra.push("사업자등록증");
+      extra.push("고용보험자격이력내역서 <span class=\"muted\">(근로자용)</span>");
+      extra.push("주업종코드확인서");
+      extra.push("병적증명서 <span class=\"muted\">(필요시)</span>");
+    }
+    if (extra.length > 0) {
+      extraWrap?.classList.remove("hidden");
+      if (extraUl) extraUl.innerHTML = extra.map((d) => `<li>${d}</li>`).join("");
+    } else {
+      extraWrap?.classList.add("hidden");
+      if (extraUl) extraUl.innerHTML = "";
+    }
+
+    const prefWrap = $("bt-docs-pref-wrap");
+    const prefUl = $("bt-docs-pref");
+    const pref = buildPreferentialDocs(g1Val, g1Kind);
+    if (pref.length > 0) {
+      prefWrap?.classList.remove("hidden");
+      if (prefUl) prefUl.innerHTML = pref.map((d) => `<li>${d}</li>`).join("");
+    } else {
+      prefWrap?.classList.add("hidden");
+      if (prefUl) prefUl.innerHTML = "";
+    }
+
+    wrap.classList.remove("hidden");
+  }
+
   function runCalc() {
     let income = num($("bt-income"));
 
@@ -530,6 +655,13 @@
     $("bt-out-reason").textContent = reasons.join(" ");
 
     $("bt-results").classList.remove("hidden");
+
+    const selfType = document.querySelector('input[name="emp-self"]:checked')?.value || "A";
+    const spouseType = document.querySelector('input[name="emp-spouse"]:checked')?.value || "A";
+    const hasSpouse = !!$("has-spouse")?.checked;
+    const smbYouth = tab === "youth" && !!$("bt-smb-youth")?.checked;
+    renderDocs({ tab, selfType, spouseType, hasSpouse, g1Val, g1Kind, smbYouth });
+
     $("bt-results").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 

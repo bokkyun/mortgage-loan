@@ -541,6 +541,60 @@ select:focus {
   border-left: 3px solid var(--accent);
 }
 
+.docs-category {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+}
+
+.docs-category + .docs-category {
+  margin-top: 0.75rem;
+}
+
+.docs-category h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.doc-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.doc-list > li {
+  margin: 0.2rem 0;
+}
+
+.doc-list > li + li {
+  margin-top: 0.35rem;
+}
+
+.doc-sublist {
+  margin: 0.3rem 0 0.2rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.doc-sublist > li {
+  margin: 0.1rem 0;
+}
+
+.doc-list .muted,
+.doc-sublist .muted,
+.muted {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .schedule-wrap {
   margin-top: 1rem;
   border: 1px solid var(--border);
