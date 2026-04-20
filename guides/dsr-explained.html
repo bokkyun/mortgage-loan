@@ -185,6 +185,219 @@ DSR = (연간 원리금 합계) / (연소득) × 100 [%]
         </ul>
       </section>
 
+      <section class="card" id="how-each-debt">
+        <h2>8. 대출 종류별 DSR 환산 방식 — 실전 계산</h2>
+        <p>
+          DSR의 본질은 "모든 대출의 연간 원리금을 더해 연소득으로 나누는 것"입니다. 하지만 대출 종류마다
+          <strong>월 상환액을 산정하는 방식</strong>이 다르기 때문에 정확한 DSR을 내려면 각 대출의 환산 룰을 알아야 합니다.
+        </p>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 0.5rem">
+          <thead>
+            <tr style="background: var(--surface2)">
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">대출 종류</th>
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">원리금 산정 방식</th>
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">특이사항</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">주택담보대출</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">실 계약 기간·상환방식 그대로</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">체증식은 초기 월상환 낮아 초반 DSR 유리</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">신용대출</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">실제 만기 기준 원리금균등 환산 (일시상환 방식도 환산)</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">만기 짧은 1~5년짜리라 월부담 큼</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">마이너스통장</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">"한도 전액 사용" 가정 + 통상 10년 균등 환산</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">실제 사용 안 해도 한도 기준 반영</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">전세자금대출</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">이자만 반영 (원금 제외)</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">정책성 일부는 완화 또는 제외</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">자동차 할부</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">잔존기간 기준 원리금 환산</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">만기가 가까우면 DSR 영향 작음</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">카드론·리볼빙</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">잔액 기준 5년 분할 환산</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">이자 높고 기간 짧아 체감 부담 큼</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">학자금대출</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">상환 개시 후 실 계약 기준 원리금</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">거치 중은 이자만, 상환 시작 후 본격 반영</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="field-hint" style="margin-top: 0.5rem">
+          ※ 마이너스통장은 "쓰지 않아도 한도 기준으로 환산"되는 구조 때문에 DSR에 큰 영향을 줍니다. 대환·구입 전에
+          <strong>사용하지 않는 마통 한도 축소·해지</strong>가 DSR 개선에 가장 효과적인 경우가 많습니다.
+        </p>
+      </section>
+
+      <section class="card" id="stress-detail">
+        <h2>9. 스트레스 DSR 실제 적용 — 숫자로 보기</h2>
+        <p>
+          스트레스 DSR은 "미래 금리 상승에 대비해 심사 시점부터 더 높은 금리를 가정"하는 제도입니다. 차주가 실제 부담할
+          금리보다 보수적으로 산정해 한도가 축소되는 효과가 있습니다. 2026년 기준 스트레스 가산은 단계적으로 확대되어
+          <strong>변동·혼합형은 약 +1.2%p, 주기형은 +0.6%p</strong>가 일반적입니다.
+        </p>
+        <h3 class="subsection-title">예시 — 부부합산 연 7,000만원, 다른 대출 없음</h3>
+        <ul class="doc-list">
+          <li>일반 DSR 한도(40%) : 2,800만원/년 → 월 233만원까지 상환 가능</li>
+          <li>30년·원리금균등·실제 금리 4.0% 가정 → 약 <strong>4억 8천만원</strong> 한도</li>
+          <li>스트레스 금리 +1.2%p = 5.2% 가정 → 월 233만원 기준 한도가 <strong>약 4억 2천만원</strong>으로 감소</li>
+          <li>체감 한도 축소 : <strong>약 -6,000만원 (-12.5%)</strong></li>
+        </ul>
+        <p>
+          스트레스 DSR 효과를 줄이려면 <strong>고정금리·30년 이상 장기</strong>의 주기형을 선택하는 것이 유리합니다. 주기형은
+          스트레스 가산이 작기 때문에 한도 축소 폭이 상대적으로 작습니다. 다만 실제 총 이자는 상환 방식 결정 시 따로 비교해야
+          합니다.
+        </p>
+      </section>
+
+      <section class="card" id="dsr-improve">
+        <h2>10. DSR을 개선하는 7가지 실전 액션</h2>
+        <ol class="doc-list">
+          <li>
+            <strong>마이너스통장 정리</strong> — 쓰지 않는 마통 한도는 DSR을 잡아먹는 1순위. 한도 축소 또는 해지로
+            즉시 개선. 효과가 가장 크고 간단합니다.
+          </li>
+          <li>
+            <strong>카드론·리볼빙 우선 상환</strong> — 5년 환산으로 월부담이 크기 때문에 소액이어도 DSR 개선 효과가 큽니다.
+            대출 접수 전 최소 6개월 이상 선제 정리 권장.
+          </li>
+          <li>
+            <strong>신용대출 만기 연장</strong> — 3년 만기를 5~7년으로 재약정하면 월 상환액이 줄어 DSR 감소. 신용등급에
+            따라 가능 여부가 달라집니다.
+          </li>
+          <li>
+            <strong>주담대 만기 최대화</strong> — 30~40년 만기 선택으로 월 상환 최소화. 디딤돌·버팀목은 대부분 30년
+            이상을 권장합니다.
+          </li>
+          <li>
+            <strong>체증식 상환 선택</strong> — 초반 DSR만 낮추면 한도가 확보되는 경우 유리. 단, 총이자 증가 주의.
+          </li>
+          <li>
+            <strong>부부합산 신청</strong> — 분모(소득)를 확대해 DSR 개선. 단, 자격 기준 소득 상한을 초과하지 않는지 확인.
+          </li>
+          <li>
+            <strong>자동차 할부·리스 완납</strong> — 잔존기간이 짧으면 영향이 적지만, 잔존기간이 1년 넘게 남은 할부는
+            선제 상환이 효과적. 리스는 전액 해지도 고려.
+          </li>
+        </ol>
+      </section>
+
+      <section class="card" id="example-impact">
+        <h2>11. 신용대출 1천만원이 주담대 한도를 얼마나 줄일까</h2>
+        <p>
+          "나는 신용대출이 겨우 1천만원인데 크게 영향 없겠지?" 하는 생각은 오해일 수 있습니다. 아래는 부부합산 6천만원
+          소득, DSR 40% 한도를 기준으로 <strong>신용대출 유무가 주담대 한도에 미치는 영향</strong>을 시뮬레이션한 예시입니다.
+        </p>
+        <ul class="doc-list">
+          <li>DSR 40% 기준 허용 연 원리금 : 2,400만원</li>
+          <li>주담대 30년·4% 월상환 ≒ 48만원 / 1억원 당</li>
+          <li>신용대출 없음 → 연 2,400만원 전액 주담대로 사용 가능 → <strong>한도 약 4억 2천만원</strong></li>
+          <li>신용대출 1천만원·5년·6% (월 19만 × 12 = 228만) → 남는 주담대 여력 2,172만원 → <strong>한도 약 3억 8천만원</strong></li>
+          <li>주담대 한도 감소폭 : <strong>약 -4,000만원</strong></li>
+        </ul>
+        <p>
+          즉, 신용대출 1천만원 때문에 주담대 한도가 약 4배인 4천만원 줄어드는 구조입니다. 이는 "신용대출의 짧은
+          만기"가 DSR을 크게 잠식하기 때문입니다. 주택 구입 전 1~2년 단위로 본인의 대출 포트폴리오를 정리하는 이유입니다.
+        </p>
+      </section>
+
+      <section class="card" id="dsr-vs-limit">
+        <h2>12. "DSR 한도"와 "LTV·DTI 한도"의 상호 관계</h2>
+        <p>
+          주담대 한도는 실제로 <strong>세 가지 제약의 교집합</strong>에서 결정됩니다.
+        </p>
+        <ul class="doc-list">
+          <li><strong>LTV</strong> — 주택가격 × 비율(예: 70%) 이내</li>
+          <li><strong>DTI / DSR</strong> — 소득 대비 원리금 비율 이내</li>
+          <li><strong>상품별 한도</strong> — 디딤돌 2.5~4억 / 신생아 특례 5억 등</li>
+        </ul>
+        <p>
+          세 제약 중 <strong>가장 작은 값</strong>이 실제 대출 가능 한도가 됩니다. 주택가격이 크면 LTV가 아닌 소득이,
+          소득이 충분하면 상품 한도가, 소득·주택 둘 다 크면 DSR이 결정 요인이 되는 식입니다. 시뮬레이션 시 "LTV만 보고
+          한도를 추정"하지 말고 세 가지를 모두 검토해야 합니다. 디딤돌의 경우
+          <a href="../didimdol/">디딤돌 계산기</a>가 세 제약을 자동으로 교집합 계산해 줍니다.
+        </p>
+      </section>
+
+      <section class="card" id="faq">
+        <h2>13. 자주 묻는 질문 (FAQ)</h2>
+        <details>
+          <summary>디딤돌대출은 DSR 40%를 넘어도 되나요?</summary>
+          <p>
+            디딤돌대출은 정책자금이라 <strong>은행권 DSR 40% 한도와 별도</strong>로 운영되며, DTI 기준(규제 50% / 비규제 60%)을
+            적용합니다. 다만 다른 은행 신용대출·주담대가 있는 경우 그 쪽 DSR에도 포함되므로, 전체 DSR이 40%를 넘으면
+            추가 대출이 어려워집니다.
+          </p>
+        </details>
+        <details>
+          <summary>배우자의 대출도 내 DSR에 포함되나요?</summary>
+          <p>
+            DSR은 <strong>차주 단위</strong>로 산정하는 것이 원칙이므로 배우자의 단독 명의 대출은 본인 DSR에 직접 포함되지
+            않습니다. 다만 <strong>부부합산 신청·공동명의 대출</strong>은 합산 산정됩니다. 부부합산으로 소득을 더해 분모를
+            늘리는 대신 부부의 대출도 모두 합산됩니다.
+          </p>
+        </details>
+        <details>
+          <summary>전세대출 원금이 DSR에 포함되는지 아닌지 헷갈립니다.</summary>
+          <p>
+            원칙적으로 전세대출 <strong>이자만 DSR에 포함</strong>되고 원금은 제외됩니다(전세 만기 시 집주인 반환 구조). 다만
+            일부 정책성 전세대출은 완전 제외 또는 완화되며, 세부 기준은 접수 시점의 공고를 확인해야 합니다.
+          </p>
+        </details>
+        <details>
+          <summary>카드 리볼빙 잔액이 10만원 수준이어도 DSR에 영향 있나요?</summary>
+          <p>
+            소액이라면 영향이 미미하지만 심사상 "리볼빙 사용자"로 분류되어 신용등급·심사 세부 판정에 부정적일 수 있습니다.
+            접수 전 완납해 <strong>"리볼빙 미사용" 상태</strong>로 만드는 것을 권장합니다.
+          </p>
+        </details>
+        <details>
+          <summary>자영업자인데 DSR 산정 소득은 어떻게 잡히나요?</summary>
+          <p>
+            자영업자는 <strong>소득금액증명원</strong>상 필요경비 공제 후 소득이 기준이 됩니다. 매출 규모보다 낮게 잡히는
+            경우가 많으며, 일부 기관은 "신고 소득 + 추정 소득" 합산을 인정합니다. 소득 증빙 전략은
+            <a href="income-docs-2years.html">2개년 소득 서류 가이드</a>에서 자세히 다룹니다.
+          </p>
+        </details>
+        <details>
+          <summary>DSR을 미리 정확히 계산해 보고 싶은데 방법은?</summary>
+          <p>
+            본 사이트의 <a href="../dsr/">DSR 계산기</a>를 사용하세요. 기존 대출을 종류별로 입력하면 연간 원리금·DSR을
+            자동으로 산정합니다. 스트레스 DSR 시나리오도 적용 가능해 한도 축소 폭을 미리 확인할 수 있습니다.
+          </p>
+        </details>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>14. DSR 최적화 체크리스트</h2>
+        <ol class="doc-list">
+          <li>현재 모든 대출(신용·마이너스·주담대·전세·자동차·카드론·학자금) 목록 정리</li>
+          <li>각 대출의 잔액·금리·만기·월상환 기록</li>
+          <li>쓰지 않는 마이너스통장 한도 축소·해지</li>
+          <li>카드 리볼빙·카드론 우선 상환</li>
+          <li>신용대출 만기를 연장 가능한지 은행 문의</li>
+          <li>차량 할부 잔여 기간 / 리스 계약 잔존 기간 확인</li>
+          <li>부부합산 신청 시 소득·대출 모두 합산됨을 시뮬레이션</li>
+          <li>스트레스 DSR 적용 후 한도 재계산 (본 사이트 <a href="../dsr/">DSR 계산기</a>)</li>
+          <li>LTV·DTI·DSR·상품 한도 4종 교집합 확인</li>
+          <li>접수 6개월~1년 전부터 DSR 개선 작업 진행</li>
+        </ol>
+      </section>
+
       <section class="card">
         <h2>관련 글</h2>
         <div class="guide-links">
