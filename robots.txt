@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mortgage-loan-5oz.pages.dev/sitemap.xml
+Sitemap: https://mortgage-loan.uk/sitemap.xml
