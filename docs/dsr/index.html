@@ -10,10 +10,10 @@
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>부동산 DSR 필요서류 안내 | Mortgage Loan Lab</title>
+    <title>주택담보대출 필요서류 안내 (부동산 DSR 기준)</title>
     <meta
       name="description"
-      content="주택담보대출 DSR 산정 및 심사 시 일반적으로 요구되는 소득·기존대출·주택 관련 서류를 정리한 참고용 안내입니다."
+      content="부동산 주택담보대출 신청 시 필요한 기본 서류(매매계약서·주민등록·소득·재직·건강보험 등)와 금리우대 입증 서류를 한눈에 정리한 참고용 안내 페이지입니다."
     />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://mortgage-loan-5oz.pages.dev/docs/dsr/" />
@@ -27,27 +27,70 @@
   </head>
   <body>
     <header>
-      <h1>부동산 DSR 필요서류 안내</h1>
-      <p>주택담보대출 DSR 심사 시 일반적으로 요구되는 서류를 정리한 참고용 가이드입니다.</p>
+      <h1>주택담보대출 필요서류 안내</h1>
+      <p>부동산 DSR·주택담보대출 신청 시 일반적으로 요구되는 서류를 재직 유형·우대 조건별로 정리한 참고용 가이드입니다.</p>
       <nav class="quick-nav" aria-label="빠른 이동">
         <a href="../../">홈</a>
         <a href="../../dsr/">DSR 계산기</a>
+        <a href="#common">기본 서류</a>
+        <a href="#income">소득 확인 서류</a>
+        <a href="#preferential">금리우대 자격서류</a>
         <a href="../didimdol/">디딤돌 필요서류</a>
         <a href="../beotimmok/">버팀목 필요서류</a>
       </nav>
       <div class="disclaimer">
-        실제 요구 서류는 취급 금융기관·지점별 기준에 따라 달라질 수 있습니다. 신청 전 해당 기관에 반드시 확인하세요.
+        실제 요구 서류는 취급 금융기관·지점·상품(변동/고정, LTV/DSR 규제, 보증기관 등)에 따라 달라질 수 있습니다. 신청 전 해당
+        기관에 반드시 확인하세요.
       </div>
     </header>
 
     <main>
-      <section class="card">
-        <h2>준비 중입니다</h2>
-        <p class="field-hint" style="margin-top: 0.75rem">
-          DSR 산정과 주택담보대출 심사 시 필요한 소득 증빙, 기존 대출 증명, 주택·담보 관련 서류 목록을 순차적으로 업데이트할
-          예정입니다.
+      <section class="card" id="common">
+        <h2>1. 공통 기본서류</h2>
+        <p class="field-hint" style="margin: 0 0 0.75rem">
+          주택담보대출(매입 자금·DSR 규제 산정 포함)의 기본이 되는 공통 서류입니다.
         </p>
-        <div class="cross-nav-row" style="margin-top: 1rem">
+        <ol class="doc-list">
+          <li>
+            <strong>부동산 매매계약서</strong>
+            <span class="muted">(필요시 부동산등기사항증명서 등 소유권 확인 서류)</span>
+          </li>
+          <li><strong>주민등록등본</strong> <span class="muted">(최근 1개월 이내)</span></li>
+          <li><strong>주민등록초본</strong> <span class="muted">(주소변동내역 포함 · 최근 1개월 이내)</span></li>
+          <li><strong>가족관계증명서</strong></li>
+          <li id="income">
+            <strong>소득확인서류</strong> — 재직 유형에 따라 다음 중 해당 항목
+            <ul class="doc-sublist">
+              <li>4대보험 근로자 → <strong>근로소득원천징수영수증</strong> (전년도)</li>
+              <li>전년도 또는 금년 입사자 → <strong>갑종근로소득원천징수영수증</strong> (입사일 ~ 현재)</li>
+              <li>사업자 → <strong>소득금액증명원</strong> (전년도 기준, 7월 이전에는 전년도 자료가 아직 발급되지 않으므로 전전년도 소득금액증명원 제출)</li>
+            </ul>
+          </li>
+          <li><strong>재직증명서</strong> <span class="muted">(사업자의 경우 사업자등록증)</span></li>
+          <li><strong>건강보험자격득실확인서</strong></li>
+          <li><strong>건강보험납부내역서</strong> <span class="muted">(최근 6개월)</span></li>
+          <li id="preferential">
+            <strong>금리우대 자격서류</strong>
+            <span class="muted">— 장애인증명서 / 유공자확인서 등 해당 시</span>
+          </li>
+          <li>
+            <strong>전입세대열람원</strong>
+            <span class="muted">(담보 주택의 전입 세대 확인 용도 · 주민센터 발급)</span>
+          </li>
+          <li>
+            <strong>인감증명서 · 인감도장</strong>
+            <span class="muted">(등기·근저당 설정 용도) — <strong>전자등기 진행 시 불필요</strong></span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>DSR·대출 가능 여부를 먼저 확인해 보세요</h2>
+        <p class="field-hint" style="margin: 0 0 0.75rem">
+          소득·기존 부채·신청 희망 금액을 입력하면 부채 비율(DSR)과 규제 기준(40%·50% 등) 대비 여유 한도를 참고 형태로 확인할
+          수 있습니다.
+        </p>
+        <div class="cross-nav-row">
           <a class="cross-nav-cta" href="../../dsr/">DSR 계산기 바로가기</a>
         </div>
       </section>
@@ -59,6 +102,9 @@
       </div>
       <div class="footer-links">
         <a href="../../">홈</a>
+        <a href="../../dsr/">DSR 계산기</a>
+        <a href="../didimdol/">디딤돌 필요서류</a>
+        <a href="../beotimmok/">버팀목 필요서류</a>
         <a href="../../privacy/">개인정보 처리방침</a>
         <a href="../../disclaimer/">면책 조항</a>
       </div>
