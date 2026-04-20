@@ -518,8 +518,12 @@
       if (extraTitle) extraTitle.textContent = "신혼가구 추가 서류";
       extra.push("혼인관계증명서");
     }
-    if (tab === "youth" && smbYouth) {
-      if (extraTitle) extraTitle.textContent = "중소기업 취업·창업 청년 추가 서류";
+    if (tab === "youth") {
+      if (extraTitle) {
+        extraTitle.textContent = smbYouth
+          ? "중소기업 취업·창업 청년 추가 서류"
+          : "중소기업 취업·창업 청년 우대 신청 시 추가 서류 (해당 시)";
+      }
       extra.push("사업자등록증");
       extra.push("고용보험자격이력내역서 <span class=\"muted\">(근로자용)</span>");
       extra.push("주업종코드확인서");
