@@ -3,103 +3,228 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>디딤돌대출 신청 조건 총정리 | Mortgage Loan Lab</title>
+    <title>디딤돌 신청 조건 총정리 (소득·주택·대출 요건) | Mortgage Loan Lab</title>
     <meta
       name="description"
-      content="소득 산정, 주택·세대 요건, 금리 우대와 상한, DTI 등 디딤돌대출 신청 전에 점검할 조건을 정리했습니다."
+      content="디딤돌대출의 부부합산 소득 상한, 무주택 요건 해석, 주택가격·면적·자산 기준, 특례(신혼·생애최초·신생아·다자녀) 상향 기준을 예시와 함께 정리한 가이드."
     />
+    <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://mortgage-loan-5oz.pages.dev/guides/apply-conditions.html" />
     <meta property="og:type" content="article" />
-    <meta property="og:title" content="디딤돌대출 신청 조건 총정리" />
-    <meta property="og:description" content="소득·주택·한도·우대 요건을 신청 전에 한 번에 점검하세요." />
+    <meta property="og:title" content="디딤돌 신청 조건 총정리" />
+    <meta property="og:description" content="소득·주택·자산·특례 기준을 예시와 함께 단계별로 풀이." />
     <meta property="og:url" content="https://mortgage-loan-5oz.pages.dev/guides/apply-conditions.html" />
     <link rel="stylesheet" href="../css/styles.css" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "디딤돌 신청 조건 총정리 (소득·주택·대출 요건)",
+        "description": "부부합산 소득·무주택·주택가격·자산·특례 조건을 단계별 예시와 함께 풀이",
+        "inLanguage": "ko-KR",
+        "datePublished": "2026-01-01",
+        "dateModified": "2026-04-20",
+        "mainEntityOfPage": "https://mortgage-loan-5oz.pages.dev/guides/apply-conditions.html",
+        "author": { "@type": "Organization", "name": "Mortgage Loan Lab" },
+        "publisher": { "@type": "Organization", "name": "Mortgage Loan Lab", "url": "https://mortgage-loan-5oz.pages.dev/" }
+      }
+    </script>
   </head>
   <body>
     <header>
       <p style="margin: 0; font-size: 0.85rem">
-        <a href="../" style="color: inherit; text-decoration: none">Mortgage Loan Lab</a>
+        <a href="../" style="color: inherit; text-decoration: none">Mortgage Loan Lab</a> ›
+        <a href="./">가이드</a>
       </p>
+      <h1>디딤돌 신청 조건 총정리 (소득·주택·대출 요건)</h1>
+      <p class="field-hint" style="margin: 0.25rem 0 0">최종 수정일 : 2026-04-20 · 약 10분 분량</p>
       <nav class="quick-nav" aria-label="사이트 주요 페이지">
         <a href="../didimdol/">디딤돌 계산기</a>
         <a href="didimdol-overview.html">디딤돌이란</a>
         <a href="apply-conditions.html" aria-current="page">신청 조건</a>
-        <a href="repayment-methods.html">상환 방식</a>
-        <a href="../dsr/">DSR 계산기</a>
-        <a href="../about/">About</a>
+        <a href="rate-discounts.html">금리 우대</a>
+        <a href="income-docs-2years.html">2개년 소득 서류</a>
       </nav>
     </header>
+
     <main>
-      <section class="card" style="margin-top: 1.25rem">
-        <h1 style="margin: 0 0 1rem; font-size: 1.3rem">디딤돌대출 신청 조건 총정리</h1>
+      <section class="card">
+        <h2>한눈에 보기</h2>
         <p>
-          아래는 신청·상담 전에 사용자가 스스로 점검하기 좋도록 <strong>일반적인 틀</strong>을 정리한 것입니다. 연도·지역·규제
-          여부에 따라 숫자 기준이 바뀔 수 있으므로, 최종 판단은 항상 당해 공고와 취급 기관 안내에 따릅니다.
+          디딤돌대출은 다음 <strong>다섯 축</strong> 모두를 만족해야 신청 가능합니다. 한 가지라도 초과하면 일반 디딤돌
+          대상에서 제외되지만, 신혼가구·생애최초·신생아 특례·2자녀 이상 등은 일부 기준이 상향됩니다.
         </p>
+        <ul class="doc-list">
+          <li>① <strong>소득</strong> — 부부합산 연소득 상한</li>
+          <li>② <strong>주택 보유</strong> — 세대원 전원 무주택</li>
+          <li>③ <strong>주택</strong> — 가격·면적·지역 기준</li>
+          <li>④ <strong>자산</strong> — 순자산 상한</li>
+          <li>⑤ <strong>신용·DTI/DSR</strong> — 기타대출 포함한 상환 여력</li>
+        </ul>
+      </section>
 
-        <h2 class="subsection-title">1) 소득과 재직 형태</h2>
+      <section class="card" id="income">
+        <h2>① 소득 기준 (가장 민감한 기준)</h2>
         <p>
-          소득 인정은 “직전 두 과세연도 근로소득”처럼 고정된 패턴만 있는 것이 아니라, 신규 입사·휴직·복직처럼
-          <strong>연도 단위 자료가 불충분한 경우</strong> 월 환산 등 별도 기준이 적용되기도 합니다. 이 때 필요한 것은
-          급여명세·소득금액증명 등 실제 수령 내역과 재직 기간을 맞춰 설명할 수 있는지입니다.
+          디딤돌 일반은 <strong>부부합산 연소득 6천만원 이하</strong>가 기준입니다. 다음의 특례에서는 상향된 기준이 적용됩니다.
         </p>
+        <ul class="doc-list">
+          <li><strong>생애최초</strong> — 7천만원 이하</li>
+          <li><strong>신혼가구</strong> — 8,500만원 이하 (혼인신고 7년 이내·예정)</li>
+          <li><strong>2자녀 이상</strong> — 7천만원 / 일부 케이스 8,500만원</li>
+          <li><strong>신생아 특례</strong> — 1.3억원 이하 (출산 자녀 있는 가구, 한시 상향 기간 2억원)</li>
+        </ul>
         <p>
-          본 사이트 계산기는 일반 재직, 신규입사(연환산), 휴직, 복직 후 근무 등 시나리오별 입력란을 나누어,
-          상담 전에 <em>대략적인</em> 인정 소득 수준을 가늠하는 데 도움을 줍니다.
+          소득은 <strong>최근 2개년</strong>의 자료를 기준으로 산술평균 또는 월환산합니다. 재직 형태별 산정식은 다음과 같습니다.
         </p>
-
-        <h2 class="subsection-title">2) 주택·세대 관련 요건</h2>
-        <p>
-          무주택 요건, 대상 주택의 가격·면적·지역, 세대원 범위 등은 정책의 핵심입니다. 특히 “세대”의 정의와 주택 수,
-          분양권·조합 입주권 등이 어떻게 취급되는지는 공고마다 세부 규정이 있으므로, 본인 케이스가 예외에 해당하는지
-          반드시 확인해야 합니다.
-        </p>
-
-        <h2 class="subsection-title">3) 대출 한도와 담보</h2>
-        <p>
-          LTV(담보인정비율)와 대출 한도 상한은 주택 가격대·지역·규제 여부와 함께 움직입니다. 같은 소득이라도
-          담봴 가치와 기존 부채에 따라 실제 승인 가능 금액이 달라질 수 있으니, “한도 계산기 숫자”와 “실제 승인 한도”를
-          구분해서 생각하는 것이 좋습니다.
-        </p>
-
-        <h2 class="subsection-title">4) 금리 우대와 중복 한도</h2>
-        <p>
-          자녀 수, 청약저축 납입, 전자계약, 지방 소재 주택, 중도상환 등 조건형 우대가 겹칠 수 있습니다. 다만 우대폭은
-          합산 상한이 있거나, 특정 항목만 중복 가능한 식으로 설계되는 경우가 많습니다. 본 계산기의 금리 탭은 이런 구조를
-          반영해 <strong>가정 기본금리</strong> 위에서 우대를 더하고 상한을 적용하는 방식으로 참고값을 보여 줍니다.
-        </p>
-
-        <h2 class="subsection-title">5) DTI·DSR과 기존 부채</h2>
-        <p>
-          DTI(총부채원리금상환비율)는 주담대 원리금과 기타 대출 이자 등을 연소득으로 나눈 비율로, 규제지역 여부 등에 따라
-          허용 상한이 달라질 수 있습니다. DSR(총부채원리금상환비율)은 다른 정책성·은행 내부 기준과 연동되므로,
-          본 사이트의 DTI 결과와 함께 <a href="../dsr/">DSR 계산기</a>로 전체 부채 부담을 점검하는 흐름을 권장합니다.
-        </p>
-
-        <h2 class="subsection-title">6) 서류와 일정을 미리 준비할 때</h2>
-        <p>
-          재직증명, 소득증빙, 주민등록 관련 서류, 매매·전세 계약 관련 자료 등은 기관별로 요구 목록이 조금씩 다릅니다.
-          복직·휴직처럼 설명이 필요한 구간은 한 페이지짜리 메모보다, 날짜와 금액이 맞아떨어지는 타임라인으로 정리해 두면
-          상담 효율이 좋아집니다.
-        </p>
-
+        <ul class="doc-list">
+          <li><strong>일반 재직</strong>: (전연도 + 전전연도) ÷ 2</li>
+          <li><strong>신규입사/금년 입사</strong>: 수령 합계 ÷ 수령 개월 수 × 12 (월환산)</li>
+          <li><strong>휴직</strong>: 휴직 직전 2개년 평균 (현재 소득은 0 처리)</li>
+          <li><strong>복직 3개월 미만</strong>: 휴직 직전 2개년 평균</li>
+          <li><strong>복직 3개월 이상</strong>: 월환산과 휴직 직전 평균 중 유리한 값 택일 가능</li>
+          <li><strong>사업자</strong>: 소득금액증명원 기준 (전년도 + 전전년도 평균)</li>
+        </ul>
         <p class="field-hint">
-          정확한 적용 기준은 접수 시점의 HUG·금융기관 공식 안내를 따릅니다. 본 문서는 참고용 요약입니다.
+          👉 본 사이트 <a href="../didimdol/">디딤돌 계산기 1~2번 섹션</a>에서 본인·배우자 재직 유형을 선택하면 자동 산정됩니다.
+          서류 준비법은 <a href="income-docs-2years.html">2개년 소득 서류 체크리스트</a> 참고.
         </p>
-        <p class="field-hint" style="margin-top: 1rem">
-          이어서 읽기: <a href="repayment-methods.html">원리금균등·원금균등·체증식 비교</a>
+        <h3 class="subsection-title">사례 — 외벌이 4,800만 + 배우자 프리랜서 1,500만</h3>
+        <p>
+          본인(4대보험 근로자) 4,800만원 + 배우자(사업자) 소득금액증명원 1,500만원 = 부부합산 6,300만원. 일반 디딤돌
+          상한(6천만원)을 소폭 초과하므로 <strong>생애최초·신혼·2자녀 특례</strong>에 해당하는지 확인이 필요합니다.
         </p>
-        <p style="margin-top: 1rem"><a href="../didimdol/">디딤돌 계산기로 돌아가기</a> · <a href="../">홈</a></p>
+      </section>
+
+      <section class="card" id="nohouse">
+        <h2>② 무주택 요건</h2>
+        <p>
+          "세대원 전원 무주택"은 <strong>주민등록표상 함께 등재된 전원</strong>을 의미합니다. 배우자는 별도 세대라도 합산
+          판정되며, 다음 케이스는 실무에서 자주 오해되는 부분입니다.
+        </p>
+        <ul class="doc-list">
+          <li><strong>분양권·조합원 입주권</strong> — 취득·등기 시점에 따라 주택 보유로 간주될 수 있음</li>
+          <li><strong>상속주택</strong> — 공유지분·미등기 포함, 경우에 따라 주택 보유로 카운트</li>
+          <li><strong>수도권 5·6억 초과 등기 이력</strong> — 과거 매도했어도 특례 판정에 영향</li>
+          <li><strong>배우자 주택 보유 이력</strong> — 혼인 전 이력은 생애최초 판정 시 예외 규정 있음</li>
+        </ul>
+        <p>
+          본 요건은 개별 공고의 정의에 크게 좌우되므로, 애매한 경우 반드시 은행 또는 HUG에 사전 확인을 받아야 합니다.
+          "모르고 신청 → 심사 중 탈락"하면 계약금 손실이 발생할 수 있습니다.
+        </p>
+      </section>
+
+      <section class="card" id="house">
+        <h2>③ 주택 요건 (가격 · 면적 · 지역)</h2>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem">
+          <thead>
+            <tr style="background: var(--surface2)">
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">구분</th>
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">가격</th>
+              <th style="text-align: left; padding: 0.5rem; border: 1px solid var(--border)">면적</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">일반 디딤돌</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">5억원 이하</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">전용 85㎡ 이하 (지방 읍·면 100㎡)</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">신혼·생애최초</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">6억원 이하</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">전용 85㎡ 이하</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">신생아·2자녀 이상</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">6~9억원 (특례별 상이)</td>
+              <td style="padding: 0.5rem; border: 1px solid var(--border)">전용 85㎡ 이하</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 0.5rem" class="field-hint">
+          수치는 시기에 따라 변동되므로 접수일 기준 공고를 확인하세요. 단독주택·다가구·다세대·오피스텔 등 주거 형태별로
+          대상 제외 또는 추가 조건이 있을 수 있습니다.
+        </p>
+      </section>
+
+      <section class="card" id="assets">
+        <h2>④ 자산 기준</h2>
+        <p>
+          디딤돌은 <strong>순자산 기준</strong>을 별도로 두고 있습니다(최근 기준 약 4.88억 수준, 연도별로 조정).
+          자산에는 부동산·금융자산·자동차 등이 포함되고, 부채는 차감합니다. 주택 구입을 위한 계약금·잔금은 자산 산정
+          시점 처리에 유의하세요.
+        </p>
+      </section>
+
+      <section class="card" id="dsr">
+        <h2>⑤ DTI · DSR · 신용 요건</h2>
+        <p>
+          규제지역 DTI 50%, 비규제 60%를 만족해야 합니다. DSR은 본 상품 자체 기준은 없지만, 금융기관 내부 정책으로
+          <strong>DSR 40%</strong>를 별도로 본 경우가 많으므로 기타 대출(학자금·신용대출·카드론 등)이 많다면 한도
+          축소가 일어납니다.
+        </p>
+        <p class="field-hint">
+          👉 규제지역별 DSR/DTI 기준은 <a href="dsr-explained.html">DSR 계산법과 규제지역 40/50/60% 기준 해설</a>에서 자세히 다룹니다.
+        </p>
+      </section>
+
+      <section class="card" id="special">
+        <h2>특례 요약 — 어떤 유형이 유리한가</h2>
+        <ul class="doc-list">
+          <li><strong>신혼가구</strong> — 혼인신고 7년 이내 또는 3개월 내 예정. 소득·주택가격 상향.</li>
+          <li><strong>생애최초</strong> — 세대원 전원 생애 첫 주택 구입. 소득 7천만·주택가격 6억 상향.</li>
+          <li><strong>2자녀 이상</strong> — 미성년 자녀 2인 이상. 소득·주택가격·한도 상향, 우대 상한 0.7%p.</li>
+          <li><strong>신생아 특례</strong> — 최근 출산·입양 가구. 소득 1.3~2억까지 크게 상향, 기본금리 인하.</li>
+        </ul>
+        <p>
+          특례는 <strong>중복 적용</strong>되는 경우가 많습니다. 예컨대 신혼 + 생애최초, 생애최초 + 2자녀 등이 동시에
+          성립하면 가장 유리한 조건을 적용받을 수 있습니다. 단 "신생아 특례"는 단독 상품이라 같은 건에 동시 중복은
+          불가하지만, 내부적으로 자녀수 우대는 함께 반영됩니다.
+        </p>
+      </section>
+
+      <section class="card" id="checklist">
+        <h2>셀프 점검 체크리스트</h2>
+        <ol class="doc-list">
+          <li>부부합산 연소득 = (본인 인정소득) + (배우자 인정소득) — 공고 기준과 비교</li>
+          <li>세대원 전원 무주택 여부 (분양권·상속 등 포함)</li>
+          <li>대상 주택 가격·면적·지역이 공고 범위 안인지</li>
+          <li>순자산 기준 이내인지</li>
+          <li>기타대출 원리금 합계가 DSR 한도 이내인지</li>
+          <li>특례(신혼·생애최초·신생아·2자녀) 해당 여부</li>
+          <li>필요서류 2개년치 준비 가능한지 (소득·재직·건보 등)</li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h2>관련 글 / 다음 단계</h2>
+        <div class="guide-links">
+          <a href="didimdol-overview.html">디딤돌대출 기본 개념</a>
+          <a href="rate-discounts.html">금리 우대 항목</a>
+          <a href="income-docs-2years.html">2개년 소득 서류</a>
+          <a href="dsr-explained.html">DSR 기준 해설</a>
+          <a href="../didimdol/">디딤돌 계산기 열기</a>
+        </div>
       </section>
     </main>
+
     <footer>
       <div class="footer-main">
-        <span>© Mortgage Loan Lab</span>
+        <span>© Mortgage Loan Lab · 참고용 계산기</span>
       </div>
       <div class="footer-links">
-        <a href="../privacy/">개인정보 처리방침</a>
-        <a href="../disclaimer/">면책 조항</a>
         <a href="../">홈</a>
+        <a href="../about/">About</a>
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../contact/">문의</a>
+        <a href="../disclaimer/">면책 조항</a>
       </div>
     </footer>
   </body>
