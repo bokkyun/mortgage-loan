@@ -510,6 +510,192 @@
     alert(`부부합산 연소득 ${fmtNum(incomeTotal)}원이 3번 탭에 반영됐습니다.`);
   }
 
+  // —— 예상 필요서류 ——
+  function didIncomeDocForType(type) {
+    if (type === "A") return "근로소득원천징수영수증 (전년도) — 4대보험 근로자";
+    if (type === "B") return "갑종근로소득원천징수영수증 (입사일 ~ 현재) — 전년도 또는 금년 입사자";
+    if (type === "C") return "근로소득원천징수영수증 (휴직 직전 2개년) — 휴직자";
+    if (type === "D")
+      return "근로소득원천징수영수증 (휴직 직전 2개년) + 복직 후 갑종근로소득원천징수영수증 — 복직자";
+    return "근로소득원천징수영수증 (전년도)";
+  }
+
+  function buildDidCommonDocs(selfType, spouseType, hasSpouse) {
+    const list = [];
+    list.push("부동산 매매계약서 <span class=\"muted\">(필요시 부동산등기사항증명서 등 소유권 확인 서류)</span>");
+    list.push("주민등록등본 <span class=\"muted\">(최근 1개월 이내)</span>");
+    list.push("주민등록초본 <span class=\"muted\">(주소변동내역 포함 · 최근 1개월 이내)</span>");
+    list.push("가족관계증명서");
+
+    const incomeDocs = [];
+    incomeDocs.push(`본인: ${didIncomeDocForType(selfType)}`);
+    if (hasSpouse) incomeDocs.push(`배우자: ${didIncomeDocForType(spouseType)}`);
+    incomeDocs.push(
+      "<span class=\"muted\">사업자인 경우 소득금액증명원 (전년도 기준, 7월 이전에는 전전년도 소득금액증명원 제출)</span>"
+    );
+    list.push(
+      "소득확인서류" +
+        "<ul class=\"doc-sublist\">" +
+        incomeDocs.map((d) => `<li>${d}</li>`).join("") +
+        "</ul>"
+    );
+
+    list.push("재직증명서 <span class=\"muted\">(사업자의 경우 사업자등록증)</span>");
+    list.push("4대보험 가입확인서 <span class=\"muted\">(정부24에서 발급)</span>");
+    list.push("건강보험자격득실확인서");
+    list.push("건강보험납부내역서 <span class=\"muted\">(최근 6개월)</span>");
+    list.push("전입세대열람원 <span class=\"muted\">(담보 주택의 전입 세대 확인 용도 · 주민센터 발급)</span>");
+    list.push(
+      "인감증명서 · 인감도장 <span class=\"muted\">(등기·근저당 설정 용도)</span> — <strong>전자등기 진행 시 불필요</strong>"
+    );
+    return list;
+  }
+
+  function renderDidDocs(opts) {
+    const wrap = $("did-docs-results");
+    if (!wrap) return;
+    const {
+      tab,
+      hasSpouse,
+      selectedPrefs = [],
+      extras = [],
+      extraTitle = "상품별 추가 서류",
+      summaryLabel,
+    } = opts;
+
+    const selfType = document.querySelector('input[name="emp-self"]:checked')?.value || "A";
+    const spouseType = document.querySelector('input[name="emp-spouse"]:checked')?.value || "A";
+
+    const summaryParts = [];
+    if (summaryLabel) summaryParts.push(summaryLabel);
+    if (hasSpouse) summaryParts.push("부부합산");
+    const summaryEl = $("did-docs-summary");
+    if (summaryEl) {
+      summaryEl.textContent = `${summaryParts.join(" · ")} 기준으로 필요한 서류를 정리했습니다.`;
+    }
+
+    const commonUl = $("did-docs-common");
+    if (commonUl) {
+      commonUl.innerHTML = buildDidCommonDocs(selfType, spouseType, hasSpouse)
+        .map((d) => `<li>${d}</li>`)
+        .join("");
+    }
+
+    const extraWrap = $("did-docs-extra-wrap");
+    const extraTitleEl = $("did-docs-extra-title");
+    const extraUl = $("did-docs-extra");
+    if (extras.length > 0) {
+      extraWrap?.classList.remove("hidden");
+      if (extraTitleEl) extraTitleEl.textContent = extraTitle;
+      if (extraUl) extraUl.innerHTML = extras.map((d) => `<li>${d}</li>`).join("");
+    } else {
+      extraWrap?.classList.add("hidden");
+      if (extraUl) extraUl.innerHTML = "";
+    }
+
+    const prefWrap = $("did-docs-pref-wrap");
+    const prefUl = $("did-docs-pref");
+    if (selectedPrefs.length > 0) {
+      prefWrap?.classList.remove("hidden");
+      if (prefUl) prefUl.innerHTML = selectedPrefs.map((d) => `<li>${d}</li>`).join("");
+    } else {
+      prefWrap?.classList.add("hidden");
+      if (prefUl) prefUl.innerHTML = "";
+    }
+
+    wrap.classList.remove("hidden");
+  }
+
+  function renderDidDocsForActiveTab() {
+    const hasSpouse = !!$("has-spouse")?.checked;
+    const didVisible = !$("rate-tab-didimdol")?.classList.contains("hidden");
+    const nbVisible = !$("rate-tab-newborn")?.classList.contains("hidden");
+
+    if (didVisible) {
+      const prefs = [];
+      const extras = [];
+      let extraTitle = "상품별 추가 서류";
+
+      if ($("did-single-parent")?.checked) prefs.push("한부모가족 증명서");
+      if ($("did-special")?.checked) {
+        prefs.push(
+          "장애인증명서 / 다문화·신혼가구 확인서류(혼인관계증명서 등) / 생애최초 확인 서류 <span class=\"muted\">(해당 자격 증빙 1종)</span>"
+        );
+        if (!extras.includes("혼인관계증명서")) {
+          extras.push("혼인관계증명서 <span class=\"muted\">(신혼가구·다문화 해당 시)</span>");
+          extraTitle = "자격 해당 시 추가 서류";
+        }
+      }
+      const childTier = parseFloat($("did-child-tier")?.value || "0") || 0;
+      if (childTier > 0) {
+        const label =
+          childTier === 0.7 ? "다자녀(3자녀 이상)" : childTier === 0.5 ? "2자녀" : "1자녀";
+        prefs.push(
+          `자녀수 확인 — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함, ${label} 우대)</span>`
+        );
+        prefs.push("자녀 기본증명서");
+      }
+      renderDidDocs({
+        tab: "did",
+        hasSpouse,
+        selectedPrefs: prefs,
+        extras,
+        extraTitle,
+        summaryLabel: "일반 디딤돌",
+      });
+    } else if (nbVisible) {
+      const prefs = [];
+      const extras = [
+        "혼인관계증명서 <span class=\"muted\">(부부합산·가족관계 확인)</span>",
+        "자녀 기본증명서 <span class=\"muted\">(신생아·미성년 자녀 전원)</span>",
+        "출생증명서 <span class=\"muted\">(출산 병원에서 발급 · 신생아 해당)</span>",
+      ];
+      const nbNew = parseFloat($("nb-child-newborn")?.value || "0") || 0;
+      const nbMinor = parseFloat($("nb-child-minor")?.value || "0") || 0;
+      if (nbNew > 0 || nbMinor > 0) {
+        const parts = [];
+        if (nbNew > 0) {
+          const n = nbNew === 0.6 ? 4 : nbNew === 0.4 ? 3 : 2;
+          parts.push(`신생아 ${n}자녀`);
+        }
+        if (nbMinor > 0) {
+          const n = nbMinor === 0.3 ? 3 : nbMinor === 0.2 ? 2 : 1;
+          parts.push(`미성년 ${n}자녀`);
+        }
+        prefs.push(
+          `자녀수 증빙 추가 확인 <span class=\"muted\">(${parts.join(" · ")} 우대 신청 시)</span>`
+        );
+      }
+      renderDidDocs({
+        tab: "nb",
+        hasSpouse,
+        selectedPrefs: prefs,
+        extras,
+        extraTitle: "신생아특례 디딤돌 추가 서류",
+        summaryLabel: "신생아 디딤돌",
+      });
+    } else {
+      const prefs = [];
+      const extras = ["혼인관계증명서"];
+      const fhChild = parseFloat($("fh-child-tier")?.value || "0") || 0;
+      if (fhChild > 0) {
+        const label = fhChild === 0.7 ? "다자녀(3자녀 이상)" : fhChild === 0.5 ? "2자녀" : "1자녀";
+        prefs.push(
+          `자녀수 확인 — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함, ${label} 우대)</span>`
+        );
+        prefs.push("자녀 기본증명서");
+      }
+      renderDidDocs({
+        tab: "fh",
+        hasSpouse,
+        selectedPrefs: prefs,
+        extras,
+        extraTitle: "생애최초·신혼가구 추가 서류",
+        summaryLabel: "생애최초·신혼가구 디딤돌",
+      });
+    }
+  }
+
   function runRateCalc() {
     const didVisible = !$("rate-tab-didimdol")?.classList.contains("hidden");
     const nbVisible  = !$("rate-tab-newborn")?.classList.contains("hidden");
@@ -540,10 +726,13 @@
       $("did-results")?.classList.remove("hidden");
       $("did-results")?.scrollIntoView({ behavior: "smooth", block: "start" });
       syncFinalRateToLoanRate(result.finalRate);
+      renderDidDocsForActiveTab();
     } else if (nbVisible) {
       runNewbornCalc();
+      if (!$("nb-results")?.classList.contains("hidden")) renderDidDocsForActiveTab();
     } else {
       runFirstHomeCalc();
+      if (!$("fh-results")?.classList.contains("hidden")) renderDidDocsForActiveTab();
     }
   }
 
@@ -729,6 +918,7 @@
     $("rate-tab-didimdol").classList.remove("hidden");
     $("rate-tab-newborn").classList.add("hidden");
     $("rate-tab-firsthome").classList.add("hidden");
+    $("did-docs-results")?.classList.add("hidden");
   });
   $("rate-tab-btn-newborn")?.addEventListener("click", () => {
     $("rate-tab-btn-newborn").classList.add("active");
@@ -737,6 +927,7 @@
     $("rate-tab-newborn").classList.remove("hidden");
     $("rate-tab-didimdol").classList.add("hidden");
     $("rate-tab-firsthome").classList.add("hidden");
+    $("did-docs-results")?.classList.add("hidden");
   });
   $("rate-tab-btn-firsthome")?.addEventListener("click", () => {
     $("rate-tab-btn-firsthome").classList.add("active");
@@ -745,6 +936,7 @@
     $("rate-tab-firsthome").classList.remove("hidden");
     $("rate-tab-didimdol").classList.add("hidden");
     $("rate-tab-newborn").classList.add("hidden");
+    $("did-docs-results")?.classList.add("hidden");
   });
 
   function genScheduleEqualInstallment(principal, annualRatePct, totalMonths, graceMonths) {
