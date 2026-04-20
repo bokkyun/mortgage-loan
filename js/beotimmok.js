@@ -1,6 +1,14 @@
 (function () {
   const $ = (id) => document.getElementById(id);
 
+  function todayStr() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   function num(el) {
     if (!el) return 0;
     const raw = String(el.value || "").replace(/,/g, "").trim();
@@ -8,50 +16,306 @@
     return Number.isFinite(v) ? v : 0;
   }
 
-  function fmt(n) {
-    return Math.round(n).toLocaleString("ko-KR");
-  }
-
-  function formatMoney(value) {
+  function formatMoneyValue(value) {
     const digits = String(value || "").replace(/[^\d]/g, "");
     if (!digits) return "";
     return Number(digits).toLocaleString("ko-KR");
   }
 
-  function wireMoneyInputs(ids) {
-    ids.forEach((id) => {
-      const el = $(id);
-      if (!el) return;
-      el.addEventListener("input", () => {
-        el.value = formatMoney(el.value);
-      });
-      if (el.value) el.value = formatMoney(el.value);
+  // —— 급여 더하기 모달 (디딤돌 페이지와 동일 UX) ——
+  const SALARY_CALC_GROUPS = [
+    { openId: "self-b-calc-open", sumId: "self-b-sum", monthsId: "self-b-months", previewId: "self-b-annual-preview" },
+    { openId: "sp-b-calc-open", sumId: "sp-b-sum", monthsId: "sp-b-months", previewId: "sp-b-annual-preview" },
+    { openId: "self-d-calc-open", sumId: "self-d-p-sum", monthsId: "self-d-p-months", previewId: "self-d-annual-preview" },
+    { openId: "sp-d-calc-open", sumId: "sp-d-p-sum", monthsId: "sp-d-p-months", previewId: "sp-d-annual-preview" },
+  ];
+
+  function updateAnnualPreviewLine(sumId, monthsId, previewId) {
+    const s = num($(sumId));
+    const moRaw = $(monthsId)?.value;
+    const m = moRaw != null && moRaw !== "" ? parseInt(String(moRaw).replace(/\D/g, ""), 10) : NaN;
+    const out = $(previewId);
+    if (!out) return;
+    if (!s || s <= 0 || !Number.isFinite(m) || m < 1) {
+      out.textContent = "";
+      return;
+    }
+    const annual = (s / m) * 12;
+    out.textContent = `연환산 연소득: ${fmtNum(annual)}원`;
+  }
+
+  function wireAnnualPreviews() {
+    SALARY_CALC_GROUPS.forEach((g) => {
+      const upd = () => updateAnnualPreviewLine(g.sumId, g.monthsId, g.previewId);
+      $(g.sumId)?.addEventListener("input", upd);
+      $(g.monthsId)?.addEventListener("input", upd);
     });
   }
 
-  /**
-   * 기본금리 정의
-   * - income: 부부합산 연소득(원)
-   * - depositIdx: 임차보증금 구간 인덱스 (0부터)
-   *
-   * 소득 구간 경계(원): 2천만, 4천만, 6천만, 7.5천만
-   */
+  function wireSalaryCalcModal() {
+    const overlay = $("salary-calc-overlay");
+    const inp = $("salary-calc-input");
+    const totalEl = $("salary-calc-total");
+    if (!overlay || !inp || !totalEl) return;
+
+    let activeSumId = null;
+    let activePreview = null;
+    let running = 0;
+
+    function renderRunning() {
+      totalEl.textContent = Math.round(running).toLocaleString("ko-KR");
+    }
+
+    function openModal(cfg) {
+      activeSumId = cfg.sumId;
+      activePreview = cfg;
+      running = Math.round(num($(cfg.sumId)));
+      inp.value = "";
+      renderRunning();
+      overlay.classList.remove("hidden");
+      setTimeout(() => inp.focus(), 10);
+    }
+
+    function closeModal() {
+      overlay.classList.add("hidden");
+      activeSumId = null;
+      activePreview = null;
+    }
+
+    function addInputToRunning() {
+      const v = num(inp);
+      if (v > 0) {
+        running += v;
+        inp.value = "";
+        renderRunning();
+      }
+    }
+
+    function commitAndClose() {
+      const v = num(inp);
+      if (v > 0) running += v;
+      inp.value = "";
+      if (!activeSumId) {
+        closeModal();
+        return;
+      }
+      const sumEl = $(activeSumId);
+      if (sumEl) sumEl.value = formatMoneyValue(String(Math.round(running)));
+      if (activePreview) {
+        updateAnnualPreviewLine(activePreview.sumId, activePreview.monthsId, activePreview.previewId);
+      }
+      closeModal();
+    }
+
+    SALARY_CALC_GROUPS.forEach((g) => {
+      $(g.openId)?.addEventListener("click", () => openModal(g));
+    });
+
+    $("salary-calc-add")?.addEventListener("click", () => {
+      addInputToRunning();
+      inp.focus();
+    });
+
+    $("salary-calc-done")?.addEventListener("click", () => commitAndClose());
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !overlay.classList.contains("hidden")) {
+        e.preventDefault();
+        closeModal();
+      }
+    });
+  }
+
+  function wireMoneyInputs() {
+    const moneyIds = [
+      "self-a-2023",
+      "self-a-2024",
+      "self-b-sum",
+      "salary-calc-input",
+      "self-c-old",
+      "self-c-new",
+      "self-d-y2",
+      "self-d-y1",
+      "self-d-p-sum",
+      "sp-a-2023",
+      "sp-a-2024",
+      "sp-b-sum",
+      "sp-c-old",
+      "sp-c-new",
+      "sp-d-y2",
+      "sp-d-y1",
+      "sp-d-p-sum",
+      "bt-income",
+    ];
+
+    moneyIds.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.type = "text";
+      el.inputMode = "numeric";
+      el.addEventListener("input", () => {
+        const formatted = formatMoneyValue(el.value);
+        el.value = formatted;
+      });
+      if (el.value) el.value = formatMoneyValue(el.value);
+    });
+  }
+
+  // —— 재직 유형 패널 전환 ——
+  function bindEmpType(radioName, prefix) {
+    const nodes = document.querySelectorAll(`input[name="${radioName}"]`);
+    nodes.forEach((r) => {
+      r.addEventListener("change", () => updatePanels(prefix, r.value));
+    });
+  }
+
+  function updatePanels(prefix, type) {
+    const ids = ["A", "B", "C", "D"];
+    ids.forEach((t) => {
+      const el = $(`panel-${prefix}-${t}`);
+      if (el) el.classList.toggle("hidden", t !== type);
+    });
+  }
+
+  function updateLeaveLabels(leaveInputId, lblOldId, lblNewId, hintId) {
+    const leaveEl = $(leaveInputId);
+    if (!leaveEl || !leaveEl.value) return;
+    const d = parseDate(leaveEl.value);
+    if (!d) return;
+    const ly = d.getFullYear();
+    const yOld = ly - 2;
+    const yNew = ly - 1;
+    const lo = $(lblOldId);
+    const ln = $(lblNewId);
+    if (lo) lo.textContent = `전전연도 소득 (${yOld}년, 원)`;
+    if (ln) ln.textContent = `전연도 소득 (${yNew}년, 원)`;
+    const h = $(hintId);
+    if (h) {
+      h.textContent = `휴직이 ${ly}년에 시작되므로, 직전 2개년은 ${yOld}년·${yNew}년 근로(과세)소득을 입력하세요.`;
+    }
+  }
+
+  function updateLeaveLabelsD(leaveInputId, lblY2, lblY1) {
+    const leaveEl = $(leaveInputId);
+    if (!leaveEl || !leaveEl.value) return;
+    const d = parseDate(leaveEl.value);
+    if (!d) return;
+    const ly = d.getFullYear();
+    const yOld = ly - 2;
+    const yNew = ly - 1;
+    const a = $(lblY2);
+    const b = $(lblY1);
+    if (a) a.textContent = `전전연도 소득 (${yOld}년, 원)`;
+    if (b) b.textContent = `전연도 소득 (${yNew}년, 원)`;
+  }
+
+  // —— 본인/배우자 소득 산출 (income.js 함수 사용) ——
+  function calcPerson(prefix) {
+    const type = document.querySelector(`input[name="emp-${prefix}"]:checked`)?.value || "A";
+    const hasProof = true;
+
+    if (type === "A") {
+      const start = prefix === "self" ? "self-a-start" : "sp-a-start";
+      const startDate = parseDate($(start)?.value);
+      if (!startDate) return { error: "재직 시작일을 입력해 주세요." };
+      if (startDate > new Date()) return { error: "재직 시작일은 오늘 이후일 수 없습니다." };
+      const i23 = num($(prefix === "self" ? "self-a-2023" : "sp-a-2023"));
+      const i24 = num($(prefix === "self" ? "self-a-2024" : "sp-a-2024"));
+      if (i23 <= 0 && i24 <= 0) return { error: "소득을 입력해 주세요." };
+      return calcGeneral(i23, i24, hasProof);
+    }
+
+    if (type === "B") {
+      const start = prefix === "self" ? "self-b-start" : "sp-b-start";
+      const sum = prefix === "self" ? "self-b-sum" : "sp-b-sum";
+      const months = prefix === "self" ? "self-b-months" : "sp-b-months";
+      return calcNewHire2025($(start)?.value, num($(sum)), num($(months)));
+    }
+
+    if (type === "C") {
+      const start = prefix === "self" ? "self-c-start" : "sp-c-start";
+      const leave = prefix === "self" ? "self-c-leave" : "sp-c-leave";
+      const old = prefix === "self" ? "self-c-old" : "sp-c-old";
+      const neu = prefix === "self" ? "self-c-new" : "sp-c-new";
+      return calcOnLeave($(start)?.value, $(leave)?.value, num($(old)), num($(neu)), hasProof);
+    }
+
+    if (type === "D") {
+      const empStartId = prefix === "self" ? "self-d-start" : "sp-d-start";
+      const leave = prefix === "self" ? "self-d-leave" : "sp-d-leave";
+      const ret = prefix === "self" ? "self-d-return" : "sp-d-return";
+      const end = prefix === "self" ? "self-d-end" : "sp-d-end";
+      const y2 = num(prefix === "self" ? $("self-d-y2") : $("sp-d-y2"));
+      const y1 = num(prefix === "self" ? $("self-d-y1") : $("sp-d-y1"));
+      const endVal = $(end)?.value || todayStr();
+
+      const empStartVal = $(empStartId)?.value;
+      const empDate = empStartVal ? parseDate(empStartVal) : null;
+      const leaveDate = $(leave)?.value ? parseDate($(leave).value) : null;
+      if (!empDate) return { error: "재직 시작일을 입력해 주세요." };
+      if (!leaveDate) return { error: "휴직 시작일을 입력해 주세요." };
+      if (empDate > leaveDate) return { error: "재직 시작일은 휴직 시작일보다 빠르거나 같아야 합니다." };
+
+      const psum = num(prefix === "self" ? $("self-d-p-sum") : $("sp-d-p-sum"));
+      const pm = num(prefix === "self" ? $("self-d-p-months") : $("sp-d-p-months"));
+      return calcReturned($(leave)?.value, $(ret)?.value, y2, y1, "partial", 0, psum, endVal, pm, hasProof);
+    }
+
+    return { error: "유형을 선택해 주세요." };
+  }
+
+  function runIncomeCalc() {
+    const resSelf = calcPerson("self");
+    if (resSelf.error) { alert(resSelf.error); return; }
+
+    let incomeSpouse = 0;
+    let resSpouse = null;
+    if ($("has-spouse")?.checked) {
+      resSpouse = calcPerson("spouse");
+      if (resSpouse.error) { alert("배우자: " + resSpouse.error); return; }
+      incomeSpouse = resSpouse.income;
+    }
+
+    const incomeTotal = resSelf.income + incomeSpouse;
+
+    const btInc = $("bt-income");
+    if (btInc) btInc.value = formatMoneyValue(String(Math.round(incomeTotal)));
+
+    $("out-self").textContent = `${fmtNum(resSelf.income)}원`;
+    $("out-spouse").textContent = $("has-spouse")?.checked ? `${fmtNum(incomeSpouse)}원` : "(미합산)";
+    $("out-sum").textContent = `${fmtNum(incomeTotal)}원`;
+    $("out-reason-self").textContent = "본인: " + resSelf.reason;
+    const rsp = $("out-reason-spouse");
+    if (resSpouse && $("has-spouse")?.checked) {
+      rsp.classList.remove("hidden");
+      rsp.textContent = "배우자: " + resSpouse.reason;
+    } else {
+      rsp.classList.add("hidden");
+    }
+
+    $("income-results").classList.remove("hidden");
+    $("income-results").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // —— 버팀목 금리표 ——
   const INCOME_BREAKS = [20000000, 40000000, 60000000, 75000000];
 
   function incomeTier(income) {
     for (let i = 0; i < INCOME_BREAKS.length; i++) {
       if (income <= INCOME_BREAKS[i]) return i;
     }
-    return INCOME_BREAKS.length; // 초과
+    return INCOME_BREAKS.length;
   }
 
-  // 일반 버팀목 (이미지 1 기준): 5천만 이하 / 1억 이하 / 1억 초과
   const GENERAL_TABLE = [
-    // [deposit<=5천, deposit<=1억, deposit>1억]
-    [2.5, 2.6, 2.7], // 2천만 이하
-    [2.7, 2.8, 2.9], // 4천만 이하
-    [3.0, 3.1, 3.2], // 6천만 이하
-    [3.3, 3.4, 3.5], // 7.5천만 이하
+    [2.5, 2.6, 2.7],
+    [2.7, 2.8, 2.9],
+    [3.0, 3.1, 3.2],
+    [3.3, 3.4, 3.5],
   ];
   const GENERAL_DEPOSITS = [
     { label: "5천만원 이하", key: "5k" },
@@ -59,7 +323,6 @@
     { label: "1억원 초과", key: "1eo" },
   ];
 
-  // 신혼가구 (이미지 4 기준, 541-0158, 2025.08.24): 5천만/1억/1.5억/1.5억 초과
   const NEWLYWED_TABLE = [
     [1.9, 2.0, 2.1, 2.2],
     [2.2, 2.3, 2.4, 2.5],
@@ -73,14 +336,7 @@
     { label: "1.5억원 초과", key: "15eo" },
   ];
 
-  // 청년 전용 (이미지 5 기준, 541-0158, 2025.03.24): 3억 이하 단일 구간
-  // 소득 구간: 2천만 이하 2.2, 2천~4천 2.5, 4천~6천 2.9, 6천~7.5천 3.3
-  const YOUTH_TABLE = [
-    [2.2],
-    [2.5],
-    [2.9],
-    [3.3],
-  ];
+  const YOUTH_TABLE = [[2.2], [2.5], [2.9], [3.3]];
   const YOUTH_DEPOSITS = [{ label: "3억원 이하", key: "3e" }];
 
   const PRODUCTS = {
@@ -125,7 +381,6 @@
     });
     $("bt-deposit-hint").textContent = cfg.depositHint;
 
-    // 1군 라디오: 신혼가구 탭에서는 기초생활·한부모·장애인·노인·다문화·고령자 항목 숨김
     document.querySelectorAll("#bt-group1 .radio-pill").forEach((pill) => {
       const allow = pill.dataset.tab;
       if (!allow) {
@@ -144,7 +399,6 @@
       }
     });
 
-    // 2군: 청년 탭에서만 중소기업·청년가구 표시
     document.querySelectorAll(".bt-youth-only").forEach((el) => {
       el.classList.toggle("hidden", tab !== "youth");
       if (tab !== "youth") {
@@ -154,38 +408,32 @@
     });
   }
 
-  function updateIncomePreview() {
-    const self = num($("bt-self-income"));
-    const hasSp = $("bt-has-spouse")?.checked;
-    const sp = hasSp ? num($("bt-spouse-income")) : 0;
-    const total = self + sp;
-    const out = $("bt-income-preview");
-    if (!out) return;
-    if (total <= 0) {
-      out.textContent = "";
-      return;
-    }
-    out.textContent = `부부합산 연소득: ${fmt(total)}원`;
-  }
-
   function getCap(tab, g1Kind) {
-    // 우대 상한
-    // - 기초생활수급자·차상위·한부모(1군의 basic): 1.0%
-    // - 다자녀가구(1군의 child3): 0.7%
-    // - 그 외: 0.5%
     if (g1Kind === "basic") return 1.0;
     if (g1Kind === "child3") return 0.7;
     return 0.5;
   }
 
   function runCalc() {
-    const selfInc = num($("bt-self-income"));
-    const hasSp = $("bt-has-spouse")?.checked;
-    const spInc = hasSp ? num($("bt-spouse-income")) : 0;
-    const income = selfInc + spInc;
+    let income = num($("bt-income"));
 
     if (income <= 0) {
-      alert("본인(및 배우자) 연소득을 입력해 주세요.");
+      const resSelf = calcPerson("self");
+      if (!resSelf.error) {
+        let sp = 0;
+        if ($("has-spouse")?.checked) {
+          const r = calcPerson("spouse");
+          if (r.error) { alert("배우자: " + r.error); return; }
+          sp = r.income;
+        }
+        income = resSelf.income + sp;
+        const btInc = $("bt-income");
+        if (btInc) btInc.value = formatMoneyValue(String(Math.round(income)));
+      }
+    }
+
+    if (income <= 0) {
+      alert("부부합산 연소득을 입력하거나, 1·2번에서 「소득 계산」을 먼저 실행해 주세요.");
       return;
     }
 
@@ -203,23 +451,18 @@
     const depositIdx = parseInt($("bt-deposit-tier")?.value || "0", 10) || 0;
     const depositLabel = cfg.deposits[depositIdx]?.label || "—";
 
-    // 기본금리
     let base = cfg.table[tier][depositIdx];
 
-    // 지방 소재 인하
     const isLocal = $("bt-local-home")?.checked;
     if (isLocal) base -= 0.2;
 
-    // 신용대출 가산
     const isCredit = $("bt-credit-loan")?.checked;
     const surcharge = isCredit ? 1.0 : 0;
 
-    // 그룹1 (중복불가, 택1)
     const g1El = document.querySelector('input[name="bt-g1"]:checked');
     const g1Val = parseFloat(g1El?.value || "0") || 0;
     const g1Kind = g1El?.dataset?.kind || "";
 
-    // 그룹2 (중복 가능)
     let g2Raw = 0;
     document.querySelectorAll(".check-item input[type=checkbox][data-rate]").forEach((c) => {
       if (c.checked && !c.closest(".hidden")) {
@@ -237,7 +480,7 @@
     const floored = beforeFloor < FLOOR;
 
     $("bt-out-product").textContent = cfg.title;
-    $("bt-out-income").textContent = `${fmt(income)}원${hasSp ? " (본인+배우자 합산)" : ""}`;
+    $("bt-out-income").textContent = `${fmtNum(income)}원`;
     $("bt-out-deposit").textContent = depositLabel;
     $("bt-out-base").textContent =
       `${base.toFixed(2)}%${isLocal ? " (지방 −0.2%p 적용)" : ""}`;
@@ -247,7 +490,7 @@
     $("bt-out-final").textContent = `${finalRate.toFixed(2)}%`;
 
     const reasons = [];
-    reasons.push(`소득 ${fmt(income)}원 · ${cfg.title} · 임차보증금 구간: ${depositLabel} 기준.`);
+    reasons.push(`소득 ${fmtNum(income)}원 · ${cfg.title} · 임차보증금 구간: ${depositLabel} 기준.`);
     if (isLocal) reasons.push("지방 소재 주택으로 기본금리 −0.2%p 인하.");
     if (isCredit) reasons.push("전세자금 신용대출 가산 +1.00%p 반영.");
     if (discountRaw > cap) {
@@ -266,29 +509,41 @@
     $("bt-results").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // 이벤트 바인딩
-  wireMoneyInputs(["bt-self-income", "bt-spouse-income"]);
+  // —— 이벤트 바인딩 ——
+  function initDefaults() {
+    const t = todayStr();
+    if ($("self-d-end")) $("self-d-end").value = t;
+    if ($("sp-d-end")) $("sp-d-end").value = t;
+  }
 
-  $("bt-has-spouse")?.addEventListener("change", () => {
-    const w = $("bt-spouse-wrap");
-    const on = $("bt-has-spouse").checked;
-    w?.classList.toggle("hidden", !on);
-    if (!on) {
-      const sp = $("bt-spouse-income");
-      if (sp) sp.value = "";
-    }
-    updateIncomePreview();
+  $("has-spouse")?.addEventListener("change", () => {
+    $("spouse-wrap").classList.toggle("hidden", !$("has-spouse").checked);
   });
-  ["bt-self-income", "bt-spouse-income"].forEach((id) => {
-    $(id)?.addEventListener("input", updateIncomePreview);
-  });
+
+  $("self-c-leave")?.addEventListener("change", () =>
+    updateLeaveLabels("self-c-leave", "self-c-lbl-old", "self-c-lbl-new", "self-c-hint")
+  );
+  $("sp-c-leave")?.addEventListener("change", () =>
+    updateLeaveLabels("sp-c-leave", "sp-c-lbl-old", "sp-c-lbl-new", null)
+  );
+  $("self-d-leave")?.addEventListener("change", () => updateLeaveLabelsD("self-d-leave", "self-d-lbl-y2", "self-d-lbl-y1"));
+  $("sp-d-leave")?.addEventListener("change", () => updateLeaveLabelsD("sp-d-leave", "sp-d-lbl-y2", "sp-d-lbl-y1"));
+
+  bindEmpType("emp-self", "self");
+  bindEmpType("emp-spouse", "spouse");
 
   document.querySelectorAll(".bt-tab-btn").forEach((b) => {
     b.addEventListener("click", () => applyTabUI(b.dataset.tab));
   });
 
+  $("btn-income-calc")?.addEventListener("click", runIncomeCalc);
   $("bt-btn-calc")?.addEventListener("click", runCalc);
 
-  // 초기화
+  initDefaults();
+  wireMoneyInputs();
+  wireSalaryCalcModal();
+  wireAnnualPreviews();
+  updatePanels("self", document.querySelector('input[name="emp-self"]:checked')?.value || "A");
+  updatePanels("spouse", document.querySelector('input[name="emp-spouse"]:checked')?.value || "A");
   applyTabUI("general");
 })();
