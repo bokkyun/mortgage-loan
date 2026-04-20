@@ -303,14 +303,7 @@
   }
 
   // —— 버팀목 금리표 ——
-  const INCOME_BREAKS = [20000000, 40000000, 60000000, 75000000];
-
-  function incomeTier(income) {
-    for (let i = 0; i < INCOME_BREAKS.length; i++) {
-      if (income <= INCOME_BREAKS[i]) return i;
-    }
-    return INCOME_BREAKS.length;
-  }
+  const DEFAULT_INCOME_BREAKS = [20000000, 40000000, 60000000, 75000000];
 
   const GENERAL_TABLE = [
     [2.5, 2.6, 2.7],
@@ -342,11 +335,34 @@
   // 청년 전용: 보증금 구간이 하나(3억원 이하) — 3억 초과 시 안내용 경고만 표시
   const YOUTH_DEPOSITS = [{ label: "3억원 이하(보증금 무관 동일 금리)", max: 300000000 }];
 
+  // 신생아특례 버팀목 (특례금리 적용 시)
+  const NEWBORN_INCOME_BREAKS = [
+    20000000, 40000000, 60000000, 75000000, 100000000, 130000000, 150000000, 170000000, 200000000,
+  ];
+  const NEWBORN_TABLE = [
+    [1.3, 1.4, 1.5, 1.6],
+    [1.6, 1.7, 1.8, 1.9],
+    [1.9, 2.0, 2.1, 2.2],
+    [2.2, 2.3, 2.4, 2.5],
+    [2.55, 2.65, 2.75, 2.85],
+    [2.9, 3.0, 3.1, 3.2],
+    [3.25, 3.35, 3.45, 3.55],
+    [3.6, 3.7, 3.8, 3.9],
+    [4.0, 4.1, 4.2, 4.3],
+  ];
+  const NEWBORN_DEPOSITS = [
+    { label: "5천만원 이하", max: 50000000 },
+    { label: "1억원 이하", max: 100000000 },
+    { label: "1.5억원 이하", max: 150000000 },
+    { label: "1.5억원 초과", max: Infinity },
+  ];
+
   const PRODUCTS = {
     general: {
       title: "일반 버팀목",
       deposits: GENERAL_DEPOSITS,
       table: GENERAL_TABLE,
+      incomeBreaks: DEFAULT_INCOME_BREAKS,
       depositHint: "5천만 이하 / 1억 이하 / 1억 초과 3개 구간에서 보증금에 맞는 구간이 자동 선택됩니다.",
       maxSoftLimit: Infinity,
     },
@@ -354,6 +370,7 @@
       title: "신혼가구 버팀목",
       deposits: NEWLYWED_DEPOSITS,
       table: NEWLYWED_TABLE,
+      incomeBreaks: DEFAULT_INCOME_BREAKS,
       depositHint: "5천만 / 1억 / 1.5억 / 1.5억 초과 4개 구간에서 자동 선택됩니다.",
       maxSoftLimit: Infinity,
     },
@@ -361,10 +378,28 @@
       title: "청년 전용 버팀목",
       deposits: YOUTH_DEPOSITS,
       table: YOUTH_TABLE,
+      incomeBreaks: DEFAULT_INCOME_BREAKS,
       depositHint: "",
       maxSoftLimit: 300000000,
     },
+    newborn: {
+      title: "신생아특례 버팀목",
+      deposits: NEWBORN_DEPOSITS,
+      table: NEWBORN_TABLE,
+      incomeBreaks: NEWBORN_INCOME_BREAKS,
+      depositHint:
+        "5천만 / 1억 / 1.5억 / 1.5억 초과 4개 구간에서 자동 선택됩니다. 부부합산 연소득은 2억원까지 특례금리 구간이 구분됩니다.",
+      maxSoftLimit: Infinity,
+    },
   };
+
+  function incomeTier(income, tab) {
+    const breaks = PRODUCTS[tab]?.incomeBreaks || DEFAULT_INCOME_BREAKS;
+    for (let i = 0; i < breaks.length; i++) {
+      if (income <= breaks[i]) return i;
+    }
+    return breaks.length;
+  }
 
   function depositTierIndex(tab, deposit) {
     const deposits = PRODUCTS[tab].deposits;
@@ -414,9 +449,26 @@
         if (c) c.checked = false;
       }
     });
+
+    document.querySelectorAll(".bt-general-pref").forEach((el) => {
+      el.classList.toggle("hidden", tab === "newborn");
+    });
+    document.querySelectorAll(".bt-newborn-only").forEach((el) => {
+      el.classList.toggle("hidden", tab !== "newborn");
+    });
+    if (tab === "newborn") {
+      const g1def = document.querySelector('input[name="bt-g1"][value="0"]');
+      if (g1def) g1def.checked = true;
+    } else {
+      const nbNewDef = document.querySelector('input[name="bt-nb-new"][value="0"]');
+      if (nbNewDef) nbNewDef.checked = true;
+      const nbMinorDef = document.querySelector('input[name="bt-nb-minor"][value="0"]');
+      if (nbMinorDef) nbMinorDef.checked = true;
+    }
   }
 
   function getCap(tab, g1Kind) {
+    if (tab === "newborn") return 0.5;
     if (g1Kind === "basic") return 1.0;
     if (g1Kind === "child3") return 0.7;
     return 0.5;
@@ -472,12 +524,15 @@
     }
     if (g1Kind === "child3") {
       list.push("자녀수 확인 — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+      list.push("자녀별 기본증명서");
     }
     if (!g1Kind && g1Val === 0.5) {
       list.push("자녀수 확인(2자녀) — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+      list.push("자녀별 기본증명서");
     }
     if (!g1Kind && g1Val === 0.3) {
       list.push("자녀수 확인(1자녀) — 가족관계증명서 <span class=\"muted\">(공통 기본서류에 포함)</span>");
+      list.push("자녀 기본증명서");
     }
     if (!g1Kind && g1Val === 0.2) {
       list.push(
@@ -487,7 +542,17 @@
     return list;
   }
 
-  function renderDocs({ tab, selfType, spouseType, hasSpouse, g1Val, g1Kind, smbYouth }) {
+  function renderDocs({
+    tab,
+    selfType,
+    spouseType,
+    hasSpouse,
+    g1Val,
+    g1Kind,
+    smbYouth,
+    nbNewCount,
+    nbMinorCount,
+  }) {
     const wrap = $("bt-docs-results");
     if (!wrap) return;
 
@@ -495,6 +560,7 @@
     if (tab === "general") summaryParts.push("일반 버팀목");
     if (tab === "newlywed") summaryParts.push("신혼가구 버팀목");
     if (tab === "youth") summaryParts.push("청년 전용 버팀목");
+    if (tab === "newborn") summaryParts.push("신생아특례 버팀목");
     if (tab === "youth" && smbYouth) summaryParts.push("중소기업 취업·창업 청년 우대");
     if (hasSpouse) summaryParts.push("부부합산");
 
@@ -528,6 +594,20 @@
       extra.push("고용보험자격이력내역서 <span class=\"muted\">(근로자용)</span>");
       extra.push("주업종코드확인서");
       extra.push("병적증명서 <span class=\"muted\">(필요시)</span>");
+    }
+    if (tab === "newborn") {
+      if (extraTitle) extraTitle.textContent = "신생아특례 추가 서류";
+      extra.push("혼인관계증명서 <span class=\"muted\">(부부합산·가족관계 확인)</span>");
+      extra.push("자녀 기본증명서 <span class=\"muted\">(신생아·미성년 자녀 전원)</span>");
+      extra.push("출생증명서 <span class=\"muted\">(출산 병원에서 발급 · 신생아 해당)</span>");
+      if (nbNewCount > 0 || nbMinorCount > 0) {
+        const parts = [];
+        if (nbNewCount > 0) parts.push(`신생아 ${nbNewCount}자녀`);
+        if (nbMinorCount > 0) parts.push(`미성년 ${nbMinorCount}자녀`);
+        extra.push(
+          `자녀수 증빙 추가 확인 <span class=\"muted\">(${parts.join(" · ")} 우대 신청 시)</span>`
+        );
+      }
     }
     if (extra.length > 0) {
       extraWrap?.classList.remove("hidden");
@@ -577,11 +657,13 @@
     const tab = getActiveTab();
     const cfg = PRODUCTS[tab];
 
-    const tier = incomeTier(income);
+    const tier = incomeTier(income, tab);
     if (tier >= cfg.table.length) {
-      alert(
-        "부부합산 연소득이 7,500만원을 초과합니다. 버팀목 전세자금 대출 소득 요건 한도(7,500만원)를 초과하는 경우 일반 기준으로는 신청 대상이 아닙니다."
-      );
+      const limitMsg =
+        tab === "newborn"
+          ? "부부합산 연소득이 2억원을 초과합니다. 신생아특례 버팀목 소득 요건(2억원 이하)을 초과하므로 신청 대상이 아닙니다."
+          : "부부합산 연소득이 7,500만원을 초과합니다. 버팀목 전세자금 대출 소득 요건 한도(7,500만원)를 초과하는 경우 일반 기준으로는 신청 대상이 아닙니다.";
+      alert(limitMsg);
       return;
     }
 
@@ -611,7 +693,7 @@
     const isCredit = $("bt-credit-loan")?.checked;
     const surcharge = isCredit ? 1.0 : 0;
 
-    const g1El = document.querySelector('input[name="bt-g1"]:checked');
+    const g1El = tab === "newborn" ? null : document.querySelector('input[name="bt-g1"]:checked');
     const g1Val = parseFloat(g1El?.value || "0") || 0;
     const g1Kind = g1El?.dataset?.kind || "";
 
@@ -622,7 +704,16 @@
       }
     });
 
-    const discountRaw = g1Val + g2Raw;
+    let nbNewVal = 0;
+    let nbMinorVal = 0;
+    if (tab === "newborn") {
+      const nbNewEl = document.querySelector('input[name="bt-nb-new"]:checked');
+      const nbMinorEl = document.querySelector('input[name="bt-nb-minor"]:checked');
+      nbNewVal = parseFloat(nbNewEl?.value || "0") || 0;
+      nbMinorVal = parseFloat(nbMinorEl?.value || "0") || 0;
+    }
+
+    const discountRaw = g1Val + g2Raw + nbNewVal + nbMinorVal;
     const cap = getCap(tab, g1Kind);
     const applied = Math.min(discountRaw, cap);
 
@@ -649,7 +740,8 @@
     if (discountRaw > cap) {
       reasons.push(`원우대 합계 ${discountRaw.toFixed(2)}%p가 상한 ${cap.toFixed(1)}%p를 초과하여 상한까지만 적용.`);
     } else if (applied > 0) {
-      reasons.push(`1군·2군 우대 합계 ${applied.toFixed(2)}%p 적용(상한 ${cap.toFixed(1)}%p 이내).`);
+      const label = tab === "newborn" ? "신생아특례 금리우대" : "1군·2군 우대";
+      reasons.push(`${label} 합계 ${applied.toFixed(2)}%p 적용(상한 ${cap.toFixed(1)}%p 이내).`);
     } else {
       reasons.push("선택된 금리우대 항목이 없습니다.");
     }
@@ -664,7 +756,19 @@
     const spouseType = document.querySelector('input[name="emp-spouse"]:checked')?.value || "A";
     const hasSpouse = !!$("has-spouse")?.checked;
     const smbYouth = tab === "youth" && !!$("bt-smb-youth")?.checked;
-    renderDocs({ tab, selfType, spouseType, hasSpouse, g1Val, g1Kind, smbYouth });
+    const nbNewCount = nbNewVal === 0.6 ? 4 : nbNewVal === 0.4 ? 3 : nbNewVal === 0.2 ? 2 : 0;
+    const nbMinorCount = nbMinorVal === 0.3 ? 3 : nbMinorVal === 0.2 ? 2 : nbMinorVal === 0.1 ? 1 : 0;
+    renderDocs({
+      tab,
+      selfType,
+      spouseType,
+      hasSpouse,
+      g1Val,
+      g1Kind,
+      smbYouth,
+      nbNewCount,
+      nbMinorCount,
+    });
 
     $("bt-results").scrollIntoView({ behavior: "smooth", block: "start" });
   }

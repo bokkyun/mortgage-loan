@@ -349,6 +349,7 @@
           <button type="button" class="bt-tab-btn active" data-tab="general" id="bt-tab-btn-general">일반 버팀목</button>
           <button type="button" class="bt-tab-btn" data-tab="newlywed" id="bt-tab-btn-newlywed">신혼가구</button>
           <button type="button" class="bt-tab-btn" data-tab="youth" id="bt-tab-btn-youth">청년 전용</button>
+          <button type="button" class="bt-tab-btn" data-tab="newborn" id="bt-tab-btn-newborn">신생아특례</button>
         </div>
 
         <div class="grid grid-2">
@@ -362,20 +363,48 @@
           </div>
         </div>
 
-        <div class="subsection-title" style="margin-top: 1rem">금리우대 1군 (중복 불가 · 택 1)</div>
-        <div class="radio-row" id="bt-group1">
-          <label class="radio-pill"><input type="radio" name="bt-g1" value="0" checked /><span>해당 없음</span></label>
-          <label class="radio-pill" data-tab="general,youth">
-            <input type="radio" name="bt-g1" value="1.0" data-kind="basic" />
-            <span>기초생활수급자·차상위·한부모 (연소득 4천/5천만 이하) 1.0%p</span>
-          </label>
-          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.7" data-kind="child3" /><span>다자녀가구 0.7%p</span></label>
-          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.5" /><span>2자녀 0.5%p</span></label>
-          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.3" /><span>1자녀 0.3%p</span></label>
-          <label class="radio-pill" data-tab="general,youth">
-            <input type="radio" name="bt-g1" value="0.2" />
-            <span>장애인·노인부양·다문화·고령자 0.2%p</span>
-          </label>
+        <div class="bt-general-pref">
+          <div class="subsection-title" style="margin-top: 1rem">금리우대 1군 (중복 불가 · 택 1)</div>
+          <div class="radio-row" id="bt-group1">
+            <label class="radio-pill"><input type="radio" name="bt-g1" value="0" checked /><span>해당 없음</span></label>
+            <label class="radio-pill" data-tab="general,youth">
+              <input type="radio" name="bt-g1" value="1.0" data-kind="basic" />
+              <span>기초생활수급자·차상위·한부모 (연소득 4천/5천만 이하) 1.0%p</span>
+            </label>
+            <label class="radio-pill"><input type="radio" name="bt-g1" value="0.7" data-kind="child3" /><span>다자녀가구 0.7%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-g1" value="0.5" /><span>2자녀 0.5%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-g1" value="0.3" /><span>1자녀 0.3%p</span></label>
+            <label class="radio-pill" data-tab="general,youth">
+              <input type="radio" name="bt-g1" value="0.2" />
+              <span>장애인·노인부양·다문화·고령자 0.2%p</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="bt-newborn-only hidden">
+          <div class="subsection-title" style="margin-top: 1rem">
+            신생아특례 금리우대 (중복 가능, 최대 0.5%p)
+          </div>
+          <p class="field-hint" style="margin-top: 0">
+            신청일 기준 신생아(2022.01.01 이후 출생) 자녀수와 미성년 자녀수에 따라 우대금리가 결정됩니다. 자녀 1명당 4년 적용(최장
+            12년), 단 30% 이하 신청·신생아 추가 우대는 대출실행일로부터 4년간 적용됩니다.
+          </p>
+
+          <div class="subsection-title" style="margin-top: 0.75rem">신생아 자녀수 (2자녀 이상부터 우대)</div>
+          <div class="radio-row" id="bt-group-nb-new">
+            <label class="radio-pill"><input type="radio" name="bt-nb-new" value="0" checked /><span>해당 없음</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-new" value="0.2" /><span>신생아 2자녀 −0.2%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-new" value="0.4" /><span>신생아 3자녀 −0.4%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-new" value="0.6" /><span>신생아 4자녀 이상 −0.6%p</span></label>
+          </div>
+
+          <div class="subsection-title" style="margin-top: 0.75rem">미성년 자녀수 (신생아 제외, 1자녀부터 우대)</div>
+          <div class="radio-row" id="bt-group-nb-minor">
+            <label class="radio-pill"><input type="radio" name="bt-nb-minor" value="0" checked /><span>해당 없음</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-minor" value="0.1" /><span>미성년 1자녀 −0.1%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-minor" value="0.2" /><span>미성년 2자녀 −0.2%p</span></label>
+            <label class="radio-pill"><input type="radio" name="bt-nb-minor" value="0.3" /><span>미성년 3자녀 이상 −0.3%p</span></label>
+          </div>
         </div>
 
         <div class="subsection-title" style="margin-top: 1rem">금리우대 2군 (중복 가능)</div>
