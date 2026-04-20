@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J1JQSVPNM6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+      gtag("config", "G-J1JQSVPNM6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>버팀목 전세자금 대출금리 계산기 | 일반·신혼·청년 금리 참고 산출</title>
+    <meta
+      name="description"
+      content="버팀목 전세자금 대출금리 계산기. 일반 버팀목·신혼가구·청년전용 3개 탭에서 부부합산 연소득, 임차보증금, 우대금리 조건을 입력해 최종 금리를 한 번에 참고 산출합니다."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <link rel="canonical" href="https://mortgage-loan-5oz.pages.dev/beotimmok/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="버팀목 전세자금 대출금리 계산기" />
+    <meta property="og:title" content="버팀목 전세자금 대출금리 계산기 | 일반·신혼·청년" />
+    <meta
+      property="og:description"
+      content="일반 버팀목·신혼가구·청년 전용 버팀목 금리를 부부합산 연소득, 임차보증금, 금리우대 조건으로 참고 산출하는 계산기입니다."
+    />
+    <meta property="og:url" content="https://mortgage-loan-5oz.pages.dev/beotimmok/" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3300541490593571"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "버팀목 전세자금 대출금리 계산기",
+        "url": "https://mortgage-loan-5oz.pages.dev/beotimmok/",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "inLanguage": "ko-KR",
+        "description": "일반 버팀목, 신혼가구, 청년 전용 버팀목 전세자금 대출의 기본금리와 우대금리를 조건별로 계산하는 참고용 웹 계산기",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>버팀목 전세자금 대출금리 계산기</h1>
+      <p>일반 버팀목·신혼가구·청년 전용 버팀목 전세자금의 기본금리와 우대금리를 조건별로 참고 산출합니다.</p>
+      <nav class="quick-nav" aria-label="빠른 이동">
+        <a href="../">홈</a>
+        <a href="#income-section">소득 입력</a>
+        <a href="#rate-section">금리 계산</a>
+        <a href="#faq-section">자주 묻는 질문</a>
+        <a href="../didimdol/">디딤돌 계산기</a>
+        <a href="../dsr/">DSR 계산기</a>
+      </nav>
+      <div class="disclaimer">
+        본 페이지는 공개된 금리표(<strong>541-0158·541-0164, 2025.08.24 / 2025.03.24 시행</strong>)를 바탕으로 한
+        <strong>참고용 추정치</strong>입니다. 실제 적용 금리·우대는 접수 시점, 채권양도·신용대출 여부, 취급 금융기관의
+        심사 결과에 따라 달라질 수 있습니다.
+      </div>
+    </header>
+
+    <main>
+      <section class="card" id="income-section">
+        <h2>1. 부부합산 연소득 <span class="badge">필수</span></h2>
+        <div class="grid grid-2">
+          <div>
+            <label for="bt-self-income">본인 연소득 (원)</label>
+            <input type="text" id="bt-self-income" inputmode="numeric" placeholder="예: 35000000" />
+          </div>
+          <div>
+            <label class="check-item" style="margin-top: 0.2rem">
+              <input type="checkbox" id="bt-has-spouse" />
+              배우자 소득 합산
+            </label>
+            <div id="bt-spouse-wrap" class="hidden" style="margin-top: 0.4rem">
+              <label for="bt-spouse-income">배우자 연소득 (원)</label>
+              <input type="text" id="bt-spouse-income" inputmode="numeric" placeholder="예: 28000000" />
+            </div>
+          </div>
+        </div>
+        <p class="annual-preview" id="bt-income-preview" aria-live="polite"></p>
+        <p class="field-hint" style="margin-top: 0.5rem">
+          디딤돌 계산기의 재직 유형별 연환산 결과를 그대로 옮겨 입력해도 됩니다. 이 계산기는 연소득만으로 기본 금리 구간을
+          판정합니다(소득 산정 규칙은 <a href="../didimdol/">디딤돌 계산기</a>에서 계산).
+        </p>
+      </section>
+
+      <section class="card" id="rate-section">
+        <h2>2. 상품 선택 · 금리우대</h2>
+        <p class="field-hint" style="margin: 0 0 0.75rem">
+          사용할 버팀목 유형 탭을 선택하고 임차보증금 구간·주택 소재·금리우대 항목을 체크하세요. 결과는 하단 「금리 계산」
+          버튼을 누르면 표시됩니다.
+        </p>
+        <div class="person-tabs" role="tablist" aria-label="버팀목 유형">
+          <button type="button" class="bt-tab-btn active" data-tab="general" id="bt-tab-btn-general">일반 버팀목</button>
+          <button type="button" class="bt-tab-btn" data-tab="newlywed" id="bt-tab-btn-newlywed">신혼가구</button>
+          <button type="button" class="bt-tab-btn" data-tab="youth" id="bt-tab-btn-youth">청년 전용</button>
+        </div>
+
+        <!-- 공통: 임차보증금·지방·신용대출 -->
+        <div class="grid grid-2">
+          <div>
+            <label for="bt-deposit-tier">임차보증금 구간</label>
+            <select id="bt-deposit-tier"></select>
+            <p class="field-hint" id="bt-deposit-hint"></p>
+          </div>
+          <div>
+            <label class="check-item" style="margin-top: 1.4rem">
+              <input type="checkbox" id="bt-local-home" /> 지방 소재 주택 (−0.2%p)
+            </label>
+            <label class="check-item" style="margin-top: 0.35rem">
+              <input type="checkbox" id="bt-credit-loan" /> 전세자금 신용대출 (+1.0%p 가산)
+            </label>
+          </div>
+        </div>
+
+        <!-- 그룹 1: 중복불가 -->
+        <div class="subsection-title" style="margin-top: 1rem">금리우대 1군 (중복 불가 · 택 1)</div>
+        <div class="radio-row" id="bt-group1">
+          <label class="radio-pill"><input type="radio" name="bt-g1" value="0" checked /><span>해당 없음</span></label>
+          <label class="radio-pill" data-tab="general,youth">
+            <input type="radio" name="bt-g1" value="1.0" data-kind="basic" />
+            <span>기초생활수급자·차상위·한부모 (연소득 4천/5천만 이하) 1.0%p</span>
+          </label>
+          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.7" data-kind="child3" /><span>다자녀가구 0.7%p</span></label>
+          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.5" /><span>2자녀 0.5%p</span></label>
+          <label class="radio-pill"><input type="radio" name="bt-g1" value="0.3" /><span>1자녀 0.3%p</span></label>
+          <label class="radio-pill" data-tab="general,youth">
+            <input type="radio" name="bt-g1" value="0.2" />
+            <span>장애인·노인부양·다문화·고령자 0.2%p</span>
+          </label>
+        </div>
+
+        <!-- 그룹 2: 중복 가능 -->
+        <div class="subsection-title" style="margin-top: 1rem">금리우대 2군 (중복 가능)</div>
+        <div class="check-grid">
+          <label class="check-item">
+            <input type="checkbox" id="bt-under30" data-rate="0.2" />
+            대출 실사로 산정한 대출금액의 30% 이하로 대출 신청 (대출실행일로부터 4년간) −0.2%p
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="bt-electronic" data-rate="0.1" />
+            부동산 전자계약 시스템 활용 임대차계약 &lt;2026.12.31 한시&gt; (최초 대출기한 1회) −0.1%p
+          </label>
+          <label class="check-item bt-youth-only hidden">
+            <input type="checkbox" id="bt-smb-youth" data-rate="0.3" />
+            중소기업 취업·창업 청년 (대출실행일로부터 4년간) −0.3%p
+          </label>
+          <label class="check-item bt-youth-only hidden">
+            <input type="checkbox" id="bt-youth-single" data-rate="0.3" />
+            청년가구(만 25세 미만, 전용 60㎡ 이하, 대출금 1.5억 이하, 단독세대주 예정) −0.3%p
+          </label>
+        </div>
+
+        <p class="field-hint" style="margin-top: 0.75rem" id="bt-cap-hint">
+          우대금리 상한은 유형·1군 선택에 따라 자동 적용됩니다. 우대 적용 후 최종금리가 1.0% 미만이면 1.0%로 하한 처리합니다.
+        </p>
+
+        <section class="card results hidden" id="bt-results" style="margin-top: 1rem">
+          <h2>버팀목 금리 결과</h2>
+          <div class="result-row"><span>선택한 상품</span><span id="bt-out-product">—</span></div>
+          <div class="result-row"><span>부부합산 연소득</span><span id="bt-out-income">—</span></div>
+          <div class="result-row"><span>임차보증금 구간</span><span id="bt-out-deposit">—</span></div>
+          <div class="result-row"><span>기본금리(표 기준)</span><span id="bt-out-base">—</span></div>
+          <div class="result-row"><span>가산(신용대출 등)</span><span id="bt-out-surcharge">—</span></div>
+          <div class="result-row"><span>우대 합계 (적용/원)</span><span id="bt-out-discount">—</span></div>
+          <div class="result-row"><span>최종금리</span><span id="bt-out-final" class="big-number">—</span></div>
+          <p class="reason-text" id="bt-out-reason"></p>
+        </section>
+      </section>
+
+      <button type="button" class="btn-primary" id="bt-btn-calc">금리 계산</button>
+
+      <section class="card seo-faq" id="faq-section" style="margin-top: 1rem">
+        <h2>자주 묻는 질문 (FAQ)</h2>
+        <div class="faq-list">
+          <details>
+            <summary>버팀목 전세자금 대출은 누가 신청할 수 있나요?</summary>
+            <p>
+              무주택 세대주(또는 예정자)로서 연소득·자산 요건을 충족하는 임차인이 신청 대상입니다. 일반 버팀목은 부부합산
+              연소득 7.5천만원 이하, 신혼가구·청년 전용은 각 상품 기준(연소득·연령·세대 구성 등)을 추가로 확인해야 합니다.
+              실제 자격은 취급 금융기관과 주택도시기금 기준을 따릅니다.
+            </p>
+          </details>
+          <details>
+            <summary>이 계산기는 어떤 기준으로 금리를 계산하나요?</summary>
+            <p>
+              541-0158·541-0164(2025.08.24 / 2025.03.24 시행) 기준표를 반영했습니다. 부부합산 연소득 구간과 임차보증금
+              구간에서 기본금리를 찾은 뒤, 지방 소재 주택 인하(−0.2%p), 신용대출 가산(+1.0%p)을 반영하고 1·2군 우대금리를
+              합쳐 최종 금리를 계산합니다. 최종 금리가 1.0% 미만이면 1.0%로 하한 처리합니다.
+            </p>
+          </details>
+          <details>
+            <summary>1군·2군 우대를 동시에 적용할 수 있나요?</summary>
+            <p>
+              네. 1군과 2군은 중복 적용이 가능하지만, 1군 내부 항목은 하나만 선택할 수 있습니다. 우대 총합은 유형별
+              상한(기본 0.5%p, 다자녀 가구는 0.7%p, 1군 기초생활수급자·한부모는 1.0%p)까지만 적용됩니다.
+            </p>
+          </details>
+          <details>
+            <summary>계산 결과를 실제 금리로 봐도 되나요?</summary>
+            <p>
+              아니요. 본 계산기는 <strong>참고용 추정</strong>입니다. 채권양도 방식, 노후고시원 이주 세대주 고시금리 등
+              별도 규정이 적용될 수 있고, 실제 심사 결과와 차이가 날 수 있습니다.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-main">
+        <span>© Mortgage Loan Lab · 참고용 계산기</span>
+      </div>
+      <div class="footer-links">
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../disclaimer/">면책 조항</a>
+        <a href="../didimdol/">디딤돌 계산기</a>
+        <a href="../dsr/" class="footer-cta-link">DSR 계산기</a>
+        <a href="../about/">About</a>
+      </div>
+      <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
+    </footer>
+
+    <script src="../js/beotimmok.js"></script>
+  </body>
+</html>
