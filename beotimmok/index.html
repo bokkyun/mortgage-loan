@@ -332,16 +332,21 @@
       <div style="height: 1rem"></div>
 
       <section class="card" id="rate-section">
-        <h2>3. 상품 선택 · 금리우대</h2>
+        <h2>3. 금리 계산</h2>
         <p class="field-hint" style="margin: 0 0 0.75rem">
-          1·2번 없이도 아래 부부합산 연소득란에 직접 입력한 뒤 「금리 계산」만으로 이용할 수 있습니다. 1·2번에서
-          「소득 계산」을 누르면 여기로 그대로 반영됩니다.
+          1·2번 없이도 아래 부부합산 연소득·전세보증금을 직접 입력한 뒤 「금리 계산」만으로 이용할 수 있습니다. 1·2번에서
+          「소득 계산」을 누르면 연소득이 자동 반영됩니다.
         </p>
 
         <div class="grid grid-2">
-          <div class="grid-span-2">
+          <div>
             <label for="bt-income">부부합산 연소득 (원)</label>
             <input type="text" id="bt-income" inputmode="numeric" placeholder="예: 50000000" />
+          </div>
+          <div>
+            <label for="bt-deposit">전세보증금 (원)</label>
+            <input type="text" id="bt-deposit" inputmode="numeric" placeholder="예: 150000000" />
+            <p class="field-hint" id="bt-deposit-hint"></p>
           </div>
         </div>
 
@@ -352,13 +357,8 @@
         </div>
 
         <div class="grid grid-2">
-          <div>
-            <label for="bt-deposit-tier">임차보증금 구간</label>
-            <select id="bt-deposit-tier"></select>
-            <p class="field-hint" id="bt-deposit-hint"></p>
-          </div>
-          <div>
-            <label class="check-item" style="margin-top: 1.4rem">
+          <div class="grid-span-2">
+            <label class="check-item">
               <input type="checkbox" id="bt-local-home" /> 지방 소재 주택 (−0.2%p)
             </label>
             <label class="check-item" style="margin-top: 0.35rem">
@@ -411,7 +411,8 @@
           <h2>버팀목 금리 결과</h2>
           <div class="result-row"><span>선택한 상품</span><span id="bt-out-product">—</span></div>
           <div class="result-row"><span>부부합산 연소득</span><span id="bt-out-income">—</span></div>
-          <div class="result-row"><span>임차보증금 구간</span><span id="bt-out-deposit">—</span></div>
+          <div class="result-row"><span>전세보증금</span><span id="bt-out-deposit-amount">—</span></div>
+          <div class="result-row"><span>적용 보증금 구간</span><span id="bt-out-deposit">—</span></div>
           <div class="result-row"><span>기본금리(표 기준)</span><span id="bt-out-base">—</span></div>
           <div class="result-row"><span>가산(신용대출 등)</span><span id="bt-out-surcharge">—</span></div>
           <div class="result-row"><span>우대 합계 (적용/원)</span><span id="bt-out-discount">—</span></div>

@@ -150,6 +150,7 @@
       "sp-d-y1",
       "sp-d-p-sum",
       "bt-income",
+      "bt-deposit",
     ];
 
     moneyIds.forEach((id) => {
@@ -317,10 +318,11 @@
     [3.0, 3.1, 3.2],
     [3.3, 3.4, 3.5],
   ];
+  // 각 구간의 상한(원). 마지막은 Infinity
   const GENERAL_DEPOSITS = [
-    { label: "5천만원 이하", key: "5k" },
-    { label: "1억원 이하", key: "1e" },
-    { label: "1억원 초과", key: "1eo" },
+    { label: "5천만원 이하", max: 50000000 },
+    { label: "1억원 이하", max: 100000000 },
+    { label: "1억원 초과", max: Infinity },
   ];
 
   const NEWLYWED_TABLE = [
@@ -330,35 +332,49 @@
     [3.0, 3.1, 3.2, 3.3],
   ];
   const NEWLYWED_DEPOSITS = [
-    { label: "5천만원 이하", key: "5k" },
-    { label: "1억원 이하", key: "1e" },
-    { label: "1.5억원 이하", key: "15e" },
-    { label: "1.5억원 초과", key: "15eo" },
+    { label: "5천만원 이하", max: 50000000 },
+    { label: "1억원 이하", max: 100000000 },
+    { label: "1.5억원 이하", max: 150000000 },
+    { label: "1.5억원 초과", max: Infinity },
   ];
 
   const YOUTH_TABLE = [[2.2], [2.5], [2.9], [3.3]];
-  const YOUTH_DEPOSITS = [{ label: "3억원 이하", key: "3e" }];
+  // 청년 전용: 보증금 구간이 하나(3억원 이하) — 3억 초과 시 안내용 경고만 표시
+  const YOUTH_DEPOSITS = [{ label: "3억원 이하(보증금 무관 동일 금리)", max: 300000000 }];
 
   const PRODUCTS = {
     general: {
       title: "일반 버팀목",
       deposits: GENERAL_DEPOSITS,
       table: GENERAL_TABLE,
-      depositHint: "일반 버팀목 최대 임차보증금 기준으로 구간을 선택하세요.",
+      depositHint: "5천만 이하 / 1억 이하 / 1억 초과 3개 구간에서 보증금에 맞는 구간이 자동 선택됩니다.",
+      maxSoftLimit: Infinity,
     },
     newlywed: {
       title: "신혼가구 버팀목",
       deposits: NEWLYWED_DEPOSITS,
       table: NEWLYWED_TABLE,
-      depositHint: "신혼가구 전용은 1.5억원 초과 구간까지 금리표가 정의되어 있습니다.",
+      depositHint: "5천만 / 1억 / 1.5억 / 1.5억 초과 4개 구간에서 자동 선택됩니다.",
+      maxSoftLimit: Infinity,
     },
     youth: {
       title: "청년 전용 버팀목",
       deposits: YOUTH_DEPOSITS,
       table: YOUTH_TABLE,
-      depositHint: "청년 전용 버팀목은 3억원 이하 단일 구간입니다.",
+      depositHint: "청년 전용은 보증금 구간과 무관하게 동일 금리가 적용됩니다(상품 한도 3억원).",
+      maxSoftLimit: 300000000,
     },
   };
+
+  function depositTierIndex(tab, deposit) {
+    const deposits = PRODUCTS[tab].deposits;
+    // 청년: 단일 구간 고정
+    if (tab === "youth") return 0;
+    for (let i = 0; i < deposits.length; i++) {
+      if (deposit <= deposits[i].max) return i;
+    }
+    return deposits.length - 1;
+  }
 
   function getActiveTab() {
     const btn = document.querySelector(".bt-tab-btn.active");
@@ -371,14 +387,6 @@
     });
 
     const cfg = PRODUCTS[tab];
-    const sel = $("bt-deposit-tier");
-    sel.innerHTML = "";
-    cfg.deposits.forEach((d, i) => {
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = d.label;
-      sel.appendChild(opt);
-    });
     $("bt-deposit-hint").textContent = cfg.depositHint;
 
     document.querySelectorAll("#bt-group1 .radio-pill").forEach((pill) => {
@@ -448,7 +456,22 @@
       return;
     }
 
-    const depositIdx = parseInt($("bt-deposit-tier")?.value || "0", 10) || 0;
+    const deposit = num($("bt-deposit"));
+    if (deposit <= 0) {
+      alert("전세보증금(원)을 입력해 주세요.");
+      return;
+    }
+    if (cfg.maxSoftLimit !== Infinity && deposit > cfg.maxSoftLimit) {
+      if (
+        !confirm(
+          `청년 전용 버팀목의 상품 한도(3억원)를 초과합니다. 참고용으로 계산을 진행할까요? (실제 신청은 상품 한도 초과 시 불가)`
+        )
+      ) {
+        return;
+      }
+    }
+
+    const depositIdx = depositTierIndex(tab, deposit);
     const depositLabel = cfg.deposits[depositIdx]?.label || "—";
 
     let base = cfg.table[tier][depositIdx];
@@ -481,6 +504,7 @@
 
     $("bt-out-product").textContent = cfg.title;
     $("bt-out-income").textContent = `${fmtNum(income)}원`;
+    $("bt-out-deposit-amount").textContent = `${fmtNum(deposit)}원`;
     $("bt-out-deposit").textContent = depositLabel;
     $("bt-out-base").textContent =
       `${base.toFixed(2)}%${isLocal ? " (지방 −0.2%p 적용)" : ""}`;
