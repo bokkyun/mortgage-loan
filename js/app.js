@@ -512,12 +512,15 @@
 
   // —— 예상 필요서류 ——
   function didIncomeDocForType(type) {
-    if (type === "A") return "근로소득원천징수영수증 (전년도) — 4대보험 근로자";
-    if (type === "B") return "갑종근로소득원천징수영수증 (입사일 ~ 현재) — 전년도 또는 금년 입사자";
-    if (type === "C") return "근로소득원천징수영수증 (휴직 직전 2개년) — 휴직자";
+    if (type === "A")
+      return "근로소득원천징수영수증 <span class=\"muted\">(전년도 + 전전년도 각 1부)</span> — 4대보험 근로자";
+    if (type === "B")
+      return "갑종근로소득원천징수영수증 <span class=\"muted\">(입사일 ~ 현재, 2개년에 걸친 경우 각 연도분)</span> — 전년도 또는 금년 입사자";
+    if (type === "C")
+      return "근로소득원천징수영수증 <span class=\"muted\">(휴직 직전 2개년 · 각 연도분)</span> — 휴직자";
     if (type === "D")
-      return "근로소득원천징수영수증 (휴직 직전 2개년) + 복직 후 갑종근로소득원천징수영수증 — 복직자";
-    return "근로소득원천징수영수증 (전년도)";
+      return "근로소득원천징수영수증 <span class=\"muted\">(휴직 직전 2개년)</span> + 복직 후 갑종근로소득원천징수영수증 — 복직자";
+    return "근로소득원천징수영수증 <span class=\"muted\">(전년도 + 전전년도 각 1부)</span>";
   }
 
   function buildDidCommonDocs(selfType, spouseType, hasSpouse) {
@@ -531,10 +534,10 @@
     incomeDocs.push(`본인: ${didIncomeDocForType(selfType)}`);
     if (hasSpouse) incomeDocs.push(`배우자: ${didIncomeDocForType(spouseType)}`);
     incomeDocs.push(
-      "<span class=\"muted\">사업자인 경우 소득금액증명원 (전년도 기준, 7월 이전에는 전전년도 소득금액증명원 제출)</span>"
+      "<span class=\"muted\">사업자인 경우 소득금액증명원 (전년도 + 전전년도 각 1부, 7월 이전에는 전전년도·전전전년도 제출)</span>"
     );
     list.push(
-      "소득확인서류" +
+      "소득확인서류 <span class=\"muted\">(최근 2개년치)</span>" +
         "<ul class=\"doc-sublist\">" +
         incomeDocs.map((d) => `<li>${d}</li>`).join("") +
         "</ul>"
