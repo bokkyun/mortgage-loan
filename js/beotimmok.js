@@ -361,7 +361,7 @@
       title: "청년 전용 버팀목",
       deposits: YOUTH_DEPOSITS,
       table: YOUTH_TABLE,
-      depositHint: "청년 전용은 보증금 구간과 무관하게 동일 금리가 적용됩니다(상품 한도 3억원).",
+      depositHint: "",
       maxSoftLimit: 300000000,
     },
   };
