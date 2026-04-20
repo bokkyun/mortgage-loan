@@ -47,8 +47,56 @@
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "All",
         "inLanguage": "ko-KR",
-        "description": "재직 유형별 소득 산정과 일반·신혼·청년 버팀목 전세자금 대출 금리·우대를 조건별로 계산하는 참고용 웹 계산기",
+        "description": "재직 유형별 소득 산정과 일반·신혼·청년·신생아특례 버팀목 전세자금 대출 금리·우대를 조건별로 계산하는 참고용 웹 계산기",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "버팀목 전세자금 대출은 누가 신청할 수 있나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "무주택 세대주(또는 예정자)로서 연소득·자산 요건을 충족하는 임차인이 신청 대상입니다. 일반 버팀목은 부부합산 5천만원 이하, 신혼가구는 7,500만원 이하, 청년 전용은 5천만원 이하·만 34세 이하, 신생아특례는 1.3억원(한시 2억) 이하 등 상품별 기준이 다릅니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "계산기는 어떤 기준으로 금리를 산출하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "부부합산 연소득 구간과 전세보증금 구간(5천만 이하/1억 이하/1억 초과)의 교차점에서 기본금리를 찾고, 금리 유형 가산·지방 인하·1·2군 우대를 합산한 뒤 상한(0.5 또는 0.7%p)과 최저금리(1.0~1.2%)를 적용합니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "1군·2군 우대를 동시에 적용할 수 있나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "1군은 내부에서 택1이며 2군은 중복 가능합니다. 전체 우대 합계는 상한(일반 0.5%p, 다자녀 0.7%p, 1군 한부모·기초생활수급자는 1.0%p)까지만 실제 적용됩니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "신생아특례 탭은 어떻게 다른가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "신생아특례는 최근 출산·입양 가구를 위한 별도 금리표(더 낮음)를 사용하며, 신생아 자녀수 -0.2/-0.4/-0.6%p와 미성년 자녀수 -0.1~-0.3%p를 합산해 상한 0.5%p 안에서 반영합니다. 최저금리 하한은 1.2%입니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "계산 결과는 실제 금리와 일치하나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "아니요. 본 계산기는 참고용 추정치입니다. 채권양도 방식·노후고시원 이주 세대주 고시금리 등 별도 규정과 취급 금융기관 심사 결과에 따라 실제 금리는 달라질 수 있습니다."
+            }
+          }
+        ]
       }
     </script>
   </head>
