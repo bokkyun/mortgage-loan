@@ -57,6 +57,7 @@
       </p>
       <nav class="quick-nav" aria-label="빠른 이동">
         <a href="../">홈</a>
+        <a href="#web-inquiry">웹 문의</a>
         <a href="#channels">연락 채널</a>
         <a href="#types">어떤 문의가 가능한가요</a>
         <a href="#template">이메일 템플릿</a>
@@ -65,8 +66,57 @@
     </header>
 
     <main>
+      <section class="card" id="web-inquiry">
+        <h2>1. 웹 문의 양식</h2>
+        <p>
+          아래 양식을 보내시면 <strong>운영자 이메일</strong>로 전달됩니다. 회신은 적어 주신 주소로 드리므로, 연락 가능한
+          이메일을 정확히 입력해 주세요.
+        </p>
+        <p class="field-hint" id="contact-form-mode-hint"></p>
+        <div id="contact-form-status" role="status" aria-live="polite" hidden></div>
+        <form id="site-contact-form" style="margin-top: 1rem">
+          <p style="margin: 0 0 0.85rem">
+            <label for="cf-category">문의 유형</label>
+            <select id="cf-category" name="category" required>
+              <option value="일반 문의">일반 문의</option>
+              <option value="오류 제보">오류 제보</option>
+              <option value="콘텐츠 수정">콘텐츠 수정·오탈자</option>
+              <option value="개인정보·광고">개인정보·광고 관련</option>
+              <option value="기타">기타</option>
+            </select>
+          </p>
+          <p style="margin: 0 0 0.85rem">
+            <label for="cf-name">이름 또는 닉네임 <span class="muted">(선택)</span></label>
+            <input id="cf-name" name="name" type="text" autocomplete="name" maxlength="120" placeholder="예: 홍길동" />
+          </p>
+          <p style="margin: 0 0 0.85rem">
+            <label for="cf-email">이메일 <span class="muted">(필수 · 회신용)</span></label>
+            <input id="cf-email" name="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com" />
+          </p>
+          <p style="margin: 0 0 0.85rem">
+            <label for="cf-page">관련 페이지 URL <span class="muted">(선택)</span></label>
+            <input id="cf-page" name="page_url" type="text" inputmode="url" maxlength="2000" placeholder="https://mortgage-loan.uk/…" />
+          </p>
+          <p style="margin: 0 0 0.85rem">
+            <label for="cf-message">문의 내용 <span class="muted">(필수)</span></label>
+            <textarea id="cf-message" name="message" required maxlength="8000" placeholder="문의 내용을 자유롭게 적어 주세요. (최대 약 8,000자)"></textarea>
+          </p>
+          <input type="checkbox" name="botcheck" value="" style="display: none" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div class="hub-card-actions" style="margin-top: 1rem">
+            <button type="submit" class="hub-btn-primary">문의 보내기</button>
+          </div>
+        </form>
+        <p class="field-hint" style="margin-top: 1rem">
+          운영자가 직접 메일 서버를 두지 않고, 전달 전용 서비스(Web3Forms)를 경유합니다.
+          <a href="https://web3forms.com" target="_blank" rel="noopener">Web3Forms</a>에서 무료 계정을 만든 뒤
+          수신 메일을 <strong>mortgageloanlab@gmail.com</strong>으로 지정하고, 발급된 access_key를 저장소의
+          <code style="font-size: 0.85em">js/contact-form.js</code> 파일 상단에 넣으면 브라우저에서 바로 전송됩니다.
+          대시보드에서 도메인을 <code>mortgage-loan.uk</code>로 제한해 두는 것을 권장합니다.
+        </p>
+      </section>
+
       <section class="card" id="channels">
-        <h2>1. 연락 채널</h2>
+        <h2>2. 연락 채널</h2>
         <ul class="doc-list">
           <li>
             <strong>이메일</strong> :
@@ -86,7 +136,7 @@
       </section>
 
       <section class="card" id="types">
-        <h2>2. 어떤 문의가 가능한가요</h2>
+        <h2>3. 어떤 문의가 가능한가요</h2>
         <ul class="doc-list">
           <li>
             <strong>계산 오류 제보</strong> — 특정 입력값에서 결과가 공식 안내와 크게 다르다고 판단될 때. 가능하면
@@ -112,7 +162,7 @@
       </section>
 
       <section class="card" id="limitations">
-        <h2>3. 회신이 어려운 문의</h2>
+        <h2>4. 회신이 어려운 문의</h2>
         <p>
           본 사이트는 <strong>참고용 계산기</strong>를 제공하는 개인 운영 프로젝트이며, 다음과 같은 요청에는
           회신이 어렵거나 제공이 불가합니다. 양해 부탁드립니다.
@@ -130,7 +180,7 @@
       </section>
 
       <section class="card" id="template">
-        <h2>4. 이메일 문의 템플릿</h2>
+        <h2>5. 이메일 문의 템플릿</h2>
         <p>아래 양식을 복사해 사용하시면 회신이 더 빠릅니다.</p>
         <pre style="background: var(--surface2); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem">
 [제목] 예: [오류] 디딤돌 금리 계산 결과 문의
@@ -145,10 +195,11 @@
       </section>
 
       <section class="card">
-        <h2>5. 운영 원칙</h2>
+        <h2>6. 운영 원칙</h2>
         <p>
           문의하신 개인 식별 정보(이메일 주소 등)는 <strong>회신 목적으로만 사용</strong>되며, 제3자에게 제공되지
-          않습니다. 자세한 내용은 <a href="../privacy/">개인정보 처리방침</a>을 참고해 주세요.
+          않습니다. 웹 양식으로 보내신 내용은 전달·스팸 방지를 위해 제3자 전달 서비스를 거칠 수 있습니다. 자세한 내용은
+          <a href="../privacy/">개인정보 처리방침</a>을 참고해 주세요.
         </p>
         <p style="margin-top: 1rem"><a href="../">← 홈으로</a></p>
       </section>
@@ -165,5 +216,6 @@
         <a href="../disclaimer/">면책 조항</a>
       </div>
     </footer>
+    <script src="../js/contact-form.js" defer></script>
   </body>
 </html>

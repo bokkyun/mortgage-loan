@@ -210,6 +210,8 @@ label {
 input[type="text"],
 input[type="number"],
 input[type="date"],
+input[type="email"],
+textarea,
 select {
   width: 100%;
   padding: 0.55rem 0.65rem;
@@ -220,8 +222,16 @@ select {
   font-size: 0.95rem;
 }
 
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 0;
 }
@@ -818,7 +828,8 @@ footer .footer-note {
   align-items: center;
 }
 
-a.hub-btn-primary {
+a.hub-btn-primary,
+button.hub-btn-primary {
   display: inline-block;
   padding: 0.65rem 1.1rem;
   border-radius: 10px;
@@ -838,10 +849,23 @@ a.hub-btn-primary {
   transition: box-shadow 0.18s ease, filter 0.18s ease, transform 0.18s ease;
 }
 
-a.hub-btn-primary:hover {
+button.hub-btn-primary {
+  cursor: pointer;
+  font-family: inherit;
+  line-height: inherit;
+}
+
+a.hub-btn-primary:hover,
+button.hub-btn-primary:hover:not(:disabled) {
   filter: brightness(1.06);
   box-shadow: var(--btn-primary-shadow-hover);
   transform: translateY(-1px);
+}
+
+button.hub-btn-primary:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
 }
 
 a.hub-btn-secondary {
