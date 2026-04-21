@@ -778,13 +778,6 @@ footer .footer-note {
   padding-bottom: 2.5rem;
 }
 
-.hub-lead {
-  margin: 0 0 1.25rem;
-  color: var(--muted);
-  font-size: 0.95rem;
-  max-width: 40rem;
-}
-
 .hub-grid {
   display: grid;
   gap: 1rem;
