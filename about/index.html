@@ -15,10 +15,10 @@
     <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#2a554a" />
     <link rel="manifest" href="../site.webmanifest" />
     <meta name="theme-color" content="#2a554a" />
-    <title>About | Mortgage Loan Lab — 디딤돌·버팀목·DSR 계산기 운영 정보</title>
+    <title>About | Mortgage Loan Lab — 운영자·편집 정책·참고 자료</title>
     <meta
       name="description"
-      content="Mortgage Loan Lab 소개: 운영 철학, 계산기 설계 원리, 참고 자료, 서비스 범위와 한계, 업데이트 정책을 정리한 About 페이지입니다."
+      content="Mortgage Loan Lab 운영자 소개, 편집·사실확인·정정 정책, 참고한 공식 자료, 이해 관계 공개, 최근 업데이트 내역을 정리한 About 페이지입니다."
     />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://mortgage-loan.uk/about/" />
@@ -26,7 +26,7 @@
     <meta property="og:title" content="About | Mortgage Loan Lab" />
     <meta
       property="og:description"
-      content="주택자금 참고용 계산기(디딤돌·버팀목·DSR)를 어떻게·왜 만들었는지, 어떤 자료를 기준으로 하는지 정리한 페이지."
+      content="주택자금 참고용 계산기(디딤돌·버팀목·DSR)를 누가·왜·어떻게 만들었는지 정리한 페이지. 편집 정책·사실확인 절차·정정 정책·이해 관계 공개 포함."
     />
     <meta property="og:url" content="https://mortgage-loan.uk/about/" />
     <link rel="stylesheet" href="../css/styles.css" />
@@ -43,10 +43,40 @@
         "name": "About | Mortgage Loan Lab",
         "url": "https://mortgage-loan.uk/about/",
         "inLanguage": "ko-KR",
+        "dateModified": "2026-04-21",
+        "about": {
+          "@type": "Organization",
+          "name": "Mortgage Loan Lab",
+          "alternateName": "모기지론 랩",
+          "url": "https://mortgage-loan.uk/",
+          "logo": "https://mortgage-loan.uk/icon-512.svg",
+          "email": "mortgageloanlab@gmail.com",
+          "foundingDate": "2026-04-08",
+          "description": "디딤돌대출·버팀목 전세자금대출·주택담보대출 DSR 등 한국 주택자금 관련 공개 정보를 바탕으로 한 참고용 계산 도구 모음",
+          "sameAs": [
+            "https://github.com/bokkyun/mortgage-loan"
+          ],
+          "founder": {
+            "@type": "Person",
+            "name": "bokkyun",
+            "url": "https://github.com/bokkyun",
+            "sameAs": ["https://github.com/bokkyun"]
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "mortgageloanlab@gmail.com",
+            "availableLanguage": ["Korean"]
+          }
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Mortgage Loan Lab",
-          "url": "https://mortgage-loan.uk/"
+          "url": "https://mortgage-loan.uk/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://mortgage-loan.uk/icon-512.svg"
+          }
         }
       }
     </script>
@@ -62,17 +92,21 @@
       <p>
         Mortgage Loan Lab은 <strong>디딤돌대출·버팀목 전세자금·주택담보대출 DSR</strong> 등 주택자금 관련 계산을
         한국 상황에 맞게 한곳에서 시뮬레이션할 수 있는 <strong>참고용 오픈 도구 모음</strong>입니다. 이 페이지는
-        사이트를 만들고 운영하는 배경, 계산 로직을 어떤 자료로 구성했는지, 그리고 이용 시 어떤 한계를
-        알아두어야 하는지를 정리했습니다.
+        사이트를 <strong>누가·왜·어떻게 만들고 운영하는지</strong>, 그리고 어떤 편집·정정 정책을 따르는지 투명하게
+        공개합니다.
       </p>
       <nav class="quick-nav" aria-label="빠른 이동">
         <a href="../">홈</a>
         <a href="#why">왜 만들었나요</a>
-        <a href="#scope">어떤 계산기를 제공하나요</a>
+        <a href="#who">누가 운영하나요</a>
+        <a href="#scope">제공 중인 계산기</a>
         <a href="#method">계산 원리와 근거</a>
+        <a href="#editorial">편집 · 검증 정책</a>
+        <a href="#corrections">정정 · 피드백</a>
+        <a href="#disclosure">이해 관계 공개</a>
         <a href="#sources">참고 자료</a>
-        <a href="#limits">한계와 주의사항</a>
-        <a href="#policy">업데이트·품질 관리</a>
+        <a href="#limits">한계와 주의</a>
+        <a href="#updates">최근 업데이트</a>
         <a href="../contact/">문의</a>
       </nav>
     </header>
@@ -94,12 +128,54 @@
         </p>
       </section>
 
+      <section class="card" id="who">
+        <h2>2. 누가 운영·편집하나요</h2>
+        <p>
+          본 사이트는 <strong>개인이 운영하는 비영리 성격의 오픈 프로젝트</strong>입니다. 특정 금융기관·대출 중개인·
+          분양 대행사와 <strong>아무런 자본·업무상 관계가 없습니다</strong>. 익명성을 유지하지만 모든 코드와 콘텐츠
+          변경 이력을 공개 저장소에 기록해, 누구나 "무엇이 언제·왜 바뀌었는지"를 검증할 수 있도록 합니다.
+        </p>
+        <div class="doc-list" style="border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; background: var(--accent-dim); margin-top: 0.75rem">
+          <p style="margin: 0 0 0.35rem; font-weight: 600">편집자 (Editor)</p>
+          <p style="margin: 0 0 0.75rem; font-size: 0.92rem; line-height: 1.65">
+            <strong>GitHub 핸들</strong>:
+            <a href="https://github.com/bokkyun" target="_blank" rel="noopener me">@bokkyun</a><br />
+            <strong>역할</strong>: 계산기 로직 설계·구현, 공식 자료 리서치, 가이드 문서 작성, 코드 리뷰·품질 관리<br />
+            <strong>배경</strong>: 전문 금융기관 소속이 아닌 <em>개인 개발자</em>로, 한국의 주택 대출 관련 공개
+            고시·기준표·규제 문서를 직접 읽어 계산기로 옮기는 것이 이 프로젝트의 주된 작업입니다.<br />
+            <strong>연락</strong>: <a href="mailto:mortgageloanlab@gmail.com">mortgageloanlab@gmail.com</a>
+            (평일 1~3영업일 내 회신)
+          </p>
+          <p style="margin: 0; font-size: 0.85rem; color: var(--muted)">
+            ※ 본 편집자는 공인중개사·세무사·변호사·금융투자 자격 등 법정 전문가 자격을 보유하지 <strong>않습니다</strong>.
+            따라서 본 사이트는 <strong>자문(advice)이 아닌 정보 정리·계산 시뮬레이션 도구</strong>로만 사용해 주세요.
+            구체적인 판단은 각 분야 자격 전문가와 금융기관 상담 창구에서 확정하시길 권장합니다.
+          </p>
+        </div>
+        <h3 class="subsection-title">운영 체제</h3>
+        <ul class="doc-list">
+          <li>
+            <strong>단일 운영자</strong> — 현재 편집·코드·CS 모두 1인이 담당합니다. 외부 기고자나 유료 필진은
+            없으며, 협업 요청이 들어오면 문서에 별도 크레딧으로 표시합니다.
+          </li>
+          <li>
+            <strong>오픈 소스</strong> — 전체 코드는
+            <a href="https://github.com/bokkyun/mortgage-loan" target="_blank" rel="noopener">GitHub 공개 저장소</a>에서
+            MIT 기반으로 공개되어 있어 누구나 열람·포크·이슈 등록이 가능합니다.
+          </li>
+          <li>
+            <strong>지속성</strong> — 2026년 4월 8일 최초 공개 이후 꾸준히 업데이트 중이며, 운영 종료 시에는
+            최소 30일 전 이 페이지에 공지합니다.
+          </li>
+        </ul>
+      </section>
+
       <section class="card" id="scope">
-        <h2>2. 현재 제공 중인 계산기</h2>
+        <h2>3. 현재 제공 중인 계산기</h2>
         <ul class="doc-list">
           <li>
             <strong><a href="../didimdol/">디딤돌대출 계산기</a></strong> — 일반 디딤돌·신생아 특례·생애최초·신혼가구
-            3개 탭을 제공하며, 부부합산 소득 구간에 따라 기본 금리와 우대 금리를 산출합니다. 재직 유형(일반·신규입사·
+            탭을 제공하며, 부부합산 소득 구간에 따라 기본 금리와 우대 금리를 산출합니다. 재직 유형(일반·신규입사·
             휴직·복직) 별 소득 산정과 DTI·월 상환액, 원리금균등·원금균등·체증식 상환 스케줄까지 확인 가능합니다.
           </li>
           <li>
@@ -123,7 +199,7 @@
       </section>
 
       <section class="card" id="method">
-        <h2>3. 계산 원리와 근거</h2>
+        <h2>4. 계산 원리와 근거</h2>
         <p>본 사이트의 모든 계산은 다음 공통 원칙에 따라 구현되어 있습니다.</p>
         <ul class="doc-list">
           <li>
@@ -161,40 +237,207 @@
         </p>
       </section>
 
+      <section class="card" id="editorial">
+        <h2>5. 편집 · 검증 정책 (Editorial Policy)</h2>
+        <p>
+          "금리 한 자릿수 차이"가 총이자 수백만 원을 바꾸는 주제인 만큼, 본 사이트의 모든 숫자와 규칙은 아래 절차를
+          통과한 뒤에만 게시합니다. 이 문서는 <strong>선언적 약속</strong>이며, 실제 운영 사례는 GitHub 커밋 이력과
+          이슈 로그로 확인하실 수 있습니다.
+        </p>
+        <h3 class="subsection-title">5-1. 1차 자료 원칙 (Primary-Source First)</h3>
+        <ul class="doc-list">
+          <li>
+            금리표·자격 요건·우대 항목의 1차 자료는 <strong>주택도시기금(HUG)·한국주택금융공사(HF)·국토교통부·
+            금융위원회·금융감독원</strong>의 공식 고시·보도자료·운영세칙입니다.
+          </li>
+          <li>
+            언론 기사·블로그·커뮤니티 글은 <strong>1차 자료의 위치를 찾는 단서</strong>로만 쓰고, 숫자와 규칙은
+            반드시 공식 문서 원문에서 재확인합니다.
+          </li>
+          <li>
+            1차 자료가 개정되면 해당 시행일(예: "2025-08-24 시행")을 계산기 또는 가이드 본문에 표기해, 이용자가
+            "지금 보이는 값이 언제 기준인지"를 분명히 알 수 있게 합니다.
+          </li>
+        </ul>
+        <h3 class="subsection-title">5-2. 검증 체크리스트 (Review Checklist)</h3>
+        <p>새 계산기·새 우대 항목을 추가하거나 금리표를 개정할 때, 아래 6가지를 모두 통과하지 못하면 배포하지 않습니다.</p>
+        <ol class="doc-list">
+          <li>
+            <strong>출처 인용</strong> — 커밋 메시지 또는 코드 주석에 1차 자료의 URL·문서명·시행일을 남긴다.
+          </li>
+          <li>
+            <strong>교차 검증</strong> — 공개된 기관 계산기(HF 자가진단·HUG 금리안내)가 있다면 동일 입력값으로
+            최소 3개 조합을 교차 비교해 오차가 ±0.05%p / ±1만 원 이내인지 확인한다.
+          </li>
+          <li>
+            <strong>경계값 테스트</strong> — 소득 구간 경계(예: 5,000만원 / 7,500만원), 보증금 구간 경계(5천 / 1억),
+            대출기간 경계(10/20/30/40년)를 각각 테스트한다.
+          </li>
+          <li>
+            <strong>상한·하한 검증</strong> — 우대 합계가 상한을 넘는 케이스, 최종 금리가 하한 아래로 떨어지는
+            케이스가 의도대로 클램프되는지 확인한다.
+          </li>
+          <li>
+            <strong>표기·맞춤법 검사</strong> — 상품명·용어(예: "체증식" / "체감식")가 공식 문서와 동일한지,
+            숫자 단위(만원/원)가 UI와 일관적인지 점검한다.
+          </li>
+          <li>
+            <strong>변경 이력 기록</strong> — 커밋 메시지·이슈 링크·변경 전후 값을 GitHub 히스토리에 남긴다.
+          </li>
+        </ol>
+        <h3 class="subsection-title">5-3. 추정·불확실성 표기</h3>
+        <p>
+          공식 고시에 명시되지 않았지만 관행적으로 적용되는 값(예: 카드론 원금 ÷ 3년 환산)은 <strong>"관행
+          적용"·"참고 추정"</strong> 문구를 달아 구분합니다. 1차 자료만으로는 결정할 수 없는 모호한 경우에는
+          결과 화면에 <em>경고 박스</em>를 띄워 "공식 창구에서 확정이 필요합니다"라고 안내합니다.
+        </p>
+      </section>
+
+      <section class="card" id="corrections">
+        <h2>6. 정정 · 피드백 정책 (Corrections Policy)</h2>
+        <p>
+          사람이 만든 코드와 문서에는 오류가 있을 수 있습니다. 본 사이트는 <strong>오류를 숨기지 않고 투명하게
+          기록·정정</strong>하는 것을 원칙으로 합니다.
+        </p>
+        <h3 class="subsection-title">6-1. 오류 제보 채널</h3>
+        <ul class="doc-list">
+          <li>
+            <strong>이메일</strong> : <a href="mailto:mortgageloanlab@gmail.com?subject=%5B%EC%98%A4%EB%A5%98%5D%20">
+            mortgageloanlab@gmail.com</a> (제목에 [오류] 태그 권장)
+          </li>
+          <li>
+            <strong>GitHub 이슈 (공개)</strong> :
+            <a href="https://github.com/bokkyun/mortgage-loan/issues" target="_blank" rel="noopener">github.com/bokkyun/mortgage-loan/issues</a>
+          </li>
+          <li>
+            <strong>계산 결과 자체 제보</strong> — 계산기 결과 카드 하단의 "결과가 이상하게 나올 때" 가이드 안내
+          </li>
+        </ul>
+        <h3 class="subsection-title">6-2. 처리 절차 · 목표 시간</h3>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 480px">
+            <thead>
+              <tr style="background: var(--surface2)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">오류 유형</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">분류 기준</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">목표 수정 시간</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>Critical</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">금리·한도·상한 값이 공식 고시와 다르게 산출</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">24시간 이내 임시 경고 배너 + 48시간 이내 수정</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">High</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">우대 항목 누락·중복 적용 규칙 오류</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">1주일 이내 수정 및 릴리스 노트 반영</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">Medium</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">본문 오탈자·링크 오류·UI 개선 제안</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">2주 이내 일괄 반영</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">Low</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">신규 기능 요청, 디자인 변경 의견</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">로드맵 반영 후 공지</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="subsection-title">6-3. 정정 공개 방식</h3>
+        <ul class="doc-list">
+          <li>
+            수치 오류가 확인되면 <strong>해당 페이지 상단에 "정정 내역" 박스</strong>를 최소 14일 게시한 뒤
+            커밋 로그로 이관합니다.
+          </li>
+          <li>
+            단순 오탈자·링크 수정은 별도 공지 없이 커밋 히스토리로만 관리합니다(GitHub에서 누구나 열람 가능).
+          </li>
+          <li>
+            개정으로 <strong>결과 값 자체가 크게 달라지는 경우</strong>(예: 하한 금리 변경)는 이 About 페이지의
+            "최근 업데이트" 섹션에 별도로 기록합니다.
+          </li>
+        </ul>
+      </section>
+
+      <section class="card" id="disclosure">
+        <h2>7. 이해 관계 · 수익 구조 공개</h2>
+        <p>
+          이용자가 콘텐츠의 중립성을 판단할 수 있도록, 본 사이트의 수익 구조와 제휴 관계를 아래와 같이 투명하게
+          공개합니다.
+        </p>
+        <ul class="doc-list">
+          <li>
+            <strong>광고</strong> — 본 사이트는 <strong>Google AdSense</strong>(게시자 ID:
+            <code>ca-pub-3300541490593571</code>) 광고만 노출합니다. 광고 수익은 도메인·호스팅 비용 및 추가 콘텐츠
+            제작에만 사용됩니다. 광고 클릭 여부와 콘텐츠 편집 의사결정은 <strong>분리</strong>되어 있습니다.
+          </li>
+          <li>
+            <strong>제휴 링크 없음</strong> — 특정 은행·대출 중개 플랫폼·분양 업체와 어떤 형태의 제휴(affiliate)
+            계약도 맺지 않았습니다. 본문의 외부 링크는 모두 <strong>공식 기관 또는 참고 자료</strong>로 연결되는
+            무보수 링크입니다.
+          </li>
+          <li>
+            <strong>유료 기사·스폰서 콘텐츠 없음</strong> — 어떤 기관·기업의 비용을 받고 콘텐츠를 게시하지
+            않습니다. 본 사이트에서 특정 상품·기관이 소개된다면 그것은 <em>공개 정보 기반 정리</em>이며 광고가
+            아닙니다.
+          </li>
+          <li>
+            <strong>추천 · 개인화 없음</strong> — "당신에게 가장 유리한 상품은 X입니다" 같은 개인화 추천을
+            제공하지 않습니다. 여러 조건을 입력·비교할 수 있는 도구만 제공하며, 최종 선택은 이용자와 금융기관이
+            합니다.
+          </li>
+          <li>
+            <strong>이용자 데이터 미수집·미판매</strong> — 계산기에 입력한 소득·대출금액 등은 서버로 전송되지
+            않고 브라우저 내에서만 처리됩니다. 데이터를 판매하거나 제3자에게 공유하지 않습니다
+            (자세한 내용: <a href="../privacy/">개인정보 처리방침</a>).
+          </li>
+        </ul>
+      </section>
+
       <section class="card" id="sources">
-        <h2>4. 참고한 공식 자료</h2>
+        <h2>8. 참고한 공식 자료</h2>
         <p>계산 로직과 안내 문구는 아래 공개 자료를 주요 근거로 하고 있습니다. 시행 시점이 다를 수 있으므로
           링크된 페이지에서 최신본을 함께 확인해 주세요.</p>
         <ul class="doc-list">
           <li>
             <a href="https://nhuf.molit.go.kr/" target="_blank" rel="noopener">주택도시기금 (HUG) 공식 포털</a>
-            <span class="muted">— 디딤돌대출·버팀목 전세자금대출의 상품 기본 구조, 자격, 금리표</span>
+            <span class="muted">— 디딤돌대출·버팀목 전세자금대출의 상품 기본 구조, 자격, 금리표 (상품코드
+            541-0158·541-0164 등)</span>
           </li>
           <li>
             <a href="https://www.hf.go.kr/" target="_blank" rel="noopener">한국주택금융공사 (HF)</a>
-            <span class="muted">— 보금자리론 등 관련 상품, 보증 구조 참고</span>
+            <span class="muted">— 보금자리론·내집마련디딤돌 등 관련 상품, 보증 구조 참고</span>
           </li>
           <li>
             <a href="https://www.molit.go.kr/" target="_blank" rel="noopener">국토교통부</a>
-            <span class="muted">— 주거정책·생애최초·신혼·다자녀 등 정책 상품 안내</span>
+            <span class="muted">— 주거정책·생애최초·신혼·다자녀·신생아 등 정책 상품 안내 및 시행 공고</span>
           </li>
           <li>
             <a href="https://www.fsc.go.kr/" target="_blank" rel="noopener">금융위원회</a>,
             <a href="https://www.fss.or.kr/" target="_blank" rel="noopener">금융감독원</a>
-            <span class="muted">— DSR·DTI 규제, 스트레스 DSR 등 규제 기준</span>
+            <span class="muted">— DSR·DTI 규제, 스트레스 DSR, 차주별 규제 기준 (가계부채 관리 선진화 방안)</span>
           </li>
           <li>
-            각 은행 주택담보대출·전세자금대출 상품 안내
-            <span class="muted">(KB국민·신한·우리·하나·농협·IBK·기업은행·카카오뱅크·토스뱅크 등)</span>
+            <strong>각 은행 주택담보대출·전세자금대출 상품 안내</strong>
+            <span class="muted">(KB국민·신한·우리·하나·농협·IBK기업·카카오뱅크·토스뱅크 등)</span>
+          </li>
+          <li>
+            <strong>국세청 홈택스</strong>·<strong>국민건강보험공단</strong>
+            <span class="muted">— 소득금액증명원·보수월액 등 소득 인정 자료 기준 파악</span>
           </li>
         </ul>
         <p class="field-hint">
-          본 사이트는 위 기관과 아무런 공식 제휴 관계가 없으며, 공개된 정보만을 바탕으로 독립 제작된 3자 도구입니다.
+          본 사이트는 위 기관과 <strong>아무런 공식 제휴·광고·데이터 제공 계약이 없으며</strong>, 공개된 정보만을
+          바탕으로 독립 제작된 3자 도구입니다.
         </p>
       </section>
 
       <section class="card" id="limits">
-        <h2>5. 한계와 주의사항</h2>
+        <h2>9. 한계와 주의사항</h2>
         <ul class="doc-list">
           <li>
             본 사이트의 결과는 <strong>참고용 추정치</strong>이며, 실제 심사 결과(한도·금리·승인 여부)와 다를 수 있습니다.
@@ -208,48 +451,120 @@
             각 분야 자격 전문가의 도움을 받으셔야 합니다.
           </li>
           <li>
+            계산기는 한국의 정책 상품·규제를 기준으로 설계되었으며, <strong>해외 거주자·외국인</strong>의 일부
+            특례는 반영되지 않았을 수 있습니다.
+          </li>
+          <li>
             자세한 내용은 <a href="../disclaimer/">면책 조항</a>을 참고해 주세요.
           </li>
         </ul>
       </section>
 
-      <section class="card" id="policy">
-        <h2>6. 업데이트·품질 관리 정책</h2>
-        <ul class="doc-list">
-          <li>
-            <strong>금리표 개정 반영</strong> — 정책 상품의 금리표가 개정되면 48시간 이내 반영을 목표로 합니다.
-            반영이 지연될 경우 해당 계산기 상단에 시행일 안내를 병기합니다.
-          </li>
-          <li>
-            <strong>오탈자·계산 오류 수정</strong> — 이용자 제보(<a href="../contact/">문의 페이지</a>) 또는
-            Google Search Console·Analytics 지표를 통해 이상이 감지되면 수정 후 커밋 로그에 기록합니다.
-          </li>
-          <li>
-            <strong>버전 관리</strong> — 소스 코드는 <a href="https://github.com/bokkyun/mortgage-loan" target="_blank" rel="noopener">GitHub 공개 저장소</a>에서 관리합니다. 모든 변경 이력이 공개되어 있어 누구나 변경 내역을 검증할 수 있습니다.
-          </li>
-          <li>
-            <strong>접근성</strong> — 모바일 우선(반응형) 디자인, 키보드 내비게이션, 색 대비 기준을 준수하려 노력합니다.
-            개선 제안 환영합니다.
-          </li>
-        </ul>
+      <section class="card" id="updates">
+        <h2>10. 최근 업데이트 내역</h2>
+        <p>
+          투명성을 위해 최근 변경 이력을 공개합니다. 전체 커밋 히스토리는
+          <a href="https://github.com/bokkyun/mortgage-loan/commits/master" target="_blank" rel="noopener">GitHub 저장소</a>에서
+          열람하실 수 있습니다.
+        </p>
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 520px">
+            <thead>
+              <tr style="background: var(--surface2)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left; white-space: nowrap">날짜</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">변경 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-21</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">SVG 파비콘·Apple Touch Icon·PWA 매니페스트 일괄 추가 (브라우저 탭/홈 아이콘 개선)</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-21</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">계산기 3종(디딤돌·버팀목·DSR)에 "계산 원리·사용법·결과 해석" 상세 섹션 추가</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">5개 가이드 본문 대폭 확장 (비교표·사례·FAQ·체크리스트 추가)</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><code>.pages.dev</code>·<code>www</code> 호스트 → apex 도메인 301 리다이렉트 (Pages Functions 미들웨어)</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><code>mortgage-loan.uk</code> 커스텀 도메인 전환 + AdSense 스크립트 전 페이지 주입</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">AdSense 재심사 2차 보강 (ads.txt · GA · OG · 은행전세 docs 실콘텐츠 · FAQPage 스키마)</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">AdSense 심사 대비 콘텐츠·정책 대폭 강화</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">홈 대표 제목을 "디딤돌·버팀목 금리·DTI 계산기"로 변경</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">디딤돌·DSR 소득확인서류 안내를 "최근 2개년치" 기준으로 반영</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border); white-space: nowrap">2026-04-20</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">디딤돌 금리 계산 후 선택된 자격별 예상 필요서류 자동 표시</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="field-hint">
+          ※ 표시된 날짜는 커밋일 기준이며, Cloudflare Pages 자동 배포 후 실제 사이트 반영까지는 1~2분이 소요됩니다.
+        </p>
       </section>
 
-      <section class="card">
-        <h2>7. 운영 정보</h2>
-        <p>
-          <strong>운영</strong> : Mortgage Loan Lab (개인 운영 프로젝트)<br />
-          <strong>호스팅</strong> : Cloudflare Pages (HTTPS 기본 제공)<br />
-          <strong>광고</strong> : Google AdSense — 관련 정책은 <a href="../privacy/">개인정보 처리방침</a>에서 확인하세요.<br />
-          <strong>문의</strong> : <a href="../contact/">연락처 페이지</a> 또는
-          <a href="mailto:mortgageloanlab@gmail.com">mortgageloanlab@gmail.com</a>
-        </p>
+      <section class="card" id="runtime">
+        <h2>11. 운영 정보</h2>
+        <ul class="doc-list">
+          <li>
+            <strong>운영 주체</strong> : Mortgage Loan Lab (개인 운영 오픈 프로젝트)
+          </li>
+          <li>
+            <strong>편집자</strong> :
+            <a href="https://github.com/bokkyun" target="_blank" rel="noopener me">@bokkyun</a>
+            (<a href="mailto:mortgageloanlab@gmail.com">mortgageloanlab@gmail.com</a>)
+          </li>
+          <li>
+            <strong>도메인</strong> : <a href="https://mortgage-loan.uk/">mortgage-loan.uk</a> (2026-04-20 전환)
+          </li>
+          <li>
+            <strong>호스팅</strong> : Cloudflare Pages (HTTPS 기본)
+          </li>
+          <li>
+            <strong>분석</strong> : Google Analytics (G-J1JQSVPNM6), Google Search Console
+          </li>
+          <li>
+            <strong>광고</strong> : Google AdSense (<code>ca-pub-3300541490593571</code>)
+          </li>
+          <li>
+            <strong>소스 코드</strong> :
+            <a href="https://github.com/bokkyun/mortgage-loan" target="_blank" rel="noopener">GitHub (공개)</a>
+          </li>
+          <li>
+            <strong>최초 공개</strong> : 2026-04-08
+          </li>
+          <li>
+            <strong>문서 마지막 검토일</strong> : 2026-04-21
+          </li>
+        </ul>
         <p style="margin-top: 1rem"><a href="../">← 홈으로</a></p>
       </section>
     </main>
 
     <footer>
       <div class="footer-main">
-        <span>© Mortgage Loan Lab · 참고용 계산기</span>
+        <span>© Mortgage Loan Lab · 참고용 계산기 · 편집: <a href="https://github.com/bokkyun" target="_blank" rel="noopener me" style="color: inherit">@bokkyun</a></span>
       </div>
       <div class="footer-links">
         <a href="../">홈</a>
