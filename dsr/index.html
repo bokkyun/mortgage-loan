@@ -518,6 +518,165 @@
   </div>
 
   <div class="section" style="margin-top: 1rem">
+    <div class="section-title">계산 원리 · 사용법 · 결과 해석</div>
+
+    <h3 style="font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.4rem">1. 계산 원리 — 어떻게 DSR이 산출되나요?</h3>
+    <p style="font-size: 13.5px; color: #444; margin-bottom: 0.6rem; line-height: 1.65">
+      DSR은 <strong>연소득 대비 모든 대출의 연간 원리금 비중</strong>입니다. 계산 공식은 단순하지만, 분자에 들어가는
+      <strong>"연간 원리금"</strong>은 대출 종류마다 환산 방식이 다릅니다. 금융감독원 「가계부채 관리 선진화 방안」과
+      은행권 DSR 모범규준을 따라, 본 계산기는 아래 표대로 환산합니다.
+    </p>
+    <div style="font-size: 13px; color: #2a554a; background: #e8f2ef; border: 1px solid rgba(53, 107, 94, 0.25); border-radius: 10px; padding: 10px 14px; margin-bottom: 0.75rem; font-family: 'SF Mono', Consolas, monospace">
+      DSR (%) = (본건 대출 + 기타 대출 연간 원리금 합계) ÷ 연소득 × 100
+    </div>
+    <div style="overflow-x: auto; margin-bottom: 0.6rem">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 500px">
+        <thead>
+          <tr style="background: #f5f5f0">
+            <th style="padding: 7px 8px; border: 1px solid #e5e5e0; text-align: left">대출 유형</th>
+            <th style="padding: 7px 8px; border: 1px solid #e5e5e0; text-align: left">연간 원리금 환산식</th>
+            <th style="padding: 7px 8px; border: 1px solid #e5e5e0; text-align: left">비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (원리금균등)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">PMT(원금, 금리, 기간) × 12</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">실제 월상환액 기준</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (부분분할·거치)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">거치기간 제외한 상환기간 기준 PMT × 12</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">거치 중에도 상환기 기준으로 산정</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (일시상환)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ min(기간, 10년) + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">장기라도 10년 기준</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">신용대출 (분할)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 약정만기(5~10년) + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">약정만기를 명시해야 유리</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">신용대출 (일시 등)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 5년 + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">마이너스통장 기본값</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">전세보증금담보대출</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 4년 + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">임차인이 받는 전세자금대출은 DSR 미포함</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">카드론 (분할)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 약정만기(≤5년)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">이자는 원금 내 포함 관행</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">카드론 (일시 등)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 3년</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">단기 상환 가정</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">비주택담보·유가증권담보</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 8년 + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">오피스텔 外</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">지급보증담보 등 기타담보</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">원금 ÷ 10년 + 원금 × 금리</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">장기 담보물건</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">할부·리스·학자금 등</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">향후 1년간 실제 상환액</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">직접 입력</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size: 12.5px; color: #666; margin-bottom: 1rem; line-height: 1.6">
+      <strong>DSR 미포함 항목:</strong> 전세자금대출(임차인 본인), 예적금담보대출, 보험계약대출, 서민금융진흥원 햇살론 일부,
+      300만 원 이하 소액신용대출 등. 반대로 이주비·중도금은 총액 ÷ 25년으로 환산해 포함됩니다.
+    </p>
+
+    <h3 style="font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.4rem; margin-top: 1rem">2. 사용법 — 5단계로 끝내는 입력 절차</h3>
+    <ol style="font-size: 13.5px; color: #444; padding-left: 1.2rem; line-height: 1.8; margin-bottom: 1rem">
+      <li>
+        <strong>연소득 입력:</strong> 세전 연간 소득(근로·사업·기타 합산)을 만원 단위로 입력합니다. 부부합산이 필요하면
+        배우자 소득도 더해서 넣으세요. 건강보험공단 보수월액 × 12, 원천징수영수증 총급여액이 대표적 인정 소득입니다.
+      </li>
+      <li>
+        <strong>본건대출 입력:</strong> 받으려는 주택담보대출의 금액·금리·기간·상환방식을 입력합니다. "부분분할상환"을
+        선택하면 거치기간 칸이 나타납니다. 거치기간이 3년이면 상환기간은 <em>(대출기간 − 3년)</em>으로 축소됩니다.
+      </li>
+      <li>
+        <strong>기타 대출 펼치기:</strong> 신용대출·전세보증금대출·카드론·비주택담보 등 <strong>보유 중인 항목만</strong>
+        펼치기를 클릭해 잔액과 금리를 입력합니다. 보유하지 않은 항목은 비워 두면 0으로 처리됩니다.
+      </li>
+      <li>
+        <strong>약정만기 설정:</strong> 신용대출·카드론의 "분할상환"을 선택한 경우 <strong>실제 약정만기</strong>와
+        동일하게 설정하세요. 5년으로 잡으면 연간 원금이 1/5, 10년으로 잡으면 1/10이라 DSR 차이가 큽니다.
+      </li>
+      <li>
+        <strong>[DSR 계산하기] 클릭:</strong> 결과 카드에 즉시 DSR(%)·연간 원리금 내역·한도 통과 여부가 표시됩니다.
+        모든 입력은 브라우저 안에서만 계산되고 서버로 전송되지 않습니다.
+      </li>
+    </ol>
+
+    <h3 style="font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.4rem; margin-top: 1rem">3. 결과 해석 — 숫자가 의미하는 것</h3>
+    <div style="overflow-x: auto; margin-bottom: 0.75rem">
+      <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 500px">
+        <thead>
+          <tr style="background: #f5f5f0">
+            <th style="padding: 7px 8px; border: 1px solid #e5e5e0; text-align: left">표시 항목</th>
+            <th style="padding: 7px 8px; border: 1px solid #e5e5e0; text-align: left">의미 / 해석 포인트</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0"><strong>내 DSR (%)</strong></td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">40% 이하면 은행권 차주별 한도 통과. 2금융권은 50%, DSR 규제 예외 대상(정책상품 일부)은 별도</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">연소득</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">입력값 재확인. 인정 소득은 원천징수영수증·건강보험료·소득금액증명원 기준</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건대출 연간 원리금</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">받을 주담대만의 연간 부담. 이 값이 연소득의 30% 이내면 기타 대출 여력 충분</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">타 대출 연간 원리금 합계</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">기존 신용·전세·카드 등 합산. 이 값이 크면 본건 대출 한도가 줄어듭니다</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">연간 원리금 합계</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">DSR 분자. 연소득의 40%를 넘으면 한도 초과</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건대출 월 납부액</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">실제 월 지출 감각 파악용. 가계부 현금흐름 점검에 활용</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #7d5700; line-height: 1.65; margin-bottom: 0.5rem">
+      <strong>DSR이 40%를 초과한 경우</strong>, 결과 카드 아래에 다음 3가지 조정안이 함께 표시됩니다.<br>
+      <strong>① 감액 필요액</strong> — 연간 원리금을 얼마만큼 줄여야 40%에 맞는가<br>
+      <strong>② 본건대출 최대 가능액</strong> — 같은 금리·기간·상환방식 기준 통과 가능 원금<br>
+      <strong>③ 필요 인정 소득</strong> — 대출금액을 유지하려면 증빙 소득이 얼마여야 하는가<br>
+      보통은 ① 대출기간 연장(30→40년) → ② 기존 신용대출 일부 상환 → ③ 배우자 소득 합산 순으로 개선합니다.
+    </div>
+    <p style="font-size: 12.5px; color: #888; margin-bottom: 0.5rem; line-height: 1.6">
+      ※ <strong>스트레스 DSR</strong>이 적용되는 변동·혼합형 대출은 실제 한도가 본 결과보다 낮게 산정됩니다.
+      2025년 기준 스트레스 금리 가산폭은 변동형 1.5%p, 혼합형 0.75%p 수준이며, 금리를 해당 폭만큼 높여 재계산해 보시기 바랍니다.
+    </p>
+  </div>
+
+  <div class="section" style="margin-top: 1rem">
     <div class="section-title">주택담보대출 DSR 가이드</div>
     <p style="font-size: 14px; color: #333; margin-bottom: 0.75rem">
       DSR(Debt Service Ratio, 총부채원리금상환비율)은 연소득 대비 <strong>모든 대출의 연간 원리금</strong>이 차지하는 비율입니다.

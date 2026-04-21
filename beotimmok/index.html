@@ -526,6 +526,148 @@
         <p class="reason-text hidden" id="out-reason-spouse"></p>
       </section>
 
+      <section class="card" id="howto-section" style="margin-top: 1rem">
+        <h2>계산 원리 · 사용법 · 결과 해석</h2>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0 0.5rem">1. 계산 원리 — 어떻게 금리가 산출되나요?</h3>
+        <p style="font-size: 0.92rem; line-height: 1.65; margin-bottom: 0.6rem">
+          버팀목 전세자금 대출금리는 <strong>"부부합산 연소득 × 임차보증금"</strong>의 교차 구간에서 시작합니다. 주택도시기금
+          고시 금리표(541-0158·541-0164, 2025.08.24 / 2025.03.24 시행)를 기반으로, 기본 금리를 찾은 뒤 금리 유형 가산 →
+          지방 인하 → 1·2군 우대 합산 → 상한·하한 적용의 순서를 거쳐 최종 금리가 결정됩니다.
+        </p>
+        <div style="background: var(--accent-dim, #e8f2ef); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: var(--text); margin-bottom: 0.6rem; font-family: 'SF Mono', Consolas, monospace; line-height: 1.5">
+          최종금리 = max( 하한금리 , 기본금리 + 금리가산 − 지방인하 − min( 1·2군 우대합, 우대상한 ) )
+        </div>
+        <div style="overflow-x: auto; margin-bottom: 0.6rem">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 500px">
+            <thead>
+              <tr style="background: var(--surface2, #f5f5f0)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">단계</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">규칙</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">입력 위치</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">① 소득 산정</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">재직 유형별 2개년 평균·월환산 · 변동률 20%↑이면 2개년 평균</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">본인·배우자 섹션</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">② 기본금리</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">소득 구간 × 보증금 구간(5천/1억/1억+) 교차점</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">자동 (보증금 입력 반영)</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">③ 금리 가산·인하</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">지방 소재 주택 −0.2%p, 신용대출 포함 +1.0%p</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">금리 조건 체크박스</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">④ 우대 합산</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">1군 택1(최대 1.0%p) + 2군 중복, 총합은 상한으로 제한</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">우대 조건 체크박스</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">⑤ 상한 적용</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">일반 0.5%p · 다자녀 0.7%p · 한부모/기초수급 1.0%p · 신생아특례 0.5%p</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">자동</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">⑥ 하한 처리</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">결과가 1.0% 미만이면 1.0% (신생아특례는 1.2%)로 고정</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">자동</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="field-hint" style="margin-bottom: 1rem">
+          ※ 탭(일반·신혼·청년·신생아특례)에 따라 ②의 기준표와 ⑤의 상한, ⑥의 하한 값이 모두 달라집니다. 탭을 전환한 뒤
+          다시 "금리 계산" 버튼을 눌러야 해당 탭 규칙이 적용됩니다.
+        </p>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.5rem">2. 사용법 — 6단계 입력 흐름</h3>
+        <ol style="font-size: 0.92rem; line-height: 1.75; padding-left: 1.2rem; margin-bottom: 1rem">
+          <li>
+            <strong>탭 선택:</strong> 상단에서 내 상황에 맞는 상품을 고릅니다. <em>일반 버팀목</em>(부부합산 5천↓) ·
+            <em>신혼가구</em>(7,500↓) · <em>청년 전용</em>(만 34세↓, 5천↓) · <em>신생아특례</em>(1.3억↓, 2세 미만 자녀).
+            중복 자격이면 상대적으로 금리가 낮은 탭부터 확인해 보세요.
+          </li>
+          <li>
+            <strong>본인 재직 유형:</strong> 일반 재직(2개년 소득), 신규입사(재직 시작일 + 수령 합계로 월환산), 휴직,
+            복직 후 근무(복직일 + 수령 합계) 중 선택하고 해당 금액을 입력합니다. 변동률이 20%를 넘으면 자동으로 2개년
+            평균이 적용된 값이 표시됩니다.
+          </li>
+          <li>
+            <strong>배우자 소득(선택):</strong> 신혼·일반 버팀목은 부부합산 소득이 기준입니다. 배우자가 없거나 소득이
+            없으면 비워 두면 0으로 처리됩니다. 맞벌이여도 각자 재직 유형이 다르면 개별 선택하세요.
+          </li>
+          <li>
+            <strong>임차보증금 입력:</strong> 만원 단위로 입력하면 보증금 구간(5천 이하 / 1억 이하 / 1억 초과)이
+            자동 판별되어 해당 구간의 기본금리가 매칭됩니다. 실제 계약서상 보증금 기준으로 입력하세요.
+          </li>
+          <li>
+            <strong>금리 조건·우대 체크:</strong> 금리 유형(고정·변동), 지방 소재 주택 여부, 1·2군 우대 항목을 체크합니다.
+            1군은 한 개만, 2군은 중복 체크 가능. 우대는 <strong>증빙서류 제출 시에만 실제 적용</strong>되므로 표시된 서류를
+            미리 준비해 두세요.
+          </li>
+          <li>
+            <strong>[금리 계산] 클릭:</strong> 기본·가산·우대 내역과 최종 금리, 부부합산 인정 소득이 한 카드에 표시됩니다.
+            아래쪽에는 선택한 탭·우대 조합에 맞춰 <strong>예상 필요서류</strong>도 자동으로 노출됩니다.
+          </li>
+        </ol>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.5rem">3. 결과 해석 — 금리·소득 값이 의미하는 것</h3>
+        <div style="overflow-x: auto; margin-bottom: 0.75rem">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 500px">
+            <thead>
+              <tr style="background: var(--surface2, #f5f5f0)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">표시 항목</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">해석 포인트</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>기본 금리</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">내가 선택한 탭·소득·보증금 구간의 원점수. 우대 없이도 적용되는 최저 수준</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">가산·인하</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">지방 소재(−0.2%p), 신용대출 포함(+1.0%p) 등 구조적 조정분. 우대와 별개</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">우대 합계</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">1·2군을 모두 더한 총합. <em>표시값 ≤ 상한</em>인 경우에만 실제 반영됨</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>최종 금리</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">하한(1.0~1.2%)·상한 반영 후 실제 적용 예상 금리. 소수점 2자리까지 표시</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">인정 연소득 (본인/배우자/합산)</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">2개년 평균·월환산 후 합산값. 구간 경계(5천·7천5백·1억 등)에 가까우면 금리 점프 주의</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">필요서류 블록</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">선택한 탭·우대·재직 유형에 따라 공통서류 + 자격증빙 + 우대증빙으로 자동 분류</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 12px 14px; font-size: 0.88rem; color: #7d5700; line-height: 1.65; margin-bottom: 0.5rem">
+          <strong>금리가 예상보다 높게 나올 때 체크 포인트</strong><br>
+          ① 부부합산 소득이 바로 윗 구간(예: 5천 → 6천)에 진입했는지<br>
+          ② 신용대출 가산(+1.0%p) 옵션을 잘못 체크하지 않았는지<br>
+          ③ 1군 우대를 두 개 이상 체크했는지(1군은 택1)<br>
+          ④ 신생아특례인데도 일반 탭에서 계산하고 있는지<br>
+          ⑤ 2군 우대가 실제로는 증빙 불가능한 상태인지(체크만으로는 반영 X)
+        </div>
+        <p class="field-hint">
+          ※ 본 결과는 <strong>참고용 추정치</strong>입니다. 실제 적용 금리는 접수 시점의 고시금리, 채권양도 방식, 보증기관
+          심사 결과에 따라 달라질 수 있습니다. 실행 전 취급 금융기관·주택도시기금 고객센터(1566-9009)에서 반드시 확정하세요.
+        </p>
+      </section>
+
       <section class="card" id="guide-section" style="margin-top: 1rem">
         <h2>버팀목 전세자금 대출 가이드</h2>
         <p>

@@ -724,6 +724,148 @@
         <div id="schedule-wrap"></div>
       </section>
 
+      <section class="card" id="howto-section">
+        <h2>계산 원리 · 사용법 · 결과 해석</h2>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.25rem 0 0.5rem">1. 계산 원리 — 4단계로 나뉘는 내부 로직</h3>
+        <p style="font-size: 0.92rem; line-height: 1.65; margin-bottom: 0.6rem">
+          디딤돌대출 계산기는 <strong>① 소득 산정 → ② 금리 산출 → ③ DTI 점검 → ④ 월 상환액 비교</strong>의
+          4단계를 따릅니다. 각 단계는 주택도시기금 고시(2025년 기준, 일반·신생아·2자녀·생애최초 탭별 금리표)와 은행권
+          여신 규정을 참고해 설계됐습니다.
+        </p>
+        <div style="overflow-x: auto; margin-bottom: 0.6rem">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 500px">
+            <thead>
+              <tr style="background: var(--surface2, #f5f5f0)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">단계</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">공식 / 규칙</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">반영 포인트</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">① 소득 산정</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">
+                  일반 재직: 직전 2개년 중 변동률 20%↑이면 <strong>2개년 평균</strong>, 아니면 직전 1개년<br>
+                  신규입사·복직: <em>수령 합계 ÷ 개월 수 × 12</em>로 월환산<br>
+                  휴직: 휴직 직전 2개년 적용
+                </td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">본인·배우자 각자 다른 유형 선택 가능</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">② 금리 산출</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">
+                  (부부합산 소득 × 대출기간) 교차 기본금리 + 탭별 보정 − 우대 합계<br>
+                  일반/신생아/2자녀/생애최초 탭별로 기준표·하한이 다름
+                </td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">하한: 일반 1.5% · 신생아 1.2% · 2자녀 1.2%</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">③ DTI 점검</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">
+                  DTI = 본건 대출 연간 원리금 ÷ 인정 연소득 × 100<br>
+                  규제 기준(수도권 60%, 지방 60%)과 비교
+                </td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">DSR과 달리 <strong>본건만</strong> 포함</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">④ 월 상환액</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">
+                  원리금균등: PMT 공식<br>
+                  원금균등: 매월 원금 일정 + 이자 감소<br>
+                  체증식: 연간 증가율(기본 2%) 반영한 점증 납입
+                </td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">세 방식의 1년차·총이자 비교 표</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background: var(--accent-dim, #e8f2ef); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; line-height: 1.55; margin-bottom: 1rem; font-family: 'SF Mono', Consolas, monospace">
+          PMT(원금, 월금리 r, 월수 n) = 원금 × r × (1+r)<sup>n</sup> ÷ ((1+r)<sup>n</sup> − 1)
+        </div>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.5rem">2. 사용법 — 5단계 입력 가이드</h3>
+        <ol style="font-size: 0.92rem; line-height: 1.75; padding-left: 1.2rem; margin-bottom: 1rem">
+          <li>
+            <strong>탭 선택:</strong> 일반 디딤돌 · 신생아 특례 · 2자녀 이상 · 생애최초 중 해당하는 탭을 선택합니다.
+            자격이 여러 개라면 금리가 가장 낮은 탭부터 계산해 비교해 보세요. 신생아 특례는 2세 미만 자녀가 있는 가구가
+            대상이며 하한 1.2%로 일반보다 유리합니다.
+          </li>
+          <li>
+            <strong>본인 · 배우자 재직 유형:</strong> 각자 <em>일반 재직 · 신규입사(연환산) · 휴직 · 복직 후 근무</em>
+            중 선택합니다. 신규입사는 입사일·수령 합계·수령 개월 수를, 일반 재직은 전연도 근로소득과 직전연도 소득을
+            입력하세요. <strong>변동률 20% 초과 시 자동으로 2개년 평균</strong>이 적용됩니다.
+          </li>
+          <li>
+            <strong>금리 우대 체크:</strong> 금리 탭에서 연소득·주택가격 구간을 확인한 뒤, 해당되는 우대(다자녀·한부모·
+            전자계약·청약저축 1년↑·다문화·장애인 등)를 체크합니다. 1군·2군 중복 규칙과 상한(0.5~1.0%p)이 자동
+            적용됩니다.
+          </li>
+          <li>
+            <strong>대출 금액·기간·상환방식:</strong> DTI 탭에서 실제 받으려는 대출 원금·기간(10~40년)·상환방식(원리금균등·
+            원금균등·체증식)을 입력합니다. 체증식은 연간 증가율(기본 2%)을 조정할 수 있습니다.
+          </li>
+          <li>
+            <strong>[계산] 버튼 클릭:</strong> 소득·금리·DTI·월 상환액이 단계별 카드로 표시되며, 하단에 선택한 자격별
+            <strong>예상 필요서류</strong> 블록이 자동으로 나타납니다. 입력값은 서버로 전송되지 않고 브라우저에서만
+            처리됩니다.
+          </li>
+        </ol>
+
+        <h3 style="font-size: 0.95rem; font-weight: 600; margin: 0.75rem 0 0.5rem">3. 결과 해석 — 4개 카드 읽는 법</h3>
+        <div style="overflow-x: auto; margin-bottom: 0.75rem">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 500px">
+            <thead>
+              <tr style="background: var(--surface2, #f5f5f0)">
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">카드</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">표시값</th>
+                <th style="padding: 7px 8px; border: 1px solid var(--border); text-align: left">해석 팁</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>인정 연소득</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">본인·배우자·합산·산정 근거</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">"2개년 평균 적용" 문구가 뜨면 변동률 20%↑ 사유. 낮은 해 기준으로 인정된 셈</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>최종 금리</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">기본금리 · 우대 합계 · 상한 적용 후 값</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">우대 합계가 상한보다 커도 상한까지만 적용. 고정·혼합·변동 중 어떤 유형인지 함께 확인</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>DTI</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">연간 원리금 ÷ 인정 소득 × 100</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">60% 초과 시 빨강. 초과하면 기간 연장 또는 금액 축소 필요</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>상환방식 비교</strong></td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">월 납입액(1년차) · 총 납입액 · 총이자</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">체증식은 초반 부담↓·총이자↑. 원금균등은 초반 부담↑·총이자↓. 가계 현금흐름과 함께 고려</td>
+              </tr>
+              <tr>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">필요서류 블록</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">공통 + 자격 + 우대 증빙 리스트</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">주민등록초본·전입세대열람원처럼 발급에 1~2주 걸리는 서류는 조기 준비</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 10px; padding: 12px 14px; font-size: 0.88rem; color: #7d5700; line-height: 1.65; margin-bottom: 0.5rem">
+          <strong>결과가 이상하게 보일 때 점검 순서</strong><br>
+          ① 탭이 의도한 상품인지(일반 → 신생아 전환만으로 하한이 1.5%→1.2%로 바뀝니다)<br>
+          ② 소득 구간 경계에 있는 경우 월환산·2개년 평균 중 어느 로직이 실행됐는지<br>
+          ③ DTI가 60%를 초과한다면 대출기간을 30→40년으로 연장 후 재계산<br>
+          ④ 월 상환액이 예상보다 높다면 원리금균등 대신 체증식(초반 완화)을 비교<br>
+          ⑤ 실제 취급 금융기관이 HUG 보증 여부·주택가격(6억 이하) 요건을 별도 확인하는지
+        </div>
+        <p class="field-hint">
+          ※ 본 계산기는 <strong>공개된 고시와 규정</strong>을 참고해 설계된 추정 도구입니다. 실제 인정 소득·금리·DTI는
+          금융기관 심사 시점 기준이 정답입니다. 특히 생애최초·신생아 특례처럼 자격 증빙이 필요한 항목은 <em>가족관계증명서·
+          기본증명서·출생증명서</em> 등의 원본 검토를 거쳐 반영됩니다.
+        </p>
+      </section>
+
       <section class="card" id="guide-section">
         <h2>디딤돌대출 가이드</h2>
         <p>
