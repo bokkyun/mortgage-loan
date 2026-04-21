@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mortgage Loan Lab logo">
+  <title>Mortgage Loan Lab</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a8274"/>
+      <stop offset="48%" stop-color="#356b5e"/>
+      <stop offset="100%" stop-color="#2a554a"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="13" fill="url(#bg)"/>
+  <path d="M11 33 L32 13 L53 33 L53 54 L11 54 Z" fill="#ffffff"/>
+  <rect x="14" y="36" width="36" height="16" rx="2" fill="#ffffff"/>
+  <text x="32" y="51" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-weight="900" font-size="22" fill="#1d9e75" text-anchor="middle" letter-spacing="-1">%</text>
+</svg>
