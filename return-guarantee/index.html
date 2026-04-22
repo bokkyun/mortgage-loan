@@ -128,21 +128,21 @@
               </select>
             </div>
             <div class="grid-span-2">
-              <label for="rg-a">주택가격 (A) — 만원</label>
-              <input type="text" id="rg-a" inputmode="decimal" placeholder="예: 50000 (5억)" autocomplete="off" />
-              <p class="field-hint">KB·부동산원 시세, 공시가격×140% 등으로 구한 뒤 입력하세요. 우측 패널에서 토지+건물×140%로 추정할 수 있습니다.</p>
+              <label for="rg-a">주택가격 (A) — 원</label>
+              <input type="text" id="rg-a" inputmode="numeric" placeholder="예: 500,000,000 (약 5억)" autocomplete="off" />
+              <p class="field-hint">KB·부동산원 시세, 공시가격×140% 등으로 구한 뒤 원 단위로 입력하세요. 천단위 콤마는 자동으로 붙습니다. 우측 패널에서 토지+건물×140%로 추정할 수 있습니다.</p>
             </div>
             <div>
-              <label for="rg-b">전세보증금 (B) — 만원</label>
-              <input type="text" id="rg-b" inputmode="decimal" placeholder="예: 20000" autocomplete="off" />
+              <label for="rg-b">전세보증금 (B) — 원</label>
+              <input type="text" id="rg-b" inputmode="numeric" placeholder="예: 200,000,000" autocomplete="off" />
             </div>
             <div>
-              <label for="rg-c">선순위채권 (C) — 만원</label>
-              <input type="text" id="rg-c" inputmode="decimal" placeholder="없으면 0" autocomplete="off" />
+              <label for="rg-c">선순위채권 (C) — 원</label>
+              <input type="text" id="rg-c" inputmode="numeric" placeholder="없으면 0" autocomplete="off" />
             </div>
             <div class="grid-span-2">
-              <label for="rg-d">선순위 임차보증금 (D) — 만원</label>
-              <input type="text" id="rg-d" inputmode="decimal" placeholder="없으면 0" autocomplete="off" />
+              <label for="rg-d">선순위 임차보증금 (D) — 원</label>
+              <input type="text" id="rg-d" inputmode="numeric" placeholder="없으면 0" autocomplete="off" />
             </div>
           </div>
 
@@ -154,8 +154,8 @@
             </label>
             <div class="grid grid-2">
               <div>
-                <label for="rg-wolse">월세 — 만원/월</label>
-                <input type="text" id="rg-wolse" inputmode="decimal" placeholder="예: 50" autocomplete="off" />
+                <label for="rg-wolse">월세 — 원/월</label>
+                <input type="text" id="rg-wolse" inputmode="numeric" placeholder="예: 500,000" autocomplete="off" />
               </div>
               <div>
                 <label for="rg-conv">전월전환율 (%)</label>
@@ -189,7 +189,7 @@
           <div class="grid grid-2">
             <div class="grid-span-2">
               <label for="rg-land-price">토지 공시지가 — 원/㎡</label>
-              <input type="text" id="rg-land-price" inputmode="decimal" placeholder="예: 3500000" autocomplete="off" />
+              <input type="text" id="rg-land-price" inputmode="numeric" placeholder="예: 3,500,000" autocomplete="off" />
             </div>
             <div class="grid-span-2">
               <label for="rg-land-area">토지 면적 — ㎡</label>
@@ -205,8 +205,8 @@
               <p class="field-hint">단독 등 전유가 아니면 분양·등기 기준 대지권 비율을 입력합니다. 전체 토지면적 기준이면 1/1.</p>
             </div>
             <div class="grid-span-2">
-              <label for="rg-building">건물 시가표준액 — 만원</label>
-              <input type="text" id="rg-building" inputmode="decimal" placeholder="홈택스 등 확인" autocomplete="off" />
+              <label for="rg-building">건물 시가표준액 — 원</label>
+              <input type="text" id="rg-building" inputmode="numeric" placeholder="홈택스 등 원 단위" autocomplete="off" />
             </div>
           </div>
           <p id="rg-land-result" class="field-hint" aria-live="polite"></p>
