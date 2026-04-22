@@ -921,6 +921,72 @@ footer .footer-note {
   flex-shrink: 0;
 }
 
+/* 반환보증: 할인 체크 행(참고용 계산기와 동일 항목) */
+.rg-dsc-grp {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0.9rem 0 0.4rem;
+  padding: 0.2rem 0.45rem;
+  display: inline-block;
+  border-radius: 6px;
+}
+.rg-dsc-grp--60 {
+  color: #6b3a8c;
+  background: #f3e8f7;
+  margin-top: 0.35rem;
+}
+.rg-dsc-grp--40 {
+  color: #1e5f8a;
+  background: #e8f2fa;
+}
+.rg-dsc-checkrow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.rg-dsc-checkrow--stack {
+  border-color: #2d7a4d;
+  background: #f0faf3;
+}
+.rg-dsc-checkrow input[type="checkbox"] {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+.rg-dsc-checkrow__title {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+.rg-dsc-pct {
+  font-weight: 800;
+  color: var(--btn-primary-mid);
+  margin-left: 0.15rem;
+}
+.rg-dsc-checkrow__desc {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.rg-dsc-badge-stack {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: #2d7a4d;
+  color: #fff;
+  vertical-align: middle;
+}
+
 /* 반환보증: 주택가격(A) 입력란 바로 아래 확인 링크 */
 .rg-price-links {
   margin-top: 0.65rem;

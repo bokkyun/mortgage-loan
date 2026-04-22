@@ -200,47 +200,276 @@
             </div>
           </div>
 
-          <div class="card rg-discount-card" style="margin-top: 1rem; background: var(--surface2); border-style: solid">
+          <div class="card rg-discount-card" id="rg-discount-card" style="margin-top: 1rem; background: var(--surface2); border-style: solid">
             <h3 class="subsection-title" style="margin-top: 0">보증료 할인·가산 (선택)</h3>
             <p class="field-hint">
               <strong>선순위 &gt; 주택가 50%</strong>일 때 <strong>요율 10% 할증(×1.1)</strong>은 위 금액으로 자동 반영됩니다. 아래서 다시
               가산하지 않습니다.
             </p>
-            <p class="field-hint" style="margin-top: 0.25rem">할인은 HUG <strong>적용순서(참고)</strong>대로 <strong>보증료 금액</strong>에 곱해 반영합니다.</p>
+            <p class="field-hint" style="margin-top: 0.25rem">
+              <strong>사회배려·모범납세·인터넷·일시납·부채비율</strong> 할인은 <strong>한 가지만</strong> 체크할 수 있습니다.
+              <strong>전자계약 3%</strong>만 다른 할인과 <strong>함께</strong> 체크할 수 있습니다. 보증료 금액에 곱해 반영합니다(참고).
+            </p>
 
             <div class="rg-discount-block">
-              <p class="rg-discount-block__label">사회배려 할인 (해당 1가지만)</p>
-              <div class="rg-discount-row">
-                <label class="rg-discount-pill"
-                  ><input type="radio" name="rg-social" value="0" checked id="rg-social-0" />해당 없음</label
-                >
-                <label class="rg-discount-pill"
-                  ><input type="radio" name="rg-social" value="60" id="rg-social-60" />60% 할인군(요건 충족)</label
-                >
-                <label class="rg-discount-pill"
-                  ><input type="radio" name="rg-social" value="40" id="rg-social-40" />40% 할인군(요건 충족)</label
-                >
+              <p class="rg-discount-block__label">사회배려층 할인 (아래 항목 중 1개)</p>
+              <p class="field-hint" style="margin: 0.25rem 0 0.5rem">
+                실제 적용은 HUG·취급기관의 무주택·소득·가구·기한 등 심사 기준에 따릅니다.
+              </p>
+              <p class="rg-dsc-grp rg-dsc-grp--60">60% 할인 대상</p>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s6"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.4"
+                  data-dsc-note="6할(연소득 5천만 이하)"
+                />
+                <div>
+                  <label for="rg-soc-s6" class="rg-dsc-checkrow__title"
+                    >연소득 5천만원 이하 <span class="rg-dsc-pct">−60%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">피보증인(배우자 포함)의 연소득이 5천만원 이하인 자</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s7"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.4"
+                  data-dsc-note="6할(한부모가족)"
+                />
+                <div>
+                  <label for="rg-soc-s7" class="rg-dsc-checkrow__title"
+                    >한부모가족 <span class="rg-dsc-pct">−60%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">한부모가족지원법에 따라 지원되는 한부모가족 (요건·중복심사는 HUG)</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s8"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.4"
+                  data-dsc-note="6할(단독세대주 고령자)"
+                />
+                <div>
+                  <label for="rg-soc-s8" class="rg-dsc-checkrow__title"
+                    >단독세대주 만 65세 이상 고령자 <span class="rg-dsc-pct">−60%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">배우자·직계존비속·친족 동거 없이 단독세대주인 만 65세 이상 (무주택자만)</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s9"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.4"
+                  data-dsc-note="6할(다문화가족)"
+                />
+                <div>
+                  <label for="rg-soc-s9" class="rg-dsc-checkrow__title"
+                    >다문화가족 <span class="rg-dsc-pct">−60%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">다문화가족지원법에 따른 가족 범위에 해당하는 경우</p>
+                </div>
+              </div>
+
+              <p class="rg-dsc-grp rg-dsc-grp--40">40% 할인 대상</p>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s1"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(다자녀)"
+                />
+                <div>
+                  <label for="rg-soc-s1" class="rg-dsc-checkrow__title"
+                    >다자녀 가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">민법상 미성년 자녀 3인 이상 (태아 포함)</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s2"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(장애인증명 대상)"
+                />
+                <div>
+                  <label for="rg-soc-s2" class="rg-dsc-checkrow__title"
+                    >장애인증명서 발급대상자 가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">직계존비속 세대원 중 1인 이상 장애인증명서 발급대상자</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s3"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(고령·노인부양)"
+                />
+                <div>
+                  <label for="rg-soc-s3" class="rg-dsc-checkrow__title"
+                    >고령자 가구 / 노인부양가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">피보증인·배우자·직계존비속 세대원 중 1인 이상 만 65세 이상</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s4"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(신혼, 합산 6천)"
+                />
+                <div>
+                  <label for="rg-soc-s4" class="rg-dsc-checkrow__title"
+                    >신혼부부 (합산연소득 6천만원 이하) <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">혼인기간 7년 이내, 결혼예정자 포함, 합산연소득 6천만원 이하</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s5"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(배당이의)"
+                />
+                <div>
+                  <label for="rg-soc-s5" class="rg-dsc-checkrow__title"
+                    >배당이의 소송 담당자 가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">임대차보호법 3자 우선변제 해당, 소득 요건(안내) 충족</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s10"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(국가유공·유족)"
+                />
+                <div>
+                  <label for="rg-soc-s10" class="rg-dsc-checkrow__title"
+                    >국가유공자 / 선순위 유족 가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">국가유공자·선순위 유족 등(안내에 따른 범위)</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-soc-s11"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.6"
+                  data-dsc-note="4할(의사상자)"
+                />
+                <div>
+                  <label for="rg-soc-s11" class="rg-dsc-checkrow__title"
+                    >의사상자 가구 <span class="rg-dsc-pct">−40%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">직계존비속 세대원 중 1인 이상이 의사상자 예우·지원 법에 따른 대상</p>
+                </div>
               </div>
             </div>
+
             <div class="rg-discount-block">
-              <p class="rg-discount-block__label">기타 감액 (중복 체크 가능)</p>
-              <label class="rg-discount-line"
-                ><input type="checkbox" id="rg-dsc-e" /> 전자계약 <strong>3%</strong> 할인</label
-              >
-              <label class="rg-discount-line"
-                ><input type="checkbox" id="rg-dsc-tax" /> 모범납세자 <strong>10%</strong> 할인</label
-              >
-              <label class="rg-discount-line"
-                ><input type="checkbox" id="rg-dsc-web" /> 인터넷·모바일 <strong>3%</strong> 할인</label
-              >
-              <label class="rg-discount-line"
-                ><input type="checkbox" id="rg-dsc-debt" /> 부채비율 <strong>10%</strong> 할인 — (B+C)÷(A×90%)
-                <strong>≤ 60%</strong>일 때만 적용</label
-              >
-              <label class="rg-discount-line"
-                ><input type="checkbox" id="rg-dsc-lump" /> 일시납 <strong>3%</strong> — 보증기간
-                <strong>1년 초과분</strong>에 대한 보증료에 한함</label
-              >
+              <p class="rg-discount-block__label">기타 할인 (전자 3%는 위와 동시 체크 가능, 나머지는 1개)</p>
+              <div class="rg-dsc-checkrow rg-dsc-checkrow--stack">
+                <input type="checkbox" id="rg-dsc-e" />
+                <div>
+                  <label for="rg-dsc-e" class="rg-dsc-checkrow__title"
+                    >전자계약 할인 <span class="rg-dsc-pct">−3%</span> <span class="rg-dsc-badge-stack">+함께</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">국토교통부 부동산거래 전자계약시스템으로 전세계약을 체결한 경우</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-dsc-tax"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.9"
+                  data-dsc-note="모범납세자 10%"
+                />
+                <div>
+                  <label for="rg-dsc-tax" class="rg-dsc-checkrow__title"
+                    >모범납세자 할인 <span class="rg-dsc-pct">−10%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">무대기간 종료일이 경과하지 않은 정부포상 및 표창 수상자</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-dsc-web"
+                  data-dsc-type="mul"
+                  data-dsc-mul="0.97"
+                  data-dsc-note="인터넷·모바일 3%"
+                />
+                <div>
+                  <label for="rg-dsc-web" class="rg-dsc-checkrow__title"
+                    >인터넷·모바일 보증 <span class="rg-dsc-pct">−3%</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">인터넷 또는 모바일로 보증을 신청한 경우</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-dsc-lump"
+                  data-dsc-type="lump"
+                  data-dsc-note="일시납(1년 초과분 3% 감액)"
+                />
+                <div>
+                  <label for="rg-dsc-lump" class="rg-dsc-checkrow__title"
+                    >일시납 할인 <span class="rg-dsc-pct">−3%*</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">보증료를 일시에 전액 납부한 경우, 1년 초과분에 대한 보증료에 감액(참고)</p>
+                </div>
+              </div>
+              <div class="rg-dsc-checkrow">
+                <input
+                  type="checkbox"
+                  class="rg-dsc-mutex"
+                  id="rg-dsc-debt"
+                  data-dsc-type="debt"
+                  data-dsc-note="부채비율 10%"
+                />
+                <div>
+                  <label for="rg-dsc-debt" class="rg-dsc-checkrow__title"
+                    >부채비율 할인 <span class="rg-dsc-pct">−10%*</span></label
+                  >
+                  <p class="rg-dsc-checkrow__desc">(B+C)÷(A×90%) ≤ 60%일 때 (조건 충족 시만 반영)</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -296,8 +525,8 @@
           <strong>반환보증료</strong>는 HUG 공개 자료를 바탕으로,           <strong>부채비율 = (전세보증금 B + 선순위채권 C) ÷ 주택가격 A</strong>로
           <strong>70% 이하 / 70% 초과~80% 미만 / 80% 이상</strong> 구간(표의 세 칸)을 쓰고, <strong>보증금액(전세 기준)</strong>·<strong>아파트/기타</strong>에 따라 기준 연요율을 고릅니다.
           <strong>선순위채권(C) &gt; 주택가(A)의 50%</strong>이면 기준 연요율에 <strong>10% 할증(×1.1)</strong>을 반영합니다(참고).
-          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할한 뒤, 화면에서 선택한 할인을
-          <strong>사회배려 → 전자계약 → 모범납세자 → 인터넷·모바일 → 부채비율(조건 충족 시) → 일시납</strong> 순으로 곱합니다.
+          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할한 뒤, 선택한 <strong>한 가지</strong> 할인(사회배려·기타)을 반영하고
+          <strong>전자계약 3%</strong>를 함께 선택한 경우 그다음에 곱합니다.
           실제 적용·중복·요건은 상품·약관·HUG 기준과 다를 수 있습니다.
         </p>
       </section>
@@ -321,6 +550,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-disc-1"></script>
+    <script src="app.js?v=hug-disc-3"></script>
   </body>
 </html>

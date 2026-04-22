@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-disc-1 — 할인 적용순서: 사회배려→전자→모범·인터넷→부채10%→일시납(요율×1.1은 자동)
+ * @version hug-disc-3 — 체크박스(택1) + 전자3% 병행, 할인: 택1→전자(요율×1.1은 자동)
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -108,6 +108,54 @@
   function lumpSumFeeFactor(months) {
     if (!Number.isFinite(months) || months <= 12) return 1;
     return (12 + 0.97 * (months - 12)) / months;
+  }
+
+  /**
+   * 사회배려·기타(모범·인터넷·일시납·부채)는 rg-dsc-mutex 중 1개만. data-dsc-type: mul|debt|lump
+   */
+  function applyMutexFeeDiscount(f, discNotes, warns, Beff, C, A, months) {
+    var card = $("rg-discount-card");
+    if (!card) return f;
+    var el = card.querySelector(".rg-dsc-mutex:checked");
+    if (!el) return f;
+    var typ = el.getAttribute("data-dsc-type") || "mul";
+    var note = (el.getAttribute("data-dsc-note") || "").trim();
+    if (typ === "mul") {
+      var m = parseFloat(el.getAttribute("data-dsc-mul"));
+      if (Number.isFinite(m)) {
+        f *= m;
+        if (note) discNotes.push(note);
+      }
+    } else if (typ === "debt") {
+      if (debtDiscountEligible(Beff, C, A)) {
+        f *= 0.9;
+        discNotes.push(note || "부채비율 10%");
+      } else {
+        warns.push("부채비율 10% 할인: (B+C)÷(A×90%)가 60%를 초과해 이 할인은 적용하지 않았습니다.");
+      }
+    } else if (typ === "lump") {
+      if (months > 12) {
+        f *= lumpSumFeeFactor(months);
+        discNotes.push(note || "일시납(1년 초과분 3% 감액)");
+      } else {
+        warns.push("일시납 할인: 보증기간이 12개월을 넘는 경우에만 반영됩니다.");
+      }
+    }
+    return f;
+  }
+
+  function wireDiscountMutex() {
+    var card = $("rg-discount-card");
+    if (!card) return;
+    card.addEventListener("change", function (e) {
+      var t = e.target;
+      if (!t || t.type !== "checkbox" || !t.classList.contains("rg-dsc-mutex")) return;
+      if (!t.checked) return;
+      var all = card.querySelectorAll(".rg-dsc-mutex");
+      for (var i = 0; i < all.length; i++) {
+        if (all[i] !== t) all[i].checked = false;
+      }
+    });
   }
 
   /** 기타주택: (토지분+건물시가)×140% (원) */
@@ -258,41 +306,10 @@
     var feeBeforeDisc = feeWon;
     var f = feeBeforeDisc;
     var discNotes = [];
-    var social = (document.querySelector('input[name="rg-social"]:checked') || {}).value;
-    if (social === "60") {
-      f *= 0.4;
-      discNotes.push("사회배려 60%");
-    } else if (social === "40") {
-      f *= 0.6;
-      discNotes.push("사회배려 40%");
-    }
-    if ($("rg-dsc-e").checked) {
+    f = applyMutexFeeDiscount(f, discNotes, warns, Beff, C, A, months);
+    if ($("rg-dsc-e") && $("rg-dsc-e").checked) {
       f *= 0.97;
       discNotes.push("전자계약 3%");
-    }
-    if ($("rg-dsc-tax").checked) {
-      f *= 0.9;
-      discNotes.push("모범납세자 10%");
-    }
-    if ($("rg-dsc-web").checked) {
-      f *= 0.97;
-      discNotes.push("인터넷·모바일 3%");
-    }
-    if ($("rg-dsc-debt").checked) {
-      if (debtDiscountEligible(Beff, C, A)) {
-        f *= 0.9;
-        discNotes.push("부채비율 10%");
-      } else {
-        warns.push("부채비율 10% 할인: (B+C)÷(A×90%)가 60%를 초과해 이 할인은 적용하지 않았습니다.");
-      }
-    }
-    if ($("rg-dsc-lump").checked) {
-      if (months > 12) {
-        f *= lumpSumFeeFactor(months);
-        discNotes.push("일시납(1년 초과분 3% 감액)");
-      } else {
-        warns.push("일시납 할인: 보증기간이 12개월을 넘는 경우에만 반영됩니다.");
-      }
     }
     var feeFinal = f;
 
@@ -364,13 +381,11 @@
     $("rg-c").value = "";
     $("rg-d").value = "";
     $("rg-wolse").value = "";
-    var r0 = $("rg-social-0");
-    if (r0) r0.checked = true;
-    if ($("rg-dsc-e")) $("rg-dsc-e").checked = false;
-    if ($("rg-dsc-tax")) $("rg-dsc-tax").checked = false;
-    if ($("rg-dsc-web")) $("rg-dsc-web").checked = false;
-    if ($("rg-dsc-debt")) $("rg-dsc-debt").checked = false;
-    if ($("rg-dsc-lump")) $("rg-dsc-lump").checked = false;
+    var dcard = $("rg-discount-card");
+    if (dcard) {
+      var cbs = dcard.querySelectorAll('input[type="checkbox"]');
+      for (var i = 0; i < cbs.length; i++) cbs[i].checked = false;
+    }
     $("rg-result").innerHTML = "";
     $("rg-result").hidden = true;
   }
@@ -386,6 +401,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     wireCommaFormatting();
+    wireDiscountMutex();
     $("rg-calc-main").addEventListener("click", runMainCalc);
     $("rg-reset-main").addEventListener("click", resetMain);
     $("rg-calc-land").addEventListener("click", runLandCalc);
