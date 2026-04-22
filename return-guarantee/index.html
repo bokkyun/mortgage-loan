@@ -200,6 +200,50 @@
             </div>
           </div>
 
+          <div class="card rg-discount-card" style="margin-top: 1rem; background: var(--surface2); border-style: solid">
+            <h3 class="subsection-title" style="margin-top: 0">보증료 할인·가산 (선택)</h3>
+            <p class="field-hint">
+              <strong>선순위 &gt; 주택가 50%</strong>일 때 <strong>요율 10% 할증(×1.1)</strong>은 위 금액으로 자동 반영됩니다. 아래서 다시
+              가산하지 않습니다.
+            </p>
+            <p class="field-hint" style="margin-top: 0.25rem">할인은 HUG <strong>적용순서(참고)</strong>대로 <strong>보증료 금액</strong>에 곱해 반영합니다.</p>
+
+            <div class="rg-discount-block">
+              <p class="rg-discount-block__label">사회배려 할인 (해당 1가지만)</p>
+              <div class="rg-discount-row">
+                <label class="rg-discount-pill"
+                  ><input type="radio" name="rg-social" value="0" checked id="rg-social-0" />해당 없음</label
+                >
+                <label class="rg-discount-pill"
+                  ><input type="radio" name="rg-social" value="60" id="rg-social-60" />60% 할인군(요건 충족)</label
+                >
+                <label class="rg-discount-pill"
+                  ><input type="radio" name="rg-social" value="40" id="rg-social-40" />40% 할인군(요건 충족)</label
+                >
+              </div>
+            </div>
+            <div class="rg-discount-block">
+              <p class="rg-discount-block__label">기타 감액 (중복 체크 가능)</p>
+              <label class="rg-discount-line"
+                ><input type="checkbox" id="rg-dsc-e" /> 전자계약 <strong>3%</strong> 할인</label
+              >
+              <label class="rg-discount-line"
+                ><input type="checkbox" id="rg-dsc-tax" /> 모범납세자 <strong>10%</strong> 할인</label
+              >
+              <label class="rg-discount-line"
+                ><input type="checkbox" id="rg-dsc-web" /> 인터넷·모바일 <strong>3%</strong> 할인</label
+              >
+              <label class="rg-discount-line"
+                ><input type="checkbox" id="rg-dsc-debt" /> 부채비율 <strong>10%</strong> 할인 — (B+C)÷(A×90%)
+                <strong>≤ 60%</strong>일 때만 적용</label
+              >
+              <label class="rg-discount-line"
+                ><input type="checkbox" id="rg-dsc-lump" /> 일시납 <strong>3%</strong> — 보증기간
+                <strong>1년 초과분</strong>에 대한 보증료에 한함</label
+              >
+            </div>
+          </div>
+
           <div class="hub-card-actions" style="margin-top: 1rem">
             <button type="button" class="hub-btn-primary" id="rg-calc-main">한도·보증료 계산</button>
             <button type="button" class="hub-btn-secondary" id="rg-reset-main">초기화</button>
@@ -252,8 +296,9 @@
           <strong>반환보증료</strong>는 HUG 공개 자료를 바탕으로,           <strong>부채비율 = (전세보증금 B + 선순위채권 C) ÷ 주택가격 A</strong>로
           <strong>70% 이하 / 70% 초과~80% 미만 / 80% 이상</strong> 구간(표의 세 칸)을 쓰고, <strong>보증금액(전세 기준)</strong>·<strong>아파트/기타</strong>에 따라 기준 연요율을 고릅니다.
           <strong>선순위채권(C) &gt; 주택가(A)의 50%</strong>이면 기준 연요율에 <strong>10% 할증(×1.1)</strong>을 반영합니다(참고).
-          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할하며, 사회배려 할인·전자계약·일시납·적용순서 등은 상품·약관·HUG 기준과
-          다를 수 있습니다.
+          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할한 뒤, 화면에서 선택한 할인을
+          <strong>사회배려 → 전자계약 → 모범납세자 → 인터넷·모바일 → 부채비율(조건 충족 시) → 일시납</strong> 순으로 곱합니다.
+          실제 적용·중복·요건은 상품·약관·HUG 기준과 다를 수 있습니다.
         </p>
       </section>
     </main>
@@ -276,6 +321,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-table-5"></script>
+    <script src="app.js?v=hug-disc-1"></script>
   </body>
 </html>

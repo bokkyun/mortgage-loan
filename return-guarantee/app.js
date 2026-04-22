@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-table-5 — 결과: 주택가·부채비율·요율·예상보증료 4행
+ * @version hug-disc-1 — 할인 적용순서: 사회배려→전자→모범·인터넷→부채10%→일시납(요율×1.1은 자동)
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -96,6 +96,18 @@
   function hasSeniorLienSurcharge(C, A) {
     if (!Number.isFinite(A) || A <= 0) return false;
     return C / A > 0.5;
+  }
+
+  /** 부채비율 10% 할인: (B+C)÷(A×90%) ≤ 60% (정수: 100(B+C) ≤ 54A) */
+  function debtDiscountEligible(B, C, A) {
+    if (!Number.isFinite(A) || A <= 0) return false;
+    return 100 * (B + C) <= 54 * A;
+  }
+
+  /** 일시납: 1년 초과 보증기간분 보증료 3% 감액(참고) — 전체 일할액에 곱하는 근사 */
+  function lumpSumFeeFactor(months) {
+    if (!Number.isFinite(months) || months <= 12) return 1;
+    return (12 + 0.97 * (months - 12)) / months;
   }
 
   /** 기타주택: (토지분+건물시가)×140% (원) */
@@ -243,6 +255,47 @@
     var feePct = liSurch ? baseFeePct * 1.1 : baseFeePct;
     var feeWon = (guaranteeBase * (feePct / 100) * months) / 12;
 
+    var feeBeforeDisc = feeWon;
+    var f = feeBeforeDisc;
+    var discNotes = [];
+    var social = (document.querySelector('input[name="rg-social"]:checked') || {}).value;
+    if (social === "60") {
+      f *= 0.4;
+      discNotes.push("사회배려 60%");
+    } else if (social === "40") {
+      f *= 0.6;
+      discNotes.push("사회배려 40%");
+    }
+    if ($("rg-dsc-e").checked) {
+      f *= 0.97;
+      discNotes.push("전자계약 3%");
+    }
+    if ($("rg-dsc-tax").checked) {
+      f *= 0.9;
+      discNotes.push("모범납세자 10%");
+    }
+    if ($("rg-dsc-web").checked) {
+      f *= 0.97;
+      discNotes.push("인터넷·모바일 3%");
+    }
+    if ($("rg-dsc-debt").checked) {
+      if (debtDiscountEligible(Beff, C, A)) {
+        f *= 0.9;
+        discNotes.push("부채비율 10%");
+      } else {
+        warns.push("부채비율 10% 할인: (B+C)÷(A×90%)가 60%를 초과해 이 할인은 적용하지 않았습니다.");
+      }
+    }
+    if ($("rg-dsc-lump").checked) {
+      if (months > 12) {
+        f *= lumpSumFeeFactor(months);
+        discNotes.push("일시납(1년 초과분 3% 감액)");
+      } else {
+        warns.push("일시납 할인: 보증기간이 12개월을 넘는 경우에만 반영됩니다.");
+      }
+    }
+    var feeFinal = f;
+
     var html = "";
     if (warns.length) {
       html +=
@@ -262,7 +315,13 @@
     html += "<p><strong>주택가액 (A)</strong> " + formatWon(A) + "</p>";
     html += "<p><strong>부채비율</strong> " + pctStr + "</p>";
     html += "<p><strong>적용 요율</strong> " + rateLine + "</p>";
-    html += "<p><strong>예상 보증료</strong> " + formatWon(feeWon) + "</p>";
+    if (Math.abs(feeFinal - feeBeforeDisc) > 0.5) {
+      html += "<p><strong>예상 보증료(할인 전)</strong> " + formatWon(feeBeforeDisc) + "</p>";
+    }
+    html += "<p><strong>예상 보증료</strong> " + formatWon(feeFinal) + "</p>";
+    if (discNotes.length) {
+      html += '<p class="field-hint" style="margin-top:0.15rem">적용한 할인: ' + discNotes.join(" → ") + "</p>";
+    }
     html +=
       '<p class="field-hint" style="margin-top:0.5rem">전세 ' +
       formatWon(guaranteeBase) +
@@ -305,6 +364,13 @@
     $("rg-c").value = "";
     $("rg-d").value = "";
     $("rg-wolse").value = "";
+    var r0 = $("rg-social-0");
+    if (r0) r0.checked = true;
+    if ($("rg-dsc-e")) $("rg-dsc-e").checked = false;
+    if ($("rg-dsc-tax")) $("rg-dsc-tax").checked = false;
+    if ($("rg-dsc-web")) $("rg-dsc-web").checked = false;
+    if ($("rg-dsc-debt")) $("rg-dsc-debt").checked = false;
+    if ($("rg-dsc-lump")) $("rg-dsc-lump").checked = false;
     $("rg-result").innerHTML = "";
     $("rg-result").hidden = true;
   }
