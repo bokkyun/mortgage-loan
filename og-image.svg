@@ -31,11 +31,12 @@
   <g transform="translate(430, 180)">
     <rect x="0" y="0" width="170" height="34" rx="17" fill="#ffffff" opacity="0.15"/>
     <text x="85" y="23" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="14" fill="#ffffff" text-anchor="middle" letter-spacing="2">CALCULATOR HUB</text>
-    <text x="0" y="100" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="800" font-size="62" fill="#ffffff" letter-spacing="-1.5">&#46356;&#46372;&#46028; &#183; &#48260;&#54016;&#47785;</text>
-    <text x="0" y="174" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="800" font-size="62" fill="#ffffff" letter-spacing="-1.5">DSR &#44228;&#49328;&#44592;</text>
-    <rect x="0" y="206" width="80" height="4" rx="2" fill="#1d9e75"/>
-    <text x="0" y="252" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="500" font-size="24" fill="#ffffff" opacity="0.92" letter-spacing="-0.3">&#51452;&#53469;&#46020;&#49884;&#44592;&#44552; &#44256;&#49884; &#44592;&#51456; &#44552;&#47532; &#183; DTI &#183; &#54620;&#46020;</text>
-    <text x="0" y="292" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="500" font-size="24" fill="#ffffff" opacity="0.92" letter-spacing="-0.3">&#52280;&#44256;&#50857; &#44228;&#49328;&#44592;&#50752; &#54596;&#50836;&#49436;&#47448; &#44032;&#51060;&#46300; &#54620; &#44275;&#50640;</text>
+    <text x="0" y="90" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="800" font-size="58" fill="#ffffff" letter-spacing="-1.5">&#46356;&#46372;&#46028; &#183; &#48260;&#54016;&#47785;</text>
+    <text x="0" y="158" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="800" font-size="58" fill="#ffffff" letter-spacing="-1.5">DSR &#44228;&#49328;&#44592;</text>
+    <text x="0" y="218" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="800" font-size="48" fill="#ffffff" letter-spacing="-1.2">&#48152;&#54872;&#48372;&#51613;&#48372;&#54744;</text>
+    <rect x="0" y="236" width="80" height="4" rx="2" fill="#1d9e75"/>
+    <text x="0" y="278" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="500" font-size="24" fill="#ffffff" opacity="0.92" letter-spacing="-0.3">&#51452;&#53469;&#46020;&#49884;&#44592;&#44552; &#44256;&#49884; &#44592;&#51456; &#44552;&#47532; &#183; DTI &#183; &#54620;&#46020;</text>
+    <text x="0" y="318" font-family="Pretendard, 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif" font-weight="500" font-size="24" fill="#ffffff" opacity="0.92" letter-spacing="-0.3">&#52280;&#44256;&#50857; &#44228;&#49328;&#44592;&#50752; &#54596;&#50836;&#49436;&#47448; &#44032;&#51060;&#46300; &#54620; &#44275;&#50640;</text>
   </g>
   <g transform="translate(0, 560)">
     <rect x="0" y="0" width="1200" height="70" fill="#000000" opacity="0.22"/>
