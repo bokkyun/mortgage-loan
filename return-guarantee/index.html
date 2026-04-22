@@ -207,8 +207,8 @@
               가산하지 않습니다.
             </p>
             <p class="field-hint" style="margin-top: 0.25rem">
-              <strong>사회배려·모범납세·인터넷·일시납·부채비율</strong> 할인은 <strong>한 가지만</strong> 체크할 수 있습니다.
-              <strong>전자계약 3%</strong>만 다른 할인과 <strong>함께</strong> 체크할 수 있습니다. 보증료 금액에 곱해 반영합니다(참고).
+              <strong>사회배려</strong> 할인은 <strong>한 가지만</strong> 체크할 수 있고, <strong>전자계약 3%</strong>는
+              사회배려와 <strong>함께</strong> 체크할 수 있습니다. 보증료 금액에 곱해 반영합니다(참고).
             </p>
 
             <div class="rg-discount-block">
@@ -398,7 +398,7 @@
             </div>
 
             <div class="rg-discount-block">
-              <p class="rg-discount-block__label">기타 할인 (전자 3%는 위와 동시 체크 가능, 나머지는 1개)</p>
+              <p class="rg-discount-block__label">전자계약 할인 (선택 — 사회배려와 동시 체크 가능)</p>
               <div class="rg-dsc-checkrow rg-dsc-checkrow--stack">
                 <input type="checkbox" id="rg-dsc-e" />
                 <div>
@@ -406,68 +406,6 @@
                     >전자계약 할인 <span class="rg-dsc-pct">−3%</span> <span class="rg-dsc-badge-stack">+함께</span></label
                   >
                   <p class="rg-dsc-checkrow__desc">국토교통부 부동산거래 전자계약시스템으로 전세계약을 체결한 경우</p>
-                </div>
-              </div>
-              <div class="rg-dsc-checkrow">
-                <input
-                  type="checkbox"
-                  class="rg-dsc-mutex"
-                  id="rg-dsc-tax"
-                  data-dsc-type="mul"
-                  data-dsc-mul="0.9"
-                  data-dsc-note="모범납세자 10%"
-                />
-                <div>
-                  <label for="rg-dsc-tax" class="rg-dsc-checkrow__title"
-                    >모범납세자 할인 <span class="rg-dsc-pct">−10%</span></label
-                  >
-                  <p class="rg-dsc-checkrow__desc">무대기간 종료일이 경과하지 않은 정부포상 및 표창 수상자</p>
-                </div>
-              </div>
-              <div class="rg-dsc-checkrow">
-                <input
-                  type="checkbox"
-                  class="rg-dsc-mutex"
-                  id="rg-dsc-web"
-                  data-dsc-type="mul"
-                  data-dsc-mul="0.97"
-                  data-dsc-note="인터넷·모바일 3%"
-                />
-                <div>
-                  <label for="rg-dsc-web" class="rg-dsc-checkrow__title"
-                    >인터넷·모바일 보증 <span class="rg-dsc-pct">−3%</span></label
-                  >
-                  <p class="rg-dsc-checkrow__desc">인터넷 또는 모바일로 보증을 신청한 경우</p>
-                </div>
-              </div>
-              <div class="rg-dsc-checkrow">
-                <input
-                  type="checkbox"
-                  class="rg-dsc-mutex"
-                  id="rg-dsc-lump"
-                  data-dsc-type="lump"
-                  data-dsc-note="일시납(1년 초과분 3% 감액)"
-                />
-                <div>
-                  <label for="rg-dsc-lump" class="rg-dsc-checkrow__title"
-                    >일시납 할인 <span class="rg-dsc-pct">−3%*</span></label
-                  >
-                  <p class="rg-dsc-checkrow__desc">보증료를 일시에 전액 납부한 경우, 1년 초과분에 대한 보증료에 감액(참고)</p>
-                </div>
-              </div>
-              <div class="rg-dsc-checkrow">
-                <input
-                  type="checkbox"
-                  class="rg-dsc-mutex"
-                  id="rg-dsc-debt"
-                  data-dsc-type="debt"
-                  data-dsc-note="부채비율 10%"
-                />
-                <div>
-                  <label for="rg-dsc-debt" class="rg-dsc-checkrow__title"
-                    >부채비율 할인 <span class="rg-dsc-pct">−10%*</span></label
-                  >
-                  <p class="rg-dsc-checkrow__desc">(B+C)÷(A×90%) ≤ 60%일 때 (조건 충족 시만 반영)</p>
                 </div>
               </div>
             </div>
@@ -525,7 +463,7 @@
           <strong>반환보증료</strong>는 HUG 공개 자료를 바탕으로,           <strong>부채비율 = (전세보증금 B + 선순위채권 C) ÷ 주택가격 A</strong>로
           <strong>70% 이하 / 70% 초과~80% 미만 / 80% 이상</strong> 구간(표의 세 칸)을 쓰고, <strong>보증금액(전세 기준)</strong>·<strong>아파트/기타</strong>에 따라 기준 연요율을 고릅니다.
           <strong>선순위채권(C) &gt; 주택가(A)의 50%</strong>이면 기준 연요율에 <strong>10% 할증(×1.1)</strong>을 반영합니다(참고).
-          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할한 뒤, 선택한 <strong>한 가지</strong> 할인(사회배려·기타)을 반영하고
+          예상액은 보증대상×적용요율×(입력한 개월/12)로 일할한 뒤, 선택한 <strong>한 가지</strong> 사회배려 할인을 반영하고
           <strong>전자계약 3%</strong>를 함께 선택한 경우 그다음에 곱합니다.
           실제 적용·중복·요건은 상품·약관·HUG 기준과 다를 수 있습니다.
         </p>
@@ -550,6 +488,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-disc-3"></script>
+    <script src="app.js?v=hug-disc-4"></script>
   </body>
 </html>
