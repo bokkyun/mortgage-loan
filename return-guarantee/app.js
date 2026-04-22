@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-table-3 — 요율구간: 70%이하 / 70~80%미만 / 80%이상(80.0%→3구간), 선순위 C/A>50% 시 ×1.1
+ * @version hug-table-4 — UI: 담보한도 60%(담보가) vs 보증료할증 C/A>50% 구분 안내
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -275,9 +275,15 @@
     }
 
     html += '<div class="rg-result-box ' + (passSum && passC && passCD80 ? "rg-result-ok" : "rg-result-bad") + '">';
+    html += "<p><strong>〔담보·가입 한도 점검〕</strong> — 아래 60%·80%는 <strong>심사(담보) 조건</strong>입니다. 보증료와는 별도입니다.</p>";
     html += "<p><strong>담보로 인정되는 주택 가액</strong> (A×90%) = " + formatWon(cap) + "</p>";
     html += "<p><strong>B+C+D 합계</strong> = " + formatWon(sum) + " → " + (passSum ? "✓ 한도 이내" : "✗ 한도 초과") + "</p>";
-    html += "<p><strong>선순위채권(C)</strong> ≤ 담보가×60% (" + formatWon(cap * 0.6) + ") → " + (passC ? "✓" : "✗") + "</p>";
+    html +=
+      "<p><strong>선순위채권(C)</strong> ≤ <strong>담보인정가액의 60%</strong> (" +
+      formatWon(cap * 0.6) +
+      ") → " +
+      (passC ? "✓" : "✗") +
+      "</p>";
     if (USES_CD80.indexOf(type) !== -1) {
       html +=
         "<p><strong>C+D 합계</strong> ≤ 담보가×80% (" +
@@ -290,7 +296,7 @@
     }
     html += "<p><strong>담보·참고 부채비율</strong> (B+C+D ÷ A×90%) = " + (Number.isFinite(rCollateral) ? (rCollateral * 100).toFixed(1) + "%" : "—") + "</p>";
     html += "<hr style=\"border:none;border-top:1px solid var(--border);margin:0.75rem 0\" />";
-    html += "<p><strong>〔보증료 산정·참고〕</strong></p>";
+    html += "<p><strong>〔보증료 산정·참고〕</strong> — <strong>할증(×1.1)</strong>은 <strong>주택가(A) 대비</strong> 선순위(C) &gt; 50%일 때(위 60% 한도와 다른 규정).</p>";
     html +=
       "<p><strong>부채비율(요율)</strong> = (B+C) ÷ A = " +
       (Number.isFinite(rFee) ? (rFee * 100).toFixed(1) + "%" : "—") +
