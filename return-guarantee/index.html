@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J1JQSVPNM6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-J1JQSVPNM6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.svg" />
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#2a554a" />
+    <link rel="manifest" href="../site.webmanifest" />
+    <meta name="theme-color" content="#2a554a" />
+    <title>전세보증금 반환보증 참고 계산기 | 주택가격(A)·담보한도·예상 보증료</title>
+    <meta
+      name="description"
+      content="HUG 공개 기준을 단순화한 참고용 도구입니다. 주택가격(A)의 90% 담보 한도 대비 B+C+D, 선순위채권 60%·(C+D) 80% 점검과 부채비율 구간별 예상 보증료를 브라우저에서만 산출합니다."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <link rel="canonical" href="https://mortgage-loan.uk/return-guarantee/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="Mortgage Loan Lab" />
+    <meta property="og:title" content="전세보증금 반환보증 참고 계산기 | 주택가격·보증료" />
+    <meta
+      property="og:description"
+      content="담보 인정 A×90% 대비 전세보증금·선순위채권·선순위 임차보증금 한도 점검과 예상 보증료(참고)를 한 화면에서 확인합니다."
+    />
+    <meta property="og:url" content="https://mortgage-loan.uk/return-guarantee/" />
+    <meta property="og:image" content="https://mortgage-loan.uk/og-image.png" />
+    <meta property="og:image:secure_url" content="https://mortgage-loan.uk/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mortgage Loan Lab - mortgage calculator hub" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="전세보증금 반환보증 참고 계산기" />
+    <meta name="twitter:description" content="주택가격(A)·담보한도·예상 보증료 참고 산출" />
+    <meta name="twitter:image" content="https://mortgage-loan.uk/og-image.png" />
+    <meta name="twitter:image:alt" content="Mortgage Loan Lab - mortgage calculator hub" />
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3300541490593571"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "전세보증금 반환보증 참고 계산기",
+        "url": "https://mortgage-loan.uk/return-guarantee/",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "All",
+        "inLanguage": "ko-KR",
+        "description": "주택가격 담보 인정 한도와 전세보증금·선순위 부채 합계 비교, 부채비율 구간별 예상 보증료를 참고용으로 계산하는 웹 도구",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      }
+    </script>
+    <meta name="google-adsense-account" content="ca-pub-3300541490593571" />
+  </head>
+  <body>
+    <header>
+      <h1>전세보증금 반환보증 참고 계산기</h1>
+      <p>
+        안심전세 등 <strong>반환보증보험</strong> 심사에서 쓰이는 <strong>주택가격(A)</strong>과 담보 한도를 참고 형태로 점검하고,
+        부채비율 구간에 따른 <strong>예상 보증료</strong>를 함께 추정합니다.
+      </p>
+      <nav class="quick-nav" aria-label="빠른 이동">
+        <a href="../">홈</a>
+        <a href="#rg-main">보증·요율</a>
+        <a href="#rg-land-panel">기타주택 A</a>
+        <a href="#rg-sources">자료 출처</a>
+        <a href="../didimdol/">디딤돌</a>
+        <a href="../dsr/">DSR</a>
+        <a href="../beotimmok/">버팀목</a>
+      </nav>
+      <div class="disclaimer" style="margin-top: 0.75rem">
+        본 페이지는 <strong>참고용 단순 모델</strong>입니다. 주택가격 산정 우선순위·실제 요율·할인·가입 가능 여부는
+        <a href="https://www.khug.or.kr" rel="noopener noreferrer" target="_blank">HUG</a> 및 취급 기관 안내를 따릅니다.
+      </div>
+    </header>
+
+    <main>
+      <div class="return-guarantee-grid">
+        <section class="card" id="rg-main">
+          <h2 class="rg-panel-title">보증금액·한도 점검 · 예상 보증료</h2>
+          <p class="field-hint" style="margin-bottom: 1rem">
+            <strong>기본식:</strong> 전세보증금(B) + 선순위채권(C) + 선순위 임차보증금(D) ≤ 주택가격(A) × 90% · 선순위채권(C) ≤ (A×90%) × 60%.
+            단독·다세대·다가구·다중주택은 (C+D) ≤ (A×90%) × 80%도 함께 봅니다. D가 있는 경우 일부 유형에서만 가입이 가능하다는 안내가 있습니다.
+          </p>
+          <p class="field-hint" style="margin-bottom: 1rem">
+            전세보증금 상한(참고): 수도권 7억 원, 수도권 외 5억 원 안내가 있습니다. 월세 포함 계약은 환산 보증금 =
+            B + (월세×12) ÷ 전월전환율 로 넣을 수 있습니다.
+          </p>
+
+          <div class="grid grid-2">
+            <div>
+              <label for="rg-type">주택 유형</label>
+              <select id="rg-type">
+                <option value="아파트">아파트</option>
+                <option value="오피스텔">오피스텔</option>
+                <option value="단독주택">단독주택</option>
+                <option value="연립주택">연립주택</option>
+                <option value="다세대주택">다세대주택</option>
+                <option value="다가구주택">다가구주택</option>
+                <option value="노인복지주택">노인복지주택</option>
+                <option value="다중주택">다중주택</option>
+              </select>
+            </div>
+            <div>
+              <label for="rg-region">지역(보증금 상한 참고)</label>
+              <select id="rg-region">
+                <option value="metro">수도권(7억 한도 안내)</option>
+                <option value="other">수도권 외(5억 한도 안내)</option>
+              </select>
+            </div>
+            <div class="grid-span-2">
+              <label for="rg-a">주택가격 (A) — 만원</label>
+              <input type="text" id="rg-a" inputmode="decimal" placeholder="예: 50000 (5억)" autocomplete="off" />
+              <p class="field-hint">KB·부동산원 시세, 공시가격×140% 등으로 구한 뒤 입력하세요. 우측 패널에서 토지+건물×140%로 추정할 수 있습니다.</p>
+            </div>
+            <div>
+              <label for="rg-b">전세보증금 (B) — 만원</label>
+              <input type="text" id="rg-b" inputmode="decimal" placeholder="예: 20000" autocomplete="off" />
+            </div>
+            <div>
+              <label for="rg-c">선순위채권 (C) — 만원</label>
+              <input type="text" id="rg-c" inputmode="decimal" placeholder="없으면 0" autocomplete="off" />
+            </div>
+            <div class="grid-span-2">
+              <label for="rg-d">선순위 임차보증금 (D) — 만원</label>
+              <input type="text" id="rg-d" inputmode="decimal" placeholder="없으면 0" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 1rem; background: var(--surface2); border-style: dashed">
+            <h3 class="subsection-title" style="margin-top: 0">월세 포함 시 환산 보증금 (선택)</h3>
+            <label class="radio-pill" style="display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem">
+              <input type="checkbox" id="rg-wolse-check" />
+              <span>월세를 전월전환율로 환산해 B에 더함</span>
+            </label>
+            <div class="grid grid-2">
+              <div>
+                <label for="rg-wolse">월세 — 만원/월</label>
+                <input type="text" id="rg-wolse" inputmode="decimal" placeholder="예: 50" autocomplete="off" />
+              </div>
+              <div>
+                <label for="rg-conv">전월전환율 (%)</label>
+                <input type="number" id="rg-conv" min="0.1" step="0.1" value="4" />
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top: 1rem">
+            <div>
+              <label for="rg-months">보증·요율 일할 기간 (개월)</label>
+              <input type="number" id="rg-months" min="1" max="120" step="1" value="25" />
+              <p class="field-hint">HUG 안내 예시와 같이 25개월 등으로 두고 연요율을 월할 적용합니다.</p>
+            </div>
+          </div>
+
+          <div class="hub-card-actions" style="margin-top: 1rem">
+            <button type="button" class="hub-btn-primary" id="rg-calc-main">한도·보증료 계산</button>
+            <button type="button" class="hub-btn-secondary" id="rg-reset-main">초기화</button>
+          </div>
+
+          <div id="rg-result" hidden aria-live="polite"></div>
+        </section>
+
+        <section class="card" id="rg-land-panel">
+          <h2 class="rg-panel-title">기타주택 주택가격 (A) 추정 — 토지+건물 × 140%</h2>
+          <p class="field-hint" style="margin-bottom: 1rem">
+            연립·다세대·단독 등에서 시세 자료가 없을 때, 토지 공시지가와 건물 시가표준액을 합한 뒤 140%를 곱하는 방식을 참고할 수 있습니다.
+            산출값은 좌측 <strong>주택가격(A)</strong> 칸에 반영한 뒤 본 계산을 진행하세요.
+          </p>
+          <div class="grid grid-2">
+            <div class="grid-span-2">
+              <label for="rg-land-price">토지 공시지가 — 원/㎡</label>
+              <input type="text" id="rg-land-price" inputmode="decimal" placeholder="예: 3500000" autocomplete="off" />
+            </div>
+            <div class="grid-span-2">
+              <label for="rg-land-area">토지 면적 — ㎡</label>
+              <input type="text" id="rg-land-area" inputmode="decimal" placeholder="예: 120" autocomplete="off" />
+            </div>
+            <div class="grid-span-2">
+              <label>대지권 비율 (분의)</label>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap">
+                <input type="number" id="rg-ratio-n" min="0" step="1" placeholder="분자" style="max-width: 6rem" />
+                <span>/</span>
+                <input type="number" id="rg-ratio-d" min="1" step="1" placeholder="분모" style="max-width: 6rem" />
+              </div>
+              <p class="field-hint">단독 등 전유가 아니면 분양·등기 기준 대지권 비율을 입력합니다. 전체 토지면적 기준이면 1/1.</p>
+            </div>
+            <div class="grid-span-2">
+              <label for="rg-building">건물 시가표준액 — 만원</label>
+              <input type="text" id="rg-building" inputmode="decimal" placeholder="홈택스 등 확인" autocomplete="off" />
+            </div>
+          </div>
+          <p id="rg-land-result" class="field-hint" aria-live="polite"></p>
+          <div class="hub-card-actions" style="margin-top: 0.75rem">
+            <button type="button" class="hub-btn-primary" id="rg-calc-land">주택가격 산출</button>
+            <button type="button" class="hub-btn-secondary" id="rg-apply-a">A 칸에 넣기</button>
+            <button type="button" class="hub-btn-secondary" id="rg-reset-land">초기화</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="card" id="rg-sources" style="margin-top: 1rem">
+        <h2>주택가격 (A) 자료 — 직접 확인용 링크</h2>
+        <p class="field-hint">
+          실제 심사에서는 HUG가 정한 <strong>우선순위</strong>에 따라 KB 시세, 부동산원, 공시가격×140%, 최근 실거래 등이 달라집니다. 아래는 입력값을 찾을 때 쓰는 공개 창구입니다.
+        </p>
+        <ul class="doc-list">
+          <li>
+            <a href="https://onland.kbstar.com" rel="noopener noreferrer" target="_blank">KB 부동산 시세 (onland.kbstar.com)</a>
+          </li>
+          <li>
+            <a href="https://www.rtech.or.kr" rel="noopener noreferrer" target="_blank">한국부동산원 (rtech.or.kr)</a>
+          </li>
+          <li>
+            <a href="https://www.realtyprice.kr" rel="noopener noreferrer" target="_blank">공동주택 공시가격 (realtyprice.kr)</a>
+          </li>
+          <li>
+            <a href="https://www.hometax.go.kr" rel="noopener noreferrer" target="_blank">홈택스 — 오피스텔 시가표준액 등 (hometax.go.kr)</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="card" style="margin-top: 1rem">
+        <h2>보증료(참고) 산출 방식</h2>
+        <p>
+          이 도구는 부채비율 (B+C+D) ÷ (A×90%) 을 구간으로 나누어 연 0.115% ~ 0.154% 수준의
+          <strong>단순 구간표</strong>를 적용하고, 입력한 개월 수만큼 월할로 곱해 예상 보증료를 보여 줍니다.
+          실제 요율·취약계층 할인·보증기간 일 단위·납부 방식은 상품 고시와 계약서 기준입니다.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-main">
+        <span>© Mortgage Loan Lab · 참고용 계산기</span>
+      </div>
+      <div class="footer-links">
+        <a href="../">홈</a>
+        <a href="../about/">About</a>
+        <a href="../guides/">가이드</a>
+        <a href="../contact/">문의</a>
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../disclaimer/">면책 조항</a>
+        <a href="../didimdol/">디딤돌 계산기</a>
+        <a href="../dsr/">DSR 계산기</a>
+        <a href="../beotimmok/">버팀목 계산기</a>
+      </div>
+      <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

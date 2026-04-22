@@ -818,6 +818,58 @@ footer .footer-note {
   font-weight: 500;
 }
 
+/* 반환보증보험 계산기 2열 */
+.return-guarantee-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 960px) {
+  .return-guarantee-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.rg-panel-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--btn-primary-mid);
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.rg-result-box {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.rg-result-box p {
+  margin: 0.35rem 0;
+}
+
+.rg-result-ok {
+  background: var(--accent-dim);
+  border: 1px solid var(--border);
+}
+
+.rg-result-bad {
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  color: #1a1a1a;
+}
+
+.rg-result-warn {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #5d4200;
+}
+
 .hub-grid {
   display: grid;
   gap: 1rem;
