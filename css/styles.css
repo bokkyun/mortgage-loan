@@ -891,6 +891,104 @@ footer .footer-note {
   font-size: 0.88rem;
 }
 
+/* 반환보증: 주택 유형 아래 KB 시세 안내 */
+.rg-kb-note {
+  margin-top: 0.55rem;
+  padding: 0.55rem 0.7rem 0.6rem;
+  background: linear-gradient(165deg, rgba(53, 107, 94, 0.07) 0%, var(--surface2) 100%);
+  border: 1px solid rgba(42, 85, 74, 0.2);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--btn-primary-mid);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text, #1a1a1a);
+}
+
+.rg-kb-note__head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--btn-primary-mid);
+  text-transform: none;
+}
+
+.rg-kb-note__head-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 4px;
+  background: rgba(42, 85, 74, 0.12);
+  font-size: 0.65rem;
+  line-height: 1;
+}
+
+.rg-kb-note__row {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.28rem 0;
+}
+
+.rg-kb-note__row + .rg-kb-note__row {
+  border-top: 1px dashed rgba(42, 85, 74, 0.18);
+  margin-top: 0.1rem;
+  padding-top: 0.38rem;
+}
+
+.rg-kb-note__bullet {
+  flex-shrink: 0;
+  margin-top: 0.12em;
+  color: var(--btn-primary-mid);
+  font-size: 0.75rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.rg-kb-note__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rg-kb-note__body strong {
+  font-weight: 700;
+  color: var(--btn-primary-mid);
+}
+
+.rg-kb-note__arrow {
+  margin: 0 0.2rem;
+  color: var(--muted, #666);
+  font-weight: 600;
+  font-size: 0.82em;
+}
+
+.rg-kb-note__em {
+  font-style: normal;
+  font-weight: 600;
+  color: #234a40;
+}
+
+.rg-kb-note__sub {
+  display: block;
+  margin-top: 0.2rem;
+  padding-left: 0.1rem;
+  font-size: 0.82rem;
+  color: var(--muted, #666);
+}
+
+.rg-kb-note__sub::before {
+  content: "※ ";
+  color: var(--btn-primary-mid);
+  font-weight: 600;
+  opacity: 0.75;
+}
+
 .hub-grid {
   display: grid;
   gap: 1rem;
