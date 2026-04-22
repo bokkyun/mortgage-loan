@@ -82,7 +82,7 @@
         <a href="../">홈</a>
         <a href="#rg-main">보증·요율</a>
         <a href="#rg-land-panel">기타주택 A</a>
-        <a href="#rg-sources">자료 출처</a>
+        <a href="#rg-price-links">주택가격 링크</a>
         <a href="../didimdol/">디딤돌</a>
         <a href="../dsr/">DSR</a>
         <a href="../beotimmok/">버팀목</a>
@@ -133,9 +133,33 @@
               </select>
             </div>
             <div class="grid-span-2">
-              <label for="rg-a">주택가격 (A) — 원</label>
+              <label for="rg-a">주택가격 (A)</label>
               <input type="text" id="rg-a" inputmode="numeric" placeholder="예: 500,000,000 (약 5억)" autocomplete="off" />
-              <p class="field-hint">KB·부동산원 시세, 공시가격×140% 등으로 구한 뒤 원 단위로 입력하세요. 천단위 콤마는 자동으로 붙습니다. 우측 패널에서 토지+건물×140%로 추정할 수 있습니다.</p>
+              <div class="rg-price-links" id="rg-price-links">
+                <p class="rg-price-links__title">주택가격 확인용 링크</p>
+                <ul class="doc-list">
+                  <li>
+                    <a href="https://kbland.kr/" rel="noopener noreferrer" target="_blank">KB 부동산 시세 (kbland.kr)</a>
+                  </li>
+                  <li>
+                    <a href="https://www.rtech.or.kr" rel="noopener noreferrer" target="_blank">한국부동산원 (rtech.or.kr)</a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.realtyprice.kr/notice/town/nfSiteLink.htm"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      >공동주택 공시가격 (realtyprice.kr)</a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&amp;tmIdx=47&amp;tm2lIdx=4712090000&amp;tm3lIdx=4712090300"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                      >홈택스 — 오피스텔 시가표준액 (국세청)</a>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div>
               <label for="rg-b">전세보증금 (B) — 원</label>
@@ -222,35 +246,6 @@
           </div>
         </section>
       </div>
-
-      <section class="card" id="rg-sources" style="margin-top: 1rem">
-        <h2>주택가격 (A) 자료 — 직접 확인용 링크</h2>
-        <p class="field-hint">
-          실제 심사에서는 HUG가 정한 <strong>우선순위</strong>에 따라 KB 시세, 부동산원, 공시가격×140%, 최근 실거래 등이 달라집니다. 아래는 입력값을 찾을 때 쓰는 공개 창구입니다.
-        </p>
-        <ul class="doc-list">
-          <li>
-            <a href="https://kbland.kr/" rel="noopener noreferrer" target="_blank">KB 부동산 시세 (kbland.kr)</a>
-          </li>
-          <li>
-            <a href="https://www.rtech.or.kr" rel="noopener noreferrer" target="_blank">한국부동산원 (rtech.or.kr)</a>
-          </li>
-          <li>
-            <a
-              href="https://www.realtyprice.kr/notice/town/nfSiteLink.htm"
-              rel="noopener noreferrer"
-              target="_blank"
-              >공동주택 공시가격 (realtyprice.kr)</a>
-          </li>
-          <li>
-            <a
-              href="https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&amp;tmIdx=47&amp;tm2lIdx=4712090000&amp;tm3lIdx=4712090300"
-              rel="noopener noreferrer"
-              target="_blank"
-              >홈택스 — 오피스텔 시가표준액 (국세청)</a>
-          </li>
-        </ul>
-      </section>
 
       <section class="card" style="margin-top: 1rem">
         <h2>보증료(참고) 산출 방식</h2>
