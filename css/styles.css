@@ -778,6 +778,46 @@ footer .footer-note {
   padding-bottom: 2.5rem;
 }
 
+.hub-spotlight-bar {
+  margin: 0.15rem 0 1.15rem;
+  padding: 0.72rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(165deg, var(--surface2) 0%, var(--surface) 55%);
+  box-shadow: 0 4px 14px rgba(32, 72, 62, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.hub-spotlight-bar__label {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.hub-spotlight-bar a {
+  color: var(--btn-primary-mid);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid rgba(53, 107, 94, 0.38);
+}
+
+.hub-spotlight-bar a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.hub-spotlight-bar__hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
 .hub-grid {
   display: grid;
   gap: 1rem;
