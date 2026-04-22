@@ -870,6 +870,12 @@ footer .footer-note {
   color: #5d4200;
 }
 
+.rg-result-fee-simple p {
+  margin: 0.4rem 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
 /* 반환보증: 주택가격(A) 입력란 바로 아래 확인 링크 */
 .rg-price-links {
   margin-top: 0.65rem;

@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-table-4 — UI: 담보한도 60%(담보가) vs 보증료할증 C/A>50% 구분 안내
+ * @version hug-table-5 — 결과: 주택가·부채비율·요율·예상보증료 4행
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -32,17 +32,6 @@
   function formatWon(v) {
     if (!Number.isFinite(v)) return "—";
     return Math.round(v).toLocaleString("ko-KR") + " 원";
-  }
-
-  /** 담보로 인정되는 주택 가액 = A × 90% (원) */
-  function collateralCap(A) {
-    return A * 0.9;
-  }
-
-  /** 담보 한도 점검용: (B+C+D) ÷ (A×90%) */
-  function debtRatioToCollateral(B, C, D, cap) {
-    if (!Number.isFinite(cap) || cap <= 0) return NaN;
-    return (B + C + D) / cap;
   }
 
   /**
@@ -227,7 +216,6 @@
       );
     }
 
-    var cap = collateralCap(A);
     var maxB = region === "metro" ? 700000000 : 500000000;
     if (Beff > maxB) {
       warns.push(
@@ -248,17 +236,8 @@
       return;
     }
 
-    var sum = Beff + C + D;
-    var passSum = sum <= cap;
-    var passC = C <= cap * 0.6;
-    var passCD80 = true;
-    if (USES_CD80.indexOf(type) !== -1) {
-      passCD80 = C + D <= cap * 0.8;
-    }
-
     var guaranteeBase = Beff;
     var rFee = feeDebtRatio(Beff, C, A);
-    var rCollateral = debtRatioToCollateral(Beff, C, D, cap);
     var baseFeePct = baseAnnualReturnFeePercent(guaranteeBase, isApartmentType(type), Beff, C, A);
     var liSurch = hasSeniorLienSurcharge(C, A);
     var feePct = liSurch ? baseFeePct * 1.1 : baseFeePct;
@@ -274,54 +253,22 @@
         "</ul></div>";
     }
 
-    html += '<div class="rg-result-box ' + (passSum && passC && passCD80 ? "rg-result-ok" : "rg-result-bad") + '">';
-    html += "<p><strong>〔담보·가입 한도 점검〕</strong> — 아래 60%·80%는 <strong>심사(담보) 조건</strong>입니다. 보증료와는 별도입니다.</p>";
-    html += "<p><strong>담보로 인정되는 주택 가액</strong> (A×90%) = " + formatWon(cap) + "</p>";
-    html += "<p><strong>B+C+D 합계</strong> = " + formatWon(sum) + " → " + (passSum ? "✓ 한도 이내" : "✗ 한도 초과") + "</p>";
-    html +=
-      "<p><strong>선순위채권(C)</strong> ≤ <strong>담보인정가액의 60%</strong> (" +
-      formatWon(cap * 0.6) +
-      ") → " +
-      (passC ? "✓" : "✗") +
-      "</p>";
-    if (USES_CD80.indexOf(type) !== -1) {
-      html +=
-        "<p><strong>C+D 합계</strong> ≤ 담보가×80% (" +
-        formatWon(cap * 0.8) +
-        ") → " +
-        (passCD80 ? "✓" : "✗") +
-        "</p>";
-    } else {
-      html += "<p class=\"field-hint\">선택한 유형은 (C+D)≤담보×80% 검토가 핵심이 아닐 수 있습니다. D는 0으로 두는 경우가 많습니다.</p>";
+    var pctStr = Number.isFinite(rFee) ? (rFee * 100).toFixed(1) + "%" : "—";
+    var rateLine = Number.isFinite(feePct) ? feePct.toFixed(3) + "%/년" : "—";
+    if (liSurch && Number.isFinite(baseFeePct) && Number.isFinite(feePct)) {
+      rateLine = baseFeePct.toFixed(3) + "% → " + feePct.toFixed(3) + "%/년 (할증)";
     }
-    html += "<p><strong>담보·참고 부채비율</strong> (B+C+D ÷ A×90%) = " + (Number.isFinite(rCollateral) ? (rCollateral * 100).toFixed(1) + "%" : "—") + "</p>";
-    html += "<hr style=\"border:none;border-top:1px solid var(--border);margin:0.75rem 0\" />";
-    html += "<p><strong>〔보증료 산정·참고〕</strong> — <strong>할증(×1.1)</strong>은 <strong>주택가(A) 대비</strong> 선순위(C) &gt; 50%일 때(위 60% 한도와 다른 규정).</p>";
+    html += '<div class="rg-result-box rg-result-ok rg-result-fee-simple">';
+    html += "<p><strong>주택가액 (A)</strong> " + formatWon(A) + "</p>";
+    html += "<p><strong>부채비율</strong> " + pctStr + "</p>";
+    html += "<p><strong>적용 요율</strong> " + rateLine + "</p>";
+    html += "<p><strong>예상 보증료</strong> " + formatWon(feeWon) + "</p>";
     html +=
-      "<p><strong>부채비율(요율)</strong> = (B+C) ÷ A = " +
-      (Number.isFinite(rFee) ? (rFee * 100).toFixed(1) + "%" : "—") +
-      " (70% 이하 / 70% 초과~80% 미만 / 80% 이상 구간)</p>";
-    html +=
-      "<p><strong>선순위채권 ÷ 주택가</strong> = " +
-      (Number.isFinite(A) && A > 0 ? ((C / A) * 100).toFixed(1) + "%" : "—") +
-      (liSurch ? " → <strong>50% 초과</strong>로 기준 연요율 <strong>×1.1</strong> 할증 반영" : " → 50% 이하(할증 없음)") +
-      "</p>";
-    html += "<p><strong>보증금액 구간(요율표)</strong> = " + formatWon(guaranteeBase) + " · <strong>유형</strong> = " + (isApartmentType(type) ? "아파트" : "기타(아파트 외)") + "</p>";
-    html += "<p><strong>기준 연요율(반환보증)</strong> = " + (Number.isFinite(baseFeePct) ? baseFeePct.toFixed(3) : "—") + "%";
-    if (liSurch) {
-      html += " → <strong>적용 연요율</strong> = " + feePct.toFixed(3) + "% (할증 반영)</p>";
-    } else {
-      html += " → <strong>적용 연요율</strong> = " + (Number.isFinite(feePct) ? feePct.toFixed(3) : "—") + "%</p>";
-    }
-    html += "<p><strong>참고 보증대상 금액</strong> = " + formatWon(guaranteeBase) + "</p>";
-    html +=
-      "<p><strong>예상 보증료</strong> = 보증대상×적용요율×(보증기간 " +
+      '<p class="field-hint" style="margin-top:0.5rem">전세 ' +
+      formatWon(guaranteeBase) +
+      "·" +
       months +
-      "개월/12) ≈ " +
-      formatWon(feeWon) +
-      "</p>";
-    html +=
-      '<p class="field-hint">할인(사회배려·전자계약·일시납 등)은 별도이며, 실제 액·적용순서는 HUG·약관·취급 기관 기준입니다.</p>';
+      "개월 일할, 참고 추정(실제는 HUG·취급 기관 기준)입니다.</p>";
     html += "</div>";
 
     out.innerHTML = html;
