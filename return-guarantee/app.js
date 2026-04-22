@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-table-2 — 요율: (B+C)÷A·요율표, 선순위 C/A>50% 시 ×1.1 (0.141% 옛 구간표 없음)
+ * @version hug-table-3 — 요율구간: 70%이하 / 70~80%미만 / 80%이상(80.0%→3구간), 선순위 C/A>50% 시 ×1.1
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -60,16 +60,28 @@
   }
 
   /**
-   * 반환보증 기준 연요율(%) — 보증금액 구간·주택 유형·부채비율(70/80% 초과) 단계표(참고, HUG)
+   * 요율표 세 구간 (HUG 표기와 동일하게): 70% 이하 / 70% 초과·80% 미만 / 80% 이상
+   * — (B+C)/A가 정확히 80%인 경우는 중간이 아니라 세 번째(80% 이상) 칸.
+   * — 부동소수 오차 방지: 10(B+C)와 7A·8A를 원 단위 정수로 비교.
+   */
+  function feeTierColumn(B, C, A) {
+    if (!Number.isFinite(A) || A <= 0) return 2;
+    var n = 10 * (B + C);
+    var a7 = 7 * A;
+    var a8 = 8 * A;
+    if (n <= a7) return 0;
+    if (n < a8) return 1;
+    return 2;
+  }
+
+  /**
+   * 반환보증 기준 연요율(%) — 보증금액 구간·주택 유형·부채비율 단계표(참고, HUG)
    * @returns {number} 예: 0.097 = 연 0.097%
    */
-  function baseAnnualReturnFeePercent(guaranteeWon, apt, rFee) {
+  function baseAnnualReturnFeePercent(guaranteeWon, apt, B, C, A) {
     if (!Number.isFinite(guaranteeWon) || guaranteeWon < 0) return NaN;
-    if (!Number.isFinite(rFee) || rFee < 0) return NaN;
-    var col;
-    if (rFee <= 0.7) col = 0;
-    else if (rFee <= 0.8) col = 1;
-    else col = 2;
+    if (!Number.isFinite(A) || A <= 0) return NaN;
+    var col = feeTierColumn(B, C, A);
     var row;
     if (guaranteeWon <= 100000000) row = 0;
     else if (guaranteeWon <= 200000000) row = 1;
@@ -247,7 +259,7 @@
     var guaranteeBase = Beff;
     var rFee = feeDebtRatio(Beff, C, A);
     var rCollateral = debtRatioToCollateral(Beff, C, D, cap);
-    var baseFeePct = baseAnnualReturnFeePercent(guaranteeBase, isApartmentType(type), rFee);
+    var baseFeePct = baseAnnualReturnFeePercent(guaranteeBase, isApartmentType(type), Beff, C, A);
     var liSurch = hasSeniorLienSurcharge(C, A);
     var feePct = liSurch ? baseFeePct * 1.1 : baseFeePct;
     var feeWon = (guaranteeBase * (feePct / 100) * months) / 12;
@@ -282,7 +294,7 @@
     html +=
       "<p><strong>부채비율(요율)</strong> = (B+C) ÷ A = " +
       (Number.isFinite(rFee) ? (rFee * 100).toFixed(1) + "%" : "—") +
-      " (70%·80%·그 초과 구간으로 기준요율 선택)</p>";
+      " (70% 이하 / 70% 초과~80% 미만 / 80% 이상 구간)</p>";
     html +=
       "<p><strong>선순위채권 ÷ 주택가</strong> = " +
       (Number.isFinite(A) && A > 0 ? ((C / A) * 100).toFixed(1) + "%" : "—") +
