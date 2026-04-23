@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-disc-5 — 사회배려 택1(단독세대주 6할 고령 항목 제거) + 전자3% 병행, 요율×1.1은 자동
+ * @version hug-disc-6 — 아파트·KB오피=단일 A, 기타=기준가×%(기본140, 비움=100%)
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -126,21 +126,63 @@
     });
   }
 
-  /** 기타주택: (토지분+건물시가)×140% (원) */
-  function calcHousePriceFromLandBuilding() {
-    var landPerM2 = parseNumRaw($("rg-land-price").value); // 원/㎡
-    var area = parseNumRaw($("rg-land-area").value); // ㎡
+  /** 토지분+건물시가(원), 140% 곱하기 전 */
+  function sumLandBuildingBefore140() {
+    var landPerM2 = parseNumRaw($("rg-land-price").value);
+    var area = parseNumRaw($("rg-land-area").value);
     var rn = parseFloat($("rg-ratio-n").value) || 0;
     var rd = parseFloat($("rg-ratio-d").value) || 1;
-    var building = parseNumRaw($("rg-building").value); // 원
-
+    var building = parseNumRaw($("rg-building").value);
     if (!Number.isFinite(landPerM2) || landPerM2 < 0) return NaN;
     if (!Number.isFinite(area) || area <= 0) return NaN;
     if (!Number.isFinite(rn) || !Number.isFinite(rd) || rd === 0) return NaN;
     if (!Number.isFinite(building) || building < 0) return NaN;
-
     var landWon = landPerM2 * area * (rn / rd);
-    return (landWon + building) * 1.4;
+    return landWon + building;
+  }
+
+  /** 아파트·오피스텔(KB시세 유): 단일 A 입력. 그 외: 기준가 × (곱하기% ÷ 100) */
+  function usesKbAInput(type) {
+    return type === "아파트" || type === "오피스텔(KB시세 유)";
+  }
+
+  /** 곱하기 % — 비어 있으면 100% */
+  function parseMultPercentField(val) {
+    if (val == null) return 100;
+    var s = String(val)
+      .replace(/,/g, "")
+      .replace(/\s/g, "")
+      .replace(/%/g, "")
+      .trim();
+    if (s === "") return 100;
+    var n = parseFloat(s);
+    if (!Number.isFinite(n) || n <= 0) return NaN;
+    return n;
+  }
+
+  function getEffectiveA() {
+    var type = $("rg-type").value;
+    if (usesKbAInput(type)) {
+      return parseNumRaw($("rg-a").value);
+    }
+    var base = parseNumRaw($("rg-a-base") ? $("rg-a-base").value : "");
+    var pct = parseMultPercentField($("rg-a-pct") ? $("rg-a-pct").value : "140");
+    if (!Number.isFinite(base) || base <= 0) return NaN;
+    if (!Number.isFinite(pct)) return NaN;
+    return base * (pct / 100);
+  }
+
+  function updateHousingTypeUI() {
+    var type = $("rg-type").value;
+    var kb = usesKbAInput(type);
+    var kbBlock = $("rg-a-mode-kb");
+    var oBlock = $("rg-a-mode-other");
+    var land = $("rg-land-panel");
+    var kbHint = document.querySelector(".rg-kb-hint");
+    if (kbBlock) kbBlock.hidden = !kb;
+    if (oBlock) oBlock.hidden = kb;
+    if (land) land.hidden = kb;
+    if (kbHint) kbHint.style.display = kb ? "" : "none";
   }
 
   function setWonFieldFormatted(id, value) {
@@ -153,7 +195,7 @@
     el.value = Math.round(value).toLocaleString("ko-KR");
   }
 
-  var COMMA_WON_IDS = ["rg-a", "rg-b", "rg-c", "rg-d", "rg-wolse", "rg-building", "rg-land-price"];
+  var COMMA_WON_IDS = ["rg-a", "rg-a-base", "rg-b", "rg-c", "rg-d", "rg-wolse", "rg-building", "rg-land-price"];
 
   function onWonFocus(e) {
     var v = e.target.value;
@@ -199,7 +241,7 @@
   function runMainCalc() {
     var type = $("rg-type").value;
     var region = $("rg-region").value;
-    var A = parseNumRaw($("rg-a").value);
+    var A = getEffectiveA();
     var B = parseNumRaw($("rg-b").value);
     var C = parseNumOrZero($("rg-c").value);
     var D = parseNumOrZero($("rg-d").value);
@@ -216,7 +258,21 @@
     var errors = [];
     var warns = [];
 
-    if (!Number.isFinite(A) || A <= 0) errors.push("주택가격(A)을 입력하세요.");
+    if (!Number.isFinite(A) || A <= 0) {
+      if (usesKbAInput(type)) {
+        errors.push("주택가격(A)을 입력하세요.");
+      } else {
+        var base0 = parseNumRaw($("rg-a-base") ? $("rg-a-base").value : "");
+        var pct0 = parseMultPercentField($("rg-a-pct") ? $("rg-a-pct").value : "");
+        if (!Number.isFinite(base0) || base0 <= 0) {
+          errors.push("주택가격(기준)을 입력하세요.");
+        } else if (!Number.isFinite(pct0)) {
+          errors.push("곱하기(%)는 비우기(=100%) 또는 0보다 큰 수로 입력하세요.");
+        } else {
+          errors.push("주택가격(기준)과 곱하기(%)를 확인하세요.");
+        }
+      }
+    }
     if (!Number.isFinite(B) || B < 0) errors.push("전세보증금(B)을 입력하세요.");
     if (!Number.isFinite(C) || C < 0) C = 0;
     if (!Number.isFinite(D) || D < 0) D = 0;
@@ -298,6 +354,18 @@
     }
     html += '<div class="rg-result-box rg-result-ok rg-result-fee-simple">';
     html += "<p><strong>주택가액 (A)</strong> " + formatWon(A) + "</p>";
+    if (!usesKbAInput(type)) {
+      var bShow = parseNumRaw($("rg-a-base") ? $("rg-a-base").value : "");
+      var pShow = parseMultPercentField($("rg-a-pct") ? $("rg-a-pct").value : "");
+      if (Number.isFinite(bShow) && bShow > 0 && Number.isFinite(pShow)) {
+        html +=
+          '<p class="field-hint" style="margin-top:0.15rem">기준 ' +
+          formatWon(bShow) +
+          " × " +
+          pShow +
+          "%</p>";
+      }
+    }
     html += "<p><strong>부채비율</strong> " + pctStr + "</p>";
     html += "<p><strong>적용 요율</strong> " + rateLine + "</p>";
     if (Math.abs(feeFinal - feeBeforeDisc) > 0.5) {
@@ -320,31 +388,48 @@
   }
 
   function runLandCalc() {
-    var A = calcHousePriceFromLandBuilding();
+    var base = sumLandBuildingBefore140();
     var el = $("rg-land-result");
-    if (!Number.isFinite(A)) {
+    if (!Number.isFinite(base)) {
       el.textContent = "토지공시지가(원/㎡)·면적·대지권 비율·건물시가표준액(원)을 확인하세요.";
       el.className = "field-hint";
+      el.style.color = "";
       return;
     }
-    el.textContent = "산출 주택가격(A) ≈ " + formatWon(A) + " (140% 적용)";
+    var A = base * 1.4;
     el.className = "field-hint";
     el.style.color = "var(--ok)";
-    setWonFieldFormatted("rg-a", A);
+    if (usesKbAInput($("rg-type").value)) {
+      setWonFieldFormatted("rg-a", A);
+      el.textContent = "산출 주택가격(A) ≈ " + formatWon(A) + " (토지+건물 합 × 140% — A 칸에 반영)";
+    } else {
+      setWonFieldFormatted("rg-a-base", base);
+      if ($("rg-a-pct")) $("rg-a-pct").value = "140";
+      el.textContent =
+        "기준 " + formatWon(base) + " × 140% → (A) ≈ " + formatWon(A) + " (기준·곱하기%란에 반영)";
+    }
   }
 
   function applyLandToA() {
-    var A = calcHousePriceFromLandBuilding();
-    if (!Number.isFinite(A)) {
+    var base = sumLandBuildingBefore140();
+    if (!Number.isFinite(base)) {
       runLandCalc();
       return;
     }
-    setWonFieldFormatted("rg-a", A);
+    var A = base * 1.4;
+    if (usesKbAInput($("rg-type").value)) {
+      setWonFieldFormatted("rg-a", A);
+    } else {
+      setWonFieldFormatted("rg-a-base", base);
+      if ($("rg-a-pct")) $("rg-a-pct").value = "140";
+    }
     runLandCalc();
   }
 
   function resetMain() {
     $("rg-a").value = "";
+    if ($("rg-a-base")) $("rg-a-base").value = "";
+    if ($("rg-a-pct")) $("rg-a-pct").value = "140";
     $("rg-b").value = "";
     $("rg-c").value = "";
     $("rg-d").value = "";
@@ -367,9 +452,24 @@
     $("rg-land-result").textContent = "";
   }
 
+  function onPctBlur(e) {
+    var el = e.target;
+    if (!el.value || String(el.value).trim() === "") return;
+    var n = parseMultPercentField(el.value);
+    if (!Number.isFinite(n)) return;
+    el.value = n % 1 === 0 ? String(Math.round(n)) : String(n);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     wireCommaFormatting();
     wireDiscountMutex();
+    var typeEl = $("rg-type");
+    if (typeEl) {
+      typeEl.addEventListener("change", updateHousingTypeUI);
+      updateHousingTypeUI();
+    }
+    var pctEl = $("rg-a-pct");
+    if (pctEl) pctEl.addEventListener("blur", onPctBlur);
     $("rg-calc-main").addEventListener("click", runMainCalc);
     $("rg-reset-main").addEventListener("click", resetMain);
     $("rg-calc-land").addEventListener("click", runLandCalc);

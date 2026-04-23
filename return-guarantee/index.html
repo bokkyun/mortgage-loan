@@ -124,9 +124,38 @@
                 <option value="other">수도권 외(5억 한도 안내)</option>
               </select>
             </div>
-            <div class="grid-span-2">
-              <label for="rg-a">주택가격 (A)</label>
-              <input type="text" id="rg-a" inputmode="numeric" placeholder="예: 500,000,000 (약 5억)" autocomplete="off" />
+            <div class="grid-span-2" id="rg-a-block">
+              <div id="rg-a-mode-kb">
+                <label for="rg-a">주택가격 (A)</label>
+                <input type="text" id="rg-a" inputmode="numeric" placeholder="예: 500,000,000 (약 5억)" autocomplete="off" />
+              </div>
+              <div id="rg-a-mode-other" class="grid grid-2" style="margin-bottom: 0.5rem" hidden>
+                <div>
+                  <label for="rg-a-base">주택가격 (기준)</label>
+                  <input
+                    type="text"
+                    id="rg-a-base"
+                    inputmode="numeric"
+                    placeholder="공시가·시가표준액 합 등 (원)"
+                    autocomplete="off"
+                  />
+                </div>
+                <div>
+                  <label for="rg-a-pct">곱하기 (%)</label>
+                  <input
+                    type="text"
+                    id="rg-a-pct"
+                    inputmode="decimal"
+                    value="140"
+                    placeholder="140 또는 비움(100%)"
+                    autocomplete="off"
+                  />
+                </div>
+                <p class="field-hint grid-span-2" style="margin: 0">
+                  (A) = 기준가 × (곱하기 % ÷ 100). 기본 <strong>140%</strong> (참고)이며, % 칸을 비우면 100%로서 기준가만
+                  (A)로 씁니다.
+                </p>
+              </div>
               <div class="rg-price-links" id="rg-price-links">
                 <p class="rg-price-links__title">주택가격 확인용 링크</p>
                 <ul class="doc-list">
@@ -475,6 +504,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-disc-5"></script>
+    <script src="app.js?v=hug-disc-6"></script>
   </body>
 </html>
