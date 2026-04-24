@@ -52,7 +52,7 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3300541490593571"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/styles.css?v=step12-accordion" />
     <link
       rel="stylesheet"
       as="style"
@@ -146,7 +146,18 @@
     </header>
 
     <main>
-      <section class="card" id="income-section">
+      <div id="income-section" class="income-accordion">
+        <button
+          type="button"
+          class="income-accordion__toggle"
+          id="btn-toggle-income-step12"
+          aria-expanded="false"
+          aria-controls="income-step12-panels"
+        >
+          내 소득을 어떻게 계산하나요?
+        </button>
+        <div id="income-step12-panels" class="income-accordion__body" hidden>
+      <section class="card">
         <h2>
           1. 본인 <span class="badge">필수</span>
           <span class="section-note">부부합산 소득을 명확히 알고 있으면 3번 금리계산 탭에서 시작해도 무방합니다.</span>
@@ -402,6 +413,8 @@
       </section>
 
       <button type="button" class="btn-primary" id="btn-income-calc">소득 계산</button>
+        </div>
+      </div>
 
       <div style="height: 1rem"></div>
 
@@ -924,7 +937,7 @@
       </div>
     </div>
 
-    <script src="../js/income.js"></script>
+    <script src="../js/income.js?v=step12-accordion"></script>
     <script src="../js/app.js"></script>
   </body>
 </html>

@@ -191,3 +191,33 @@ function fmtNum(n) {
   if (n == null || Number.isNaN(n)) return "-";
   return Math.round(n).toLocaleString("ko-KR");
 }
+
+/** 디딤돌·버팀목: 1·2번 소득 블록 접기 (didimdol·beotimmok 공통) */
+(function initIncomeStep12Accordion() {
+  const btn = document.getElementById("btn-toggle-income-step12");
+  const panels = document.getElementById("income-step12-panels");
+  if (!btn || !panels) return;
+
+  function setExpanded(expanded) {
+    panels.hidden = !expanded;
+    btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+  }
+
+  btn.addEventListener("click", function () {
+    setExpanded(!!panels.hidden);
+    if (!panels.hidden) {
+      try {
+        panels.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (_) {}
+    }
+  });
+
+  function openFromHash() {
+    const h = window.location.hash;
+    if (h === "#income-section" || h === "#spouse-section") {
+      setExpanded(true);
+    }
+  }
+  openFromHash();
+  window.addEventListener("hashchange", openFromHash);
+})();

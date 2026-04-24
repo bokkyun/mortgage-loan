@@ -792,6 +792,57 @@ footer .footer-note {
   }
 }
 
+/* 디딤돌·버팀목: 1·2번 소득 접기 */
+.income-accordion {
+  margin-bottom: 1rem;
+}
+
+.income-accordion__toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--btn-primary-mid);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  line-height: 1.35;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.income-accordion__toggle:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+.income-accordion__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.income-accordion__body {
+  margin-top: 0.75rem;
+}
+
+.income-accordion__body > .card + .card {
+  margin-top: 1rem;
+}
+
+.income-accordion__body > .btn-primary {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+#income-step12-panels[hidden] {
+  display: none !important;
+}
+
 /* [hidden]이 .grid의 display보다 밀리는 경우 대비 (반환보증 A 입력 모드 전환) */
 #rg-a-mode-other[hidden],
 #rg-a-mode-kb[hidden],
