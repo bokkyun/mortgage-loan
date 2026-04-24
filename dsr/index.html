@@ -403,8 +403,9 @@
       </div>
     </div>
     <p class="note" id="main_repay_note" style="display: none; margin-top: 0">
-      ※ 원리금균등: DSR·월 납부는 매월 일정(표준 PMT) 가정. 원금균등: 첫 12개월 연 원리금 합으로 연간 부담을 잡고, 월 납부(참고)는
-      <strong>1회차(최대)</strong> 기준. 초기 월이 커 DSR이 원리금보다 <strong>높게</strong> 나올 수 있습니다.
+      ※ 원리금균등: 매월 동일(표준 PMT), 연 DSR = 월납×12. 원금균등: <strong>상환기간 전체(거치 시 이자+분할) 총 상환(원+이자) ÷ 대출기간(년)</strong> = 연평균
+      상환액. 원금을 앞에 더 갚어 총 이자는 줄어, 같은 조건이면 DSR(연평균)이 원리금보다 <strong>낮게</strong> 잡힐 수 있음.
+      월란(참고)은 그 연평균 ÷ 12.
     </p>
     <p class="note">※ 일시상환은 DSR 원금 산정 시 대출기간을 최대 10년으로 적용합니다.</p>
   </div>
@@ -616,8 +617,8 @@
           </tr>
           <tr>
             <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (원금균등)</td>
-            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">첫 12개월 월(원금/n+잔액이자) 합계</td>
-            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">초기 월이 커 1년차 DSR이 원리금 대비 높을 수 있음</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">(전체 총 상환액) ÷ 대출기간(년)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">총 이자·연평균 부담이 원리금 대비 낮을 수 있음(거치 시 거치이자+분할 합/약정기간)</td>
           </tr>
           <tr>
             <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (부분분할·거치)</td>
@@ -849,41 +850,38 @@
     return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
   }
 
-  /** 첫 12개월(또는 잔여 만기) 연간 원이자 합 — 원금균등(분할) DSR용 */
-  function year1EqualPrincipal(amt, annualRate, years) {
-    if (amt <= 0 || years <= 0) return 0;
-    const n = Math.floor(years * 12);
-    if (n <= 0) return 0;
-    const M = Math.min(12, n);
+  /**
+   * 원금균등: 분할기간 동안 매월 원금/nR + 잔액이자. 거치기간은 원금 유지·이자만.
+   * 합계 = 약정기간(년) 동안 지불할 총액(원+이자).
+   */
+  function lifeTotalRepaymentEqualPrincipal(amt, annualRate, totalYears, graceYears) {
+    if (amt <= 0 || totalYears <= 0) return 0;
     const r = annualRate / 100 / 12;
-    const principalPart = (amt / n) * M;
-    let interestSum = 0;
-    for (let m = 0; m < M; m++) {
-      const bal = amt * (1 - m / n);
-      interestSum += bal * r;
+    const nT = Math.max(0, Math.round(totalYears * 12));
+    const gY = Math.max(0, Math.min(graceYears, totalYears));
+    const nG = Math.min(Math.round(gY * 12), nT);
+    const nR = nT - nG;
+    let total = 0;
+    for (let m = 0; m < nG; m++) {
+      total += amt * r;
     }
-    return principalPart + interestSum;
+    for (let m = 0; m < nR; m++) {
+      const pp = amt / nR;
+      const bal = amt * (1 - m / nR);
+      total += pp + bal * r;
+    }
+    return total;
   }
 
-  /** 1회차(최대) 월 납입 — 표시용 */
-  function firstMonthEqualPrincipal(amt, annualRate, years) {
-    if (amt <= 0 || years <= 0) return 0;
-    const n = Math.floor(years * 12);
-    if (n <= 0) return 0;
-    const r = annualRate / 100 / 12;
-    return amt / n + amt * r;
+  /** DSR용: 총 상환 ÷ 대출기간(년) = 연평균 상환액 (원금균등) */
+  function lifeAverageAnnualEqualPrincipal(amt, annualRate, totalYears, graceYears) {
+    if (totalYears <= 0) return 0;
+    return lifeTotalRepaymentEqualPrincipal(amt, annualRate, totalYears, graceYears) / totalYears;
   }
 
-  /** y1(원금균등) = 대출원 × 계수(선형) — 역산용 */
-  function y1EqualPrincipalCoef(annualRate, years) {
-    if (years <= 0) return 0;
-    const n = Math.floor(years * 12);
-    if (n <= 0) return 0;
-    const M = Math.min(12, n);
-    const r = annualRate / 100 / 12;
-    let sumI = 0;
-    for (let m = 0; m < M; m++) sumI += 1 - m / n;
-    return M / n + (r / 12) * sumI;
+  /** 연평균(만원/년) ÷ 대출원 = 선형 계수 — 역산 max 대출원 */
+  function lifeAverageEqualPrincipalCoef(annualRate, totalYears, graceYears) {
+    return lifeAverageAnnualEqualPrincipal(1, annualRate, totalYears, graceYears);
   }
 
   function maxLoanFromAnnualAnnuity(maxAnnual, annualRate, years) {
@@ -934,15 +932,15 @@
     }
 
     const mainRepay = mainType === "full" || mainType === "partial" ? getMainRepayMode() : "pni";
-    const repayLabel = mainRepay === "pp" ? "원금균등 (1년차)" : "원리금균등";
+    const repayLabel = mainRepay === "pp" ? "원금균등 (총상환÷기간)" : "원리금균등";
 
     let mainAnnual = 0;
     let monthlyPayment = 0;
 
     if (mainType === "full") {
       if (mainRepay === "pp") {
-        mainAnnual = year1EqualPrincipal(mainAmt, mainRate, mainTerm);
-        monthlyPayment = firstMonthEqualPrincipal(mainAmt, mainRate, mainTerm);
+        mainAnnual = lifeAverageAnnualEqualPrincipal(mainAmt, mainRate, mainTerm, 0);
+        monthlyPayment = mainAnnual / 12;
       } else {
         const monthly = pmt(mainAmt, mainRate, mainTerm);
         monthlyPayment = monthly;
@@ -952,8 +950,8 @@
       const repayTerm = mainTerm - mainGrace;
       if (repayTerm <= 0) { alert("거치기간이 대출기간 이상입니다."); return; }
       if (mainRepay === "pp") {
-        mainAnnual = year1EqualPrincipal(mainAmt, mainRate, repayTerm);
-        monthlyPayment = firstMonthEqualPrincipal(mainAmt, mainRate, repayTerm);
+        mainAnnual = lifeAverageAnnualEqualPrincipal(mainAmt, mainRate, mainTerm, mainGrace);
+        monthlyPayment = mainAnnual / 12;
       } else {
         const monthly = pmt(mainAmt, mainRate, repayTerm);
         monthlyPayment = monthly;
@@ -1049,7 +1047,7 @@
     document.getElementById("r_main").textContent = fmt(mainAnnual) + " / 년";
     document.getElementById("r_others").textContent = fmt(othersTotal) + " / 년";
     document.getElementById("r_total").textContent = fmt(totalAnnual) + " / 년";
-    const monNote = mainRepay === "pp" && (mainType === "full" || mainType === "partial") ? " (1회차·최대)" : "";
+    const monNote = mainRepay === "pp" && (mainType === "full" || mainType === "partial") ? " (기간·평균)" : "";
     document.getElementById("r_monthly").textContent = fmt(monthlyPayment) + " / 월" + monNote;
 
     let warnHTML = "";
@@ -1066,10 +1064,12 @@
           const effTerm = mainType === "partial" ? mainTerm - mainGrace : mainTerm;
           if (effTerm > 0) {
             if (mainRepay === "pp") {
-              const c = y1EqualPrincipalCoef(mainRate, effTerm);
+              const gY = mainType === "partial" ? mainGrace : 0;
+              const c = lifeAverageEqualPrincipalCoef(mainRate, mainTerm, gY);
               maxLoanAmt = c > 0 ? maxMain / c : 0;
             } else {
-              maxLoanAmt = maxLoanFromAnnualAnnuity(maxMain, mainRate, effTerm);
+              const annYears = mainType === "partial" ? mainTerm - mainGrace : mainTerm;
+              maxLoanAmt = maxLoanFromAnnualAnnuity(maxMain, mainRate, annYears);
             }
             maxLoanAmt = Math.floor(maxLoanAmt / 100) * 100;
             warnHTML += `본건대출(${repayLabel}) 기준: 약 <strong>${fmt(maxLoanAmt)} 이하</strong>로 조정 필요<br>`;
