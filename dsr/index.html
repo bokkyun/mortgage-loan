@@ -185,6 +185,43 @@
     .sub-row input:focus { border-color: #356b5e; }
     .sub-row .unit { font-size: 11px; color: #aaa; min-width: 20px; }
 
+    .dsr-multi-list { margin: 0 0 0.35rem; }
+    .dsr-multi-row {
+      padding: 0.4rem 0 0.55rem;
+      margin-bottom: 0.45rem;
+      border-bottom: 1px dashed #e0e0dc;
+    }
+    .dsr-multi-row:last-child { border-bottom: none; margin-bottom: 0; }
+    .dsr-line-actions { display: flex; justify-content: flex-end; margin-top: 0.3rem; }
+    .line-remove-btn {
+      font-size: 11px;
+      padding: 0.22rem 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fafafa;
+      color: #666;
+      cursor: pointer;
+    }
+    .line-remove-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .dsr-add-line-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      font-size: 1.45rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #1f4038;
+      border: 1px solid rgba(53, 107, 94, 0.45);
+      border-radius: 10px;
+      background: #e8f2ef;
+      cursor: pointer;
+      margin: 0.15rem 0 0.4rem;
+    }
+    .dsr-add-line-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    .dsr-add-line-hint { font-size: 11px; color: #888; margin: 0 0 0.45rem; }
+
     .collapsible { display: block; }
     .collapsible.hidden { display: none; }
 
@@ -407,35 +444,10 @@
       <button type="button" class="toggle-btn" onclick="toggleSection('credit_body', this)">펼치기 ▼</button>
     </div>
     <div id="credit_body" class="collapsible hidden">
-      <div class="row">
-        <label>대출잔액</label>
-        <input type="text" id="credit_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="3,000" />
-        <span class="unit">만원</span>
-      </div>
-      <div class="row">
-        <label>금리 (연)</label>
-        <input type="number" id="credit_rate" placeholder="5.00" step="0.01" min="0" />
-        <span class="unit">%</span>
-      </div>
-      <div class="row">
-        <label>상환방식</label>
-        <select id="credit_type" onchange="onCreditTypeChange()">
-          <option value="installment">분할상환</option>
-          <option value="bullet">분할상환 외 (일시 등)</option>
-        </select>
-      </div>
-      <div id="credit_term_row" class="row">
-        <label>약정만기</label>
-        <select id="credit_term">
-          <option value="5">5년</option>
-          <option value="6">6년</option>
-          <option value="7">7년</option>
-          <option value="8">8년</option>
-          <option value="9">9년</option>
-          <option value="10">10년</option>
-        </select>
-      </div>
-      <p class="note">※ 분할상환 외: 원금 ÷ 5년 + 이자 / 분할상환: 원금 ÷ 약정만기(5~10년) + 이자</p>
+      <p class="dsr-add-line-hint">+ 를 눌러 최대 <strong>10건</strong>까지 입력·합산합니다.</p>
+      <div id="credit_list" class="dsr-multi-list" data-dsr-type="credit"></div>
+      <button type="button" class="dsr-add-line-btn" id="credit_add" title="대출 1건 추가" aria-label="신용대출 항목 추가" onclick="addDsrLine('credit')">+</button>
+      <p class="note">※ 분할상환 외: 원금 ÷ 5년 + 이자 / 분할상환: 원금 ÷ 약정만기(5~10년) + 이자 (여러 건이면 합산)</p>
     </div>
   </div>
 
@@ -446,18 +458,11 @@
       <button type="button" class="toggle-btn" onclick="toggleSection('jeonse_body', this)">펼치기 ▼</button>
     </div>
     <div id="jeonse_body" class="collapsible hidden">
-      <div class="row">
-        <label>대출잔액</label>
-        <input type="text" id="jeonse_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
-        <span class="unit">만원</span>
-      </div>
-      <div class="row">
-        <label>금리 (연)</label>
-        <input type="number" id="jeonse_rate" placeholder="4.00" step="0.01" min="0" />
-        <span class="unit">%</span>
-      </div>
+      <p class="dsr-add-line-hint">+ 를 눌러 최대 <strong>10건</strong>까지 입력·합산합니다.</p>
+      <div id="jeonse_list" class="dsr-multi-list" data-dsr-type="jeonse"></div>
+      <button type="button" class="dsr-add-line-btn" id="jeonse_add" title="대출 1건 추가" aria-label="전세보증금담보 항목 추가" onclick="addDsrLine('jeonse')">+</button>
       <p class="note">
-        ※ 원금 ÷ 4년 + 이자로 산정<br>
+        ※ 건별 원금 ÷ 4년 + 이자로 산정 (여러 건이면 합산)<br>
         ※ 전세자금대출(임차인이 직접 받는 대출)은 DSR에 포함되지 않으므로 이 항목에 입력하지 마세요.
       </p>
     </div>
@@ -470,29 +475,10 @@
       <button type="button" class="toggle-btn" onclick="toggleSection('card_body', this)">펼치기 ▼</button>
     </div>
     <div id="card_body" class="collapsible hidden">
-      <div class="row">
-        <label>대출잔액</label>
-        <input type="text" id="card_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
-        <span class="unit">만원</span>
-      </div>
-      <div class="row">
-        <label>상환방식</label>
-        <select id="card_type" onchange="onCardTypeChange()">
-          <option value="installment">분할상환</option>
-          <option value="bullet">분할상환 외</option>
-        </select>
-      </div>
-      <div id="card_term_row" class="row">
-        <label>약정만기</label>
-        <select id="card_term">
-          <option value="1">1년</option>
-          <option value="2">2년</option>
-          <option value="3">3년</option>
-          <option value="4">4년</option>
-          <option value="5">5년</option>
-        </select>
-      </div>
-      <p class="note">※ 분할상환: 원금 ÷ 약정만기(5년 이내) / 분할상환 외: 원금 ÷ 3년 (이자 별도 미산입)</p>
+      <p class="dsr-add-line-hint">+ 를 눌러 최대 <strong>10건</strong>까지 입력·합산합니다.</p>
+      <div id="card_list" class="dsr-multi-list" data-dsr-type="card"></div>
+      <button type="button" class="dsr-add-line-btn" id="card_add" title="대출 1건 추가" aria-label="카드론 항목 추가" onclick="addDsrLine('card')">+</button>
+      <p class="note">※ 분할상환: 원금 ÷ 약정만기(5년 이내) / 분할상환 외: 원금 ÷ 3년 (이자 별도 미산입) · 여러 건이면 합산</p>
     </div>
   </div>
 
@@ -503,32 +489,23 @@
       <button type="button" class="toggle-btn" onclick="toggleSection('other_body', this)">펼치기 ▼</button>
     </div>
     <div id="other_body" class="collapsible hidden">
+      <p class="dsr-add-line-hint">유형별로 + 를 눌러 각각 최대 <strong>10건</strong>까지 입력·합산합니다.</p>
+
       <div class="sub-section-title">오피스텔 外 비주택담보대출 (원금 ÷ 8년 + 이자)</div>
-      <div class="sub-row">
-        <input type="text" id="nh_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
-        <input type="number" id="nh_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
-        <span class="unit">%</span>
-      </div>
+      <div id="nh_list" class="dsr-multi-list" data-dsr-type="nh"></div>
+      <button type="button" class="dsr-add-line-btn" id="nh_add" title="1건 추가" aria-label="비주택담보 항목 추가" onclick="addDsrLine('nh')">+</button>
 
-      <div class="sub-section-title">기타담보대출 — 지급보증담보 등 (원금 ÷ 10년 + 이자)</div>
-      <div class="sub-row">
-        <input type="text" id="os_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
-        <input type="number" id="os_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
-        <span class="unit">%</span>
-      </div>
+      <div class="sub-section-title" style="margin-top:0.5rem">기타담보대출 — 지급보증담보 등 (원금 ÷ 10년 + 이자)</div>
+      <div id="os_list" class="dsr-multi-list" data-dsr-type="os"></div>
+      <button type="button" class="dsr-add-line-btn" id="os_add" title="1건 추가" aria-label="지급보증담보 항목 추가" onclick="addDsrLine('os')">+</button>
 
-      <div class="sub-section-title">유가증권담보대출 (원금 ÷ 8년 + 이자)</div>
-      <div class="sub-row">
-        <input type="text" id="sec_amount" class="input-money" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
-        <input type="number" id="sec_rate" placeholder="금리 %" step="0.01" min="0" style="max-width:90px" />
-        <span class="unit">%</span>
-      </div>
+      <div class="sub-section-title" style="margin-top:0.5rem">유가증권담보대출 (원금 ÷ 8년 + 이자)</div>
+      <div id="sec_list" class="dsr-multi-list" data-dsr-type="sec"></div>
+      <button type="button" class="dsr-add-line-btn" id="sec_add" title="1건 추가" aria-label="유가증권담보 항목 추가" onclick="addDsrLine('sec')">+</button>
 
-      <div class="sub-section-title">기타대출 (할부·리스·학자금 등) — 향후 1년간 실제 상환액 직접 입력</div>
-      <div class="sub-row">
-        <input type="text" id="other_annual" class="input-money" inputmode="numeric" autocomplete="off" placeholder="연간 상환액 (만원)" />
-        <span class="unit">만원/년</span>
-      </div>
+      <div class="sub-section-title" style="margin-top:0.5rem">기타대출 (할부·리스·학자금 등) — 향후 1년간 실제 상환액 직접 입력</div>
+      <div id="other_annual_list" class="dsr-multi-list" data-dsr-type="otherAnnual"></div>
+      <button type="button" class="dsr-add-line-btn" id="other_annual_add" title="1건 추가" aria-label="연상환액 항목 추가" onclick="addDsrLine('otherAnnual')">+</button>
 
       <p class="note">
         ※ DSR 미포함 항목: 전세자금대출, 예적금담보대출, 보험계약대출<br>
@@ -679,8 +656,8 @@
         선택하면 거치기간 칸이 나타납니다. 거치기간이 3년이면 상환기간은 <em>(대출기간 − 3년)</em>으로 축소됩니다.
       </li>
       <li>
-        <strong>기타 대출 펼치기:</strong> 신용대출·전세보증금대출·카드론·비주택담보 등 <strong>보유 중인 항목만</strong>
-        펼치기를 클릭해 잔액과 금리를 입력합니다. 보유하지 않은 항목은 비워 두면 0으로 처리됩니다.
+        <strong>기타 대출 펼치기:</strong> 신용대출·전세보증금대출·카드론·기타 대출 등 <strong>보유 중인 항목만</strong>
+        펼치기를 클릭해 입력합니다. 같은 유형이 여러 건이면 <strong>+</strong> 로 건을 추가해 최대 10건까지 넣을 수 있습니다. 보유하지 않은 항목은 비우면 0으로 처리됩니다.
       </li>
       <li>
         <strong>약정만기 설정:</strong> 신용대출·카드론의 "분할상환"을 선택한 경우 <strong>실제 약정만기</strong>와
@@ -778,6 +755,127 @@
   </footer>
 </div>
 
+<template id="tpl-credit-row">
+  <div class="credit-dsr-row dsr-multi-row">
+    <div class="row">
+      <label>대출잔액</label>
+      <input type="text" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
+      <span class="unit">만원</span>
+    </div>
+    <div class="row">
+      <label>금리 (연)</label>
+      <input type="number" class="js-credit-rate" placeholder="5.00" step="0.01" min="0" />
+      <span class="unit">%</span>
+    </div>
+    <div class="row">
+      <label>상환방식</label>
+      <select class="js-credit-type" onchange="onCreditTypeChangeRow(this)">
+        <option value="installment">분할상환</option>
+        <option value="bullet">분할상환 외 (일시 등)</option>
+      </select>
+    </div>
+    <div class="row js-credit-term-wrap">
+      <label>약정만기</label>
+      <select class="js-credit-term">
+        <option value="5">5년</option>
+        <option value="6">6년</option>
+        <option value="7">7년</option>
+        <option value="8">8년</option>
+        <option value="9">9년</option>
+        <option value="10">10년</option>
+      </select>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-jeonse-row">
+  <div class="jeonse-dsr-row dsr-multi-row">
+    <div class="row">
+      <label>대출잔액</label>
+      <input type="text" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
+      <span class="unit">만원</span>
+    </div>
+    <div class="row">
+      <label>금리 (연)</label>
+      <input type="number" class="js-jeonse-rate" placeholder="4.00" step="0.01" min="0" />
+      <span class="unit">%</span>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-card-row">
+  <div class="card-dsr-row dsr-multi-row">
+    <div class="row">
+      <label>대출잔액</label>
+      <input type="text" class="input-money" inputmode="numeric" autocomplete="off" placeholder="0" />
+      <span class="unit">만원</span>
+    </div>
+    <div class="row">
+      <label>상환방식</label>
+      <select class="js-card-type" onchange="onCardTypeChangeRow(this)">
+        <option value="installment">분할상환</option>
+        <option value="bullet">분할상환 외</option>
+      </select>
+    </div>
+    <div class="row js-card-term-wrap">
+      <label>약정만기</label>
+      <select class="js-card-term">
+        <option value="1">1년</option>
+        <option value="2">2년</option>
+        <option value="3">3년</option>
+        <option value="4">4년</option>
+        <option value="5">5년</option>
+      </select>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-dsr-nh">
+  <div class="dsr-multi-row">
+    <div class="sub-row" style="margin-bottom:0">
+      <input type="text" class="input-money js-oth-amt" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
+      <input type="number" class="js-oth-rate" placeholder="금리" step="0.01" min="0" style="max-width:90px" />
+      <span class="unit">%</span>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-dsr-os">
+  <div class="dsr-multi-row">
+    <div class="sub-row" style="margin-bottom:0">
+      <input type="text" class="input-money js-oth-amt" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
+      <input type="number" class="js-oth-rate" placeholder="금리" step="0.01" min="0" style="max-width:90px" />
+      <span class="unit">%</span>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-dsr-sec">
+  <div class="dsr-multi-row">
+    <div class="sub-row" style="margin-bottom:0">
+      <input type="text" class="input-money js-oth-amt" inputmode="numeric" autocomplete="off" placeholder="대출잔액 (만원)" />
+      <input type="number" class="js-oth-rate" placeholder="금리" step="0.01" min="0" style="max-width:90px" />
+      <span class="unit">%</span>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
+<template id="tpl-dsr-oa">
+  <div class="dsr-multi-row">
+    <div class="sub-row" style="margin-bottom:0">
+      <input type="text" class="input-money js-oa-annual" inputmode="numeric" autocomplete="off" placeholder="연간 상환액 (만원)" />
+      <span class="unit">만원/년</span>
+    </div>
+    <div class="dsr-line-actions"><button type="button" class="line-remove-btn" onclick="removeDsrLine(this)">제거</button></div>
+  </div>
+</template>
+
 <script>
   function toggleSection(id, btn) {
     const el = document.getElementById(id);
@@ -796,24 +894,90 @@
     if (rn) rn.style.display = showRepay ? "block" : "none";
   }
 
-  function onCreditTypeChange() {
-    const t = document.getElementById("credit_type").value;
-    document.getElementById("credit_term_row").style.display = (t === "installment") ? "flex" : "none";
+  function onCreditTypeChangeRow(sel) {
+    const row = sel.closest(".credit-dsr-row");
+    if (!row) return;
+    const tw = row.querySelector(".js-credit-term-wrap");
+    if (tw) tw.style.display = sel.value === "installment" ? "flex" : "none";
   }
 
-  function onCardTypeChange() {
-    const t = document.getElementById("card_type").value;
-    document.getElementById("card_term_row").style.display = (t === "installment") ? "flex" : "none";
+  function onCardTypeChangeRow(sel) {
+    const row = sel.closest(".card-dsr-row");
+    if (!row) return;
+    const tw = row.querySelector(".js-card-term-wrap");
+    if (tw) tw.style.display = sel.value === "installment" ? "flex" : "none";
+  }
+
+  const DSR_LIST_MAP = {
+    credit: { listId: "credit_list", tplId: "tpl-credit-row", addId: "credit_add" },
+    jeonse: { listId: "jeonse_list", tplId: "tpl-jeonse-row", addId: "jeonse_add" },
+    card: { listId: "card_list", tplId: "tpl-card-row", addId: "card_add" },
+    nh: { listId: "nh_list", tplId: "tpl-dsr-nh", addId: "nh_add" },
+    os: { listId: "os_list", tplId: "tpl-dsr-os", addId: "os_add" },
+    sec: { listId: "sec_list", tplId: "tpl-dsr-sec", addId: "sec_add" },
+    otherAnnual: { listId: "other_annual_list", tplId: "tpl-dsr-oa", addId: "other_annual_add" }
+  };
+  const DSR_MAX_ROWS = 10;
+
+  function getDsrListByKind(kind) {
+    const c = DSR_LIST_MAP[kind];
+    return c ? document.getElementById(c.listId) : null;
+  }
+
+  function addDsrLine(kind) {
+    const c = DSR_LIST_MAP[kind];
+    if (!c) return;
+    const list = document.getElementById(c.listId);
+    const tpl = document.getElementById(c.tplId);
+    if (!list || !tpl) return;
+    if (list.children.length >= DSR_MAX_ROWS) return;
+    list.appendChild(tpl.content.cloneNode(true));
+    updateDsrListUi(kind);
+    const last = list.lastElementChild;
+    if (kind === "credit" && last) {
+      const sel = last.querySelector(".js-credit-type");
+      if (sel) onCreditTypeChangeRow(sel);
+    }
+    if (kind === "card" && last) {
+      const sel = last.querySelector(".js-card-type");
+      if (sel) onCardTypeChangeRow(sel);
+    }
+  }
+
+  function removeDsrLine(btn) {
+    const row = btn.closest(".dsr-multi-row");
+    if (!row || !row.parentElement) return;
+    const list = row.parentElement;
+    if (list.children.length <= 1) return;
+    row.remove();
+    const kind = Object.keys(DSR_LIST_MAP).find((k) => DSR_LIST_MAP[k].listId === list.id);
+    if (kind) updateDsrListUi(kind);
+  }
+
+  function updateDsrListUi(kind) {
+    const c = DSR_LIST_MAP[kind];
+    if (!c) return;
+    const list = document.getElementById(c.listId);
+    const addBtn = document.getElementById(c.addId);
+    if (!list || !addBtn) return;
+    const n = list.children.length;
+    addBtn.disabled = n >= DSR_MAX_ROWS;
+    list.querySelectorAll(".line-remove-btn").forEach((b) => {
+      b.disabled = n <= 1;
+    });
+  }
+
+  function initDsrMultiRows() {
+    Object.keys(DSR_LIST_MAP).forEach((kind) => {
+      const list = getDsrListByKind(kind);
+      if (list && list.children.length === 0) addDsrLine(kind);
+      else updateDsrListUi(kind);
+    });
   }
 
   function fmt(v) {
     return Math.round(v).toLocaleString("ko-KR") + "만원";
   }
-
-  const MONEY_FIELD_IDS = [
-    "income", "main_amount", "credit_amount", "jeonse_amount", "card_amount",
-    "nh_amount", "os_amount", "sec_amount", "other_annual"
-  ];
 
   function formatMoneyValue(value) {
     const digits = String(value || "").replace(/[^\d]/g, "");
@@ -822,14 +986,29 @@
   }
 
   function wireMoneyInputs() {
-    MONEY_FIELD_IDS.forEach((id) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener("input", () => {
-        el.value = formatMoneyValue(el.value);
-      });
-      if (el.value) el.value = formatMoneyValue(el.value);
+    const root = document.querySelector(".wrap") || document.body;
+    root.addEventListener("input", (e) => {
+      const t = e.target;
+      if (t && t.classList && t.classList.contains("input-money")) {
+        t.value = formatMoneyValue(t.value);
+      }
     });
+  }
+
+  function parseMoneyInput(el) {
+    if (!el) return 0;
+    const raw = String(el.value ?? "").replace(/,/g, "").replace(/\s/g, "").trim();
+    if (raw === "") return 0;
+    const v = parseFloat(raw);
+    return Number.isFinite(v) ? v : 0;
+  }
+
+  function parseNumInputEl(el) {
+    if (!el) return 0;
+    const raw = String(el.value ?? "").replace(/,/g, "").replace(/\s/g, "").trim();
+    if (raw === "") return 0;
+    const v = parseFloat(raw);
+    return Number.isFinite(v) ? v : 0;
   }
 
   function pmt(principal, annualRate, years) {
@@ -955,53 +1134,71 @@
       monthlyPayment = mainAnnual / 12;
     }
 
-    const creditAmt = num("credit_amount");
-    const creditRate = num("credit_rate");
-    const creditType = sel("credit_type");
-    const creditTerm = num("credit_term");
     let creditAnnual = 0;
-    if (creditAmt > 0) {
-      if (creditType === "installment") {
-        creditAnnual = (creditAmt / creditTerm) + (creditAmt * creditRate / 100);
+    document.querySelectorAll("#credit_list .credit-dsr-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".input-money"));
+      const rate = parseNumInputEl(row.querySelector(".js-credit-rate"));
+      const ctyp = (row.querySelector(".js-credit-type") && row.querySelector(".js-credit-type").value) || "installment";
+      const cterm = parseNumInputEl(row.querySelector(".js-credit-term")) || 5;
+      if (amt <= 0) return;
+      if (ctyp === "installment") {
+        creditAnnual += (amt / cterm) + (amt * rate / 100);
       } else {
-        creditAnnual = (creditAmt / 5) + (creditAmt * creditRate / 100);
+        creditAnnual += (amt / 5) + (amt * rate / 100);
       }
-    }
+    });
 
-    const jeonseAmt = num("jeonse_amount");
-    const jeonseRate = num("jeonse_rate");
     let jeonseAnnual = 0;
-    if (jeonseAmt > 0) {
-      jeonseAnnual = (jeonseAmt / 4) + (jeonseAmt * jeonseRate / 100);
-    }
+    document.querySelectorAll("#jeonse_list .jeonse-dsr-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".input-money"));
+      const rate = parseNumInputEl(row.querySelector(".js-jeonse-rate"));
+      if (amt <= 0) return;
+      jeonseAnnual += (amt / 4) + (amt * rate / 100);
+    });
 
-    const cardAmt = num("card_amount");
-    const cardType = sel("card_type");
-    const cardTerm = num("card_term");
     let cardAnnual = 0;
-    if (cardAmt > 0) {
-      if (cardType === "installment") {
-        cardAnnual = cardAmt / cardTerm;
+    document.querySelectorAll("#card_list .card-dsr-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".input-money"));
+      const ctyp = (row.querySelector(".js-card-type") && row.querySelector(".js-card-type").value) || "installment";
+      const cterm = parseNumInputEl(row.querySelector(".js-card-term")) || 1;
+      if (amt <= 0) return;
+      if (ctyp === "installment") {
+        cardAnnual += amt / cterm;
       } else {
-        cardAnnual = cardAmt / 3;
+        cardAnnual += amt / 3;
       }
-    }
+    });
 
-    const nhAmt = num("nh_amount");
-    const nhRate = num("nh_rate");
-    const nhAnnual = nhAmt > 0 ? (nhAmt / 8) + (nhAmt * nhRate / 100) : 0;
+    let nhAnnual = 0;
+    document.querySelectorAll("#nh_list .dsr-multi-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".js-oth-amt"));
+      const rate = parseNumInputEl(row.querySelector(".js-oth-rate"));
+      if (amt <= 0) return;
+      nhAnnual += (amt / 8) + (amt * rate / 100);
+    });
 
-    const osAmt = num("os_amount");
-    const osRate = num("os_rate");
-    const osAnnual = osAmt > 0 ? (osAmt / 10) + (osAmt * osRate / 100) : 0;
+    let osAnnual = 0;
+    document.querySelectorAll("#os_list .dsr-multi-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".js-oth-amt"));
+      const rate = parseNumInputEl(row.querySelector(".js-oth-rate"));
+      if (amt <= 0) return;
+      osAnnual += (amt / 10) + (amt * rate / 100);
+    });
 
-    const secAmt = num("sec_amount");
-    const secRate = num("sec_rate");
-    const secAnnual = secAmt > 0 ? (secAmt / 8) + (secAmt * secRate / 100) : 0;
+    let secAnnual = 0;
+    document.querySelectorAll("#sec_list .dsr-multi-row").forEach((row) => {
+      const amt = parseMoneyInput(row.querySelector(".js-oth-amt"));
+      const rate = parseNumInputEl(row.querySelector(".js-oth-rate"));
+      if (amt <= 0) return;
+      secAnnual += (amt / 8) + (amt * rate / 100);
+    });
 
-    const otherAnnual = num("other_annual");
+    let otherAnnualSum = 0;
+    document.querySelectorAll("#other_annual_list .dsr-multi-row").forEach((row) => {
+      otherAnnualSum += parseMoneyInput(row.querySelector(".js-oa-annual"));
+    });
 
-    const othersTotal = creditAnnual + jeonseAnnual + cardAnnual + nhAnnual + osAnnual + secAnnual + otherAnnual;
+    const othersTotal = creditAnnual + jeonseAnnual + cardAnnual + nhAnnual + osAnnual + secAnnual + otherAnnualSum;
     const totalAnnual = mainAnnual + othersTotal;
     const dsr = (totalAnnual / income) * 100;
 
@@ -1098,6 +1295,7 @@
   wireMoneyInputs();
   wireRepayPills();
   onMainTypeChange();
+  initDsrMultiRows();
 </script>
 
 </body>
