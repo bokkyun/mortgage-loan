@@ -792,6 +792,14 @@ footer .footer-note {
   }
 }
 
+/* [hidden]이 .grid의 display보다 밀리는 경우 대비 (반환보증 A 입력 모드 전환) */
+#rg-a-mode-other[hidden],
+#rg-a-mode-kb[hidden],
+#rg-land-panel[hidden],
+#rg-nav-land[hidden] {
+  display: none !important;
+}
+
 .rg-panel-title {
   margin: 0 0 0.65rem;
   font-size: 0.95rem;
