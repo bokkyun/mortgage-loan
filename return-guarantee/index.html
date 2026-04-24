@@ -81,7 +81,7 @@
       <nav class="quick-nav" aria-label="빠른 이동">
         <a href="../">홈</a>
         <a href="#rg-main">보증·요율</a>
-        <a href="#rg-land-panel">기타주택 A</a>
+        <a href="#rg-land-panel" id="rg-nav-land" hidden>기타주택 A</a>
         <a href="#rg-price-links">주택가격 링크</a>
         <a href="../didimdol/">디딤돌</a>
         <a href="../dsr/">DSR</a>
@@ -141,7 +141,7 @@
                   />
                 </div>
                 <div>
-                  <label for="rg-a-pct">곱하기 (%)</label>
+                  <label for="rg-a-pct">적용 (%)</label>
                   <input
                     type="text"
                     id="rg-a-pct"
@@ -152,8 +152,8 @@
                   />
                 </div>
                 <p class="field-hint grid-span-2" style="margin: 0">
-                  (A) = 기준가 × (곱하기 % ÷ 100). 기본 <strong>140%</strong> (참고)이며, % 칸을 비우면 100%로서 기준가만
-                  (A)로 씁니다.
+                  (A) = 기준가 × (% ÷ 100). 기본 <strong>140%</strong> (참고)이며, % 칸을 비우면 100%로서 기준가만 (A)로
+                  씁니다.
                 </p>
               </div>
               <div class="rg-price-links" id="rg-price-links">
@@ -435,7 +435,7 @@
           <div id="rg-result" hidden aria-live="polite"></div>
         </section>
 
-        <section class="card" id="rg-land-panel">
+        <section class="card" id="rg-land-panel" hidden>
           <h2 class="rg-panel-title">기타주택 주택가격 (A) 추정 — 토지+건물 × 140%</h2>
           <p class="field-hint" style="margin-bottom: 1rem">
             연립·다세대·단독 등에서 시세 자료가 없을 때, 토지 공시지가와 건물 시가표준액을 합한 뒤 140%를 곱하는 방식을 참고할 수 있습니다.
@@ -504,6 +504,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-disc-6"></script>
+    <script src="app.js?v=hug-disc-8"></script>
   </body>
 </html>

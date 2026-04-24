@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-disc-6 — 아파트·KB오피=단일 A, 기타=기준가×%(기본140, 비움=100%)
+ * @version hug-disc-8 — KB·아파트: 토지+140% 패널·기타주택 네비 기본 숨김(HTML hidden+JS)
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -126,7 +126,7 @@
     });
   }
 
-  /** 토지분+건물시가(원), 140% 곱하기 전 */
+  /** 토지분+건물시가(원), 140% 적용 전 */
   function sumLandBuildingBefore140() {
     var landPerM2 = parseNumRaw($("rg-land-price").value);
     var area = parseNumRaw($("rg-land-area").value);
@@ -141,12 +141,12 @@
     return landWon + building;
   }
 
-  /** 아파트·오피스텔(KB시세 유): 단일 A 입력. 그 외: 기준가 × (곱하기% ÷ 100) */
+  /** 아파트·오피스텔(KB시세 유): 단일 A 입력. 그 외: 기준가 × (% ÷ 100) */
   function usesKbAInput(type) {
     return type === "아파트" || type === "오피스텔(KB시세 유)";
   }
 
-  /** 곱하기 % — 비어 있으면 100% */
+  /** 적용 % — 비어 있으면 100% */
   function parseMultPercentField(val) {
     if (val == null) return 100;
     var s = String(val)
@@ -178,10 +178,13 @@
     var kbBlock = $("rg-a-mode-kb");
     var oBlock = $("rg-a-mode-other");
     var land = $("rg-land-panel");
+    var navLand = $("rg-nav-land");
     var kbHint = document.querySelector(".rg-kb-hint");
     if (kbBlock) kbBlock.hidden = !kb;
     if (oBlock) oBlock.hidden = kb;
+    /* 아파트·KB 오피: 공시+건물×140% 추정 패널·상단 바로가기 숨김 */
     if (land) land.hidden = kb;
+    if (navLand) navLand.hidden = kb;
     if (kbHint) kbHint.style.display = kb ? "" : "none";
   }
 
@@ -267,9 +270,9 @@
         if (!Number.isFinite(base0) || base0 <= 0) {
           errors.push("주택가격(기준)을 입력하세요.");
         } else if (!Number.isFinite(pct0)) {
-          errors.push("곱하기(%)는 비우기(=100%) 또는 0보다 큰 수로 입력하세요.");
+          errors.push("적용(%)는 비우기(=100%) 또는 0보다 큰 수로 입력하세요.");
         } else {
-          errors.push("주택가격(기준)과 곱하기(%)를 확인하세요.");
+          errors.push("주택가격(기준)과 적용(%)를 확인하세요.");
         }
       }
     }
@@ -406,7 +409,7 @@
       setWonFieldFormatted("rg-a-base", base);
       if ($("rg-a-pct")) $("rg-a-pct").value = "140";
       el.textContent =
-        "기준 " + formatWon(base) + " × 140% → (A) ≈ " + formatWon(A) + " (기준·곱하기%란에 반영)";
+        "기준 " + formatWon(base) + " × 140% → (A) ≈ " + formatWon(A) + " (기준·%란에 반영)";
     }
   }
 
