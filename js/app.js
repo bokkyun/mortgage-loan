@@ -468,8 +468,6 @@
 
     const childDiscount = parseFloat($("fh-child-tier")?.value || "0") || 0;
     let base = getFirstHomeBaseRate(income, term);
-
-    base += parseFloat($("fh-rate-type")?.value || "0") || 0;
     if ($("fh-local-home")?.checked) base -= 0.2;
 
     let discountRaw = 0;
@@ -711,7 +709,7 @@
       const result = calcDidimdolLikeRate({
         income,
         term,
-        rateTypeAdd: parseFloat($("did-rate-type")?.value || "0") || 0,
+        rateTypeAdd: 0,
         localHome: $("did-local-home")?.checked,
         specialBaseDiscount: 0,
         childDiscount,
@@ -787,7 +785,7 @@
       const result = calcDidimdolLikeRate({
         income: didIncome,
         term: didTerm,
-        rateTypeAdd: parseFloat($("did-rate-type")?.value || "0") || 0,
+        rateTypeAdd: 0,
         localHome: $("did-local-home")?.checked,
         specialBaseDiscount: 0,
         childDiscount,
@@ -830,7 +828,6 @@
       }
       const childDiscount = parseFloat($("fh-child-tier")?.value || "0") || 0;
       let base = getFirstHomeBaseRate(income, term);
-      base += parseFloat($("fh-rate-type")?.value || "0") || 0;
       if ($("fh-local-home")?.checked) base -= 0.2;
       let discountRaw = 0;
       discountRaw += childDiscount;
