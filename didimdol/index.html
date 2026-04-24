@@ -632,7 +632,8 @@
       <section class="card" id="dti-section">
         <h2>4. DTI (대출금액 기반 자동계산)</h2>
         <p class="field-hint" style="margin: 0 0 0.75rem">
-          DTI: 주담대 연간 원리금 + 기타대출 연간 이자 / 연소득. 연소득은 3번 탭(또는 1·2번 산출)을 사용합니다. 「금리 계산」을 하면 아래 주담대 금리 칸에 최종 금리가 채워지며, 필요하면 직접 수정할 수 있습니다.
+          DTI(참고): 본 주담대(디딤돌) 연간 원리금 ÷ 연소득. 연소득은 3번 탭(또는 1·2번 산출)을 사용합니다. 「금리
+          계산」을 하면 아래 주담대 금리 칸에 최종 금리가 채워지며, 필요하면 직접 수정할 수 있습니다.
         </p>
         <div class="subsection-title">주택담보대출(디딤돌) 입력</div>
         <div class="grid grid-2">
@@ -649,27 +650,8 @@
             <input type="number" id="loan-rate" min="0" max="20" step="0.01" placeholder="미입력시 3번 계산금리 사용" />
           </div>
           <div>
-            <label for="dti-cap">DTI 기준 (규제지역 여부)</label>
-            <select id="dti-cap">
-              <option value="60">일반 60%</option>
-              <option value="50">규제지역 등 50%</option>
-            </select>
-          </div>
-          <div>
             <label for="grace-months">거치기간 (개월, 0이면 없음)</label>
             <input type="number" id="grace-months" value="0" min="0" max="120" step="1" />
-          </div>
-        </div>
-
-        <div class="subsection-title">기타 대출 입력</div>
-        <div class="grid grid-2">
-          <div>
-            <label for="other-amt">기타대출 원금 합계 (원)</label>
-            <input type="number" id="other-amt" min="0" step="100000" placeholder="없으면 0" />
-          </div>
-          <div>
-            <label for="other-rate">기타대출 평균 금리(%)</label>
-            <input type="number" id="other-rate" min="0" max="30" step="0.01" placeholder="예: 6.5" />
           </div>
         </div>
       </section>
@@ -694,7 +676,7 @@
         <div class="result-block">
           <h3>DTI</h3>
           <div class="result-row"><span>DTI</span><span id="out-dti">—</span></div>
-          <div class="result-row"><span>DTI vs 기준</span><span id="out-dti-judge">—</span></div>
+          <div class="result-row"><span>판정</span><span id="out-dti-judge">—</span></div>
         </div>
         <div class="result-block">
           <h3>월 상환액 (원리금균등·가정 금리)</h3>
@@ -757,7 +739,7 @@
                 <td style="padding: 7px 8px; border: 1px solid var(--border)">③ DTI 점검</td>
                 <td style="padding: 7px 8px; border: 1px solid var(--border)">
                   DTI = 본건 대출 연간 원리금 ÷ 인정 연소득 × 100<br>
-                  규제 기준(수도권 60%, 지방 60%)과 비교
+                  기타부채 없이 본건만으로 판정·내부 기준과 비교
                 </td>
                 <td style="padding: 7px 8px; border: 1px solid var(--border)">DSR과 달리 <strong>본건만</strong> 포함</td>
               </tr>
@@ -829,7 +811,7 @@
               <tr>
                 <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>DTI</strong></td>
                 <td style="padding: 7px 8px; border: 1px solid var(--border)">연간 원리금 ÷ 인정 소득 × 100</td>
-                <td style="padding: 7px 8px; border: 1px solid var(--border)">60% 초과 시 빨강. 초과하면 기간 연장 또는 금액 축소 필요</td>
+                <td style="padding: 7px 8px; border: 1px solid var(--border)">기준 초과 시 표시. 초과하면 기간 연장 또는 금액 축소를 검토</td>
               </tr>
               <tr>
                 <td style="padding: 7px 8px; border: 1px solid var(--border)"><strong>상환방식 비교</strong></td>
@@ -848,7 +830,7 @@
           <strong>결과가 이상하게 보일 때 점검 순서</strong><br>
           ① 탭이 의도한 상품인지(일반 → 신생아 전환만으로 하한이 1.5%→1.2%로 바뀝니다)<br>
           ② 소득 구간 경계에 있는 경우 월환산·2개년 평균 중 어느 로직이 실행됐는지<br>
-          ③ DTI가 60%를 초과한다면 대출기간을 30→40년으로 연장 후 재계산<br>
+          ③ DTI가 기준을 크게 초과한다면 대출기간을 30→40년으로 연장 후 재계산<br>
           ④ 월 상환액이 예상보다 높다면 원리금균등 대신 체증식(초반 완화)을 비교<br>
           ⑤ 실제 취급 금융기관이 HUG 보증 여부·주택가격(6억 이하) 요건을 별도 확인하는지
         </div>

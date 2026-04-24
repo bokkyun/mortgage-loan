@@ -152,7 +152,6 @@
       "sp-d-y1",
       "sp-d-p-sum",
       "loan-amt",
-      "other-amt",
       "nb-income",
     ];
 
@@ -853,17 +852,14 @@
     const pmt = monthlyPMT(loanAmt, loanRateForCalc, repayMonths / 12);
     const piM = pmt * 12;
 
-    const otherAmt = num($("other-amt"));
-    const otherRate = num($("other-rate"));
-    const intO = otherAmt * (otherRate / 100);
-    const dtiCapPct = parseFloat($("dti-cap")?.value || "60");
+    const dtiCapPct = 60;
 
     const judge = $("out-dti-judge");
     if (incomeTotal > 0) {
-      const dti = ((piM + intO) / incomeTotal) * 100;
+      const dti = (piM / incomeTotal) * 100;
       $("out-dti").textContent = `${dti.toFixed(2)}%`;
       const ok = dti <= dtiCapPct;
-      judge.textContent = ok ? `기준 ${dtiCapPct}% 이내` : `기준 ${dtiCapPct}% 초과`;
+      judge.textContent = ok ? "기준 이내" : "기준 초과";
       judge.className = ok ? "pill-ok" : "pill-bad";
     } else {
       $("out-dti").textContent = "—";
