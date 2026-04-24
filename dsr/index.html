@@ -328,10 +328,43 @@
       line-height: 1.5;
     }
 
-    @media (max-width: 680px) {
-      .row label { min-width: 120px; font-size: 12px; }
-      .dsr-num { font-size: 34px; }
-      .section { padding: 1rem; }
+    @media (max-width: 719px) {
+      .page-header {
+        padding: 1.05rem max(0.5rem, env(safe-area-inset-left, 0px)) 0.85rem
+          max(0.5rem, env(safe-area-inset-right, 0px));
+        border-bottom: 1px solid #e5e5e0;
+      }
+      .wrap {
+        max-width: none;
+        margin: 0;
+        padding: 0 0 2.5rem;
+      }
+      .section {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin-bottom: 0.65rem;
+        padding: 0.85rem max(0.55rem, env(safe-area-inset-left, 0px)) 0.95rem
+          max(0.55rem, env(safe-area-inset-right, 0px));
+      }
+      .header-links {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+        max-width: none;
+        width: 100%;
+      }
+      .header-links a {
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .row {
+        flex-wrap: wrap;
+        gap: 0.4rem 0.5rem;
+      }
+      .row label { min-width: 100px; font-size: 12px; }
+      .dsr-num { font-size: 32px; }
     }
   </style>
     <meta name="google-adsense-account" content="ca-pub-3300541490593571" />
