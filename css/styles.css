@@ -1055,6 +1055,98 @@ footer .footer-note {
   vertical-align: middle;
 }
 
+/* 반환보증: 접기·펼치기(월세 환산, 할인 항목 그룹) */
+details.rg-collapse {
+  padding: 0.65rem 0.75rem 0.75rem;
+}
+details.rg-collapse > .rg-collapse__summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--btn-primary-mid);
+  padding: 0.1rem 0 0.35rem 1.1rem;
+  margin: 0;
+  position: relative;
+}
+details.rg-collapse > .rg-collapse__summary::before {
+  content: "▶";
+  position: absolute;
+  left: 0.05rem;
+  top: 0.3rem;
+  font-size: 0.55em;
+  opacity: 0.7;
+  line-height: 1;
+}
+details.rg-collapse[open] > .rg-collapse__summary::before {
+  content: "▼";
+  font-size: 0.5em;
+  top: 0.45rem;
+}
+details.rg-collapse > .rg-collapse__summary::-webkit-details-marker {
+  display: none;
+}
+details.rg-collapse--wolse > .rg-collapse__summary {
+  font-size: 0.95rem;
+  padding-bottom: 0;
+  margin: 0;
+}
+details.rg-collapse--wolse:not([open]) > .rg-collapse__summary {
+  padding-bottom: 0.15rem;
+}
+details.rg-collapse .rg-collapse__body {
+  padding-top: 0.5rem;
+  margin: 0;
+  border-top: 1px dashed var(--border);
+}
+details.rg-dsc-subcoll {
+  margin-top: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 0.35rem 0.5rem 0.45rem;
+}
+details.rg-dsc-subcoll > .rg-dsc-subcoll__summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.25rem 0.1rem 0.3rem 1.1rem;
+  font-weight: 600;
+  display: block;
+  position: relative;
+}
+details.rg-dsc-subcoll > .rg-dsc-subcoll__summary::before {
+  content: "▶";
+  position: absolute;
+  left: 0.15rem;
+  top: 0.4rem;
+  font-size: 0.55em;
+  opacity: 0.7;
+  line-height: 1;
+}
+details.rg-dsc-subcoll[open] > .rg-dsc-subcoll__summary::before {
+  content: "▼";
+  font-size: 0.5em;
+  top: 0.5rem;
+}
+details.rg-dsc-subcoll > .rg-dsc-subcoll__summary .rg-dsc-grp {
+  display: inline-block;
+  vertical-align: middle;
+}
+details.rg-dsc-subcoll > .rg-dsc-subcoll__summary::-webkit-details-marker {
+  display: none;
+}
+details.rg-dsc-subcoll[open] > .rg-dsc-subcoll__summary {
+  border-bottom: 1px dashed var(--border);
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.4rem;
+}
+.rg-dsc-subcoll__body {
+  padding: 0 0.1rem 0.15rem;
+}
+details.rg-dsc-subcoll .rg-dsc-checkrow:first-of-type {
+  margin-top: 0.15rem;
+}
+
 /* 반환보증: 주택가격(A) 입력란 바로 아래 확인 링크 */
 .rg-price-links {
   margin-top: 0.65rem;

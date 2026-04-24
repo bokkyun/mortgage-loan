@@ -1,7 +1,7 @@
 /**
  * 전세보증금 반환보증(안심전세 등) 참고용 심사 조건·보증료 추정
  * — HUG 주택가격·담보 비율 공개 기준을 단순화해 브라우저에서만 계산합니다. (입력·표시: 원, 천단위 콤마)
- * @version hug-disc-9 — 기준·적용% 행: CSS로 [hidden] 강제(.grid 충돌 방지)
+ * @version hug-disc-10 — 지역(보증상한) UI 제거, 환산·할인 항목 접기
  */
 (function () {
   /** @type {string[]} 선순위 임차보증금(D) 입력이 허용되는 주택 유형(참고) */
@@ -243,7 +243,6 @@
 
   function runMainCalc() {
     var type = $("rg-type").value;
-    var region = $("rg-region").value;
     var A = getEffectiveA();
     var B = parseNumRaw($("rg-b").value);
     var C = parseNumOrZero($("rg-c").value);
@@ -303,12 +302,9 @@
       );
     }
 
-    var maxB = region === "metro" ? 700000000 : 500000000;
-    if (Beff > maxB) {
+    if (Beff > 500000000) {
       warns.push(
-        "전세보증금 상한 참고: " +
-          (region === "metro" ? "수도권 7억" : "수도권 외 5억") +
-          " 원 한도 안내가 있습니다. (실제는 상품·고시 기준)"
+        "전세보증금 상한은 지역·상품·고시에 따라 다르며(안내 예: 수도권 7억, 수도권 외 5억 등), 실제는 HUG·취급기관 기준을 따릅니다."
       );
     }
 
@@ -437,6 +433,13 @@
     $("rg-c").value = "";
     $("rg-d").value = "";
     $("rg-wolse").value = "";
+    var wolseCh = $("rg-wolse-check");
+    if (wolseCh) wolseCh.checked = false;
+    var mainSec = document.getElementById("rg-main");
+    if (mainSec) {
+      var dets = mainSec.querySelectorAll("details");
+      for (var d = 0; d < dets.length; d++) dets[d].removeAttribute("open");
+    }
     var dcard = $("rg-discount-card");
     if (dcard) {
       var cbs = dcard.querySelectorAll('input[type="checkbox"]');

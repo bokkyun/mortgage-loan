@@ -49,7 +49,7 @@
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3300541490593571"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="../css/styles.css?v=rg-a-hidden" />
+    <link rel="stylesheet" href="../css/styles.css?v=rg-collapse" />
     <link
       rel="stylesheet"
       as="style"
@@ -99,7 +99,7 @@
           <h2 class="rg-panel-title">보증금액·한도 점검 · 예상 보증료</h2>
 
           <div class="grid grid-2">
-            <div>
+            <div class="grid-span-2">
               <label for="rg-type">주택 유형</label>
               <select id="rg-type">
                 <option value="아파트">아파트</option>
@@ -116,13 +116,6 @@
                 아파트는 KB 시세 일반 평균가(단, 1층은 하위 평균가)<br />
                 오피스텔은 하위 평균가
               </p>
-            </div>
-            <div>
-              <label for="rg-region">지역(보증금 상한 참고)</label>
-              <select id="rg-region">
-                <option value="metro">수도권(7억 한도 안내)</option>
-                <option value="other">수도권 외(5억 한도 안내)</option>
-              </select>
             </div>
             <div class="grid-span-2" id="rg-a-block">
               <div id="rg-a-mode-kb">
@@ -203,23 +196,25 @@
             </div>
           </div>
 
-          <div class="card" style="margin-top: 1rem; background: var(--surface2); border-style: dashed">
-            <h3 class="subsection-title" style="margin-top: 0">월세 포함 시 환산 보증금 (선택)</h3>
-            <label class="radio-pill" style="display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem">
-              <input type="checkbox" id="rg-wolse-check" />
-              <span>월세를 전월전환율로 환산해 B에 더함</span>
-            </label>
-            <div class="grid grid-2">
-              <div>
-                <label for="rg-wolse">월세 — 원/월</label>
-                <input type="text" id="rg-wolse" inputmode="numeric" placeholder="예: 500,000" autocomplete="off" />
-              </div>
-              <div>
-                <label for="rg-conv">전월전환율 (%)</label>
-                <input type="number" id="rg-conv" min="0.1" step="0.1" value="4" />
+          <details class="card rg-collapse rg-collapse--wolse" style="margin-top: 1rem; background: var(--surface2); border-style: dashed">
+            <summary class="rg-collapse__summary">월세 포함 시 환산 보증금 (선택)</summary>
+            <div class="rg-collapse__body">
+              <label class="radio-pill" style="display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem">
+                <input type="checkbox" id="rg-wolse-check" />
+                <span>월세를 전월전환율로 환산해 B에 더함</span>
+              </label>
+              <div class="grid grid-2">
+                <div>
+                  <label for="rg-wolse">월세 — 원/월</label>
+                  <input type="text" id="rg-wolse" inputmode="numeric" placeholder="예: 500,000" autocomplete="off" />
+                </div>
+                <div>
+                  <label for="rg-conv">전월전환율 (%)</label>
+                  <input type="number" id="rg-conv" min="0.1" step="0.1" value="4" />
+                </div>
               </div>
             </div>
-          </div>
+          </details>
 
           <div class="grid grid-2" style="margin-top: 1rem">
             <div>
@@ -245,7 +240,11 @@
               <p class="field-hint" style="margin: 0.25rem 0 0.5rem">
                 실제 적용은 HUG·취급기관의 무주택·소득·가구·기한 등 심사 기준에 따릅니다.
               </p>
-              <p class="rg-dsc-grp rg-dsc-grp--60">60% 할인 대상</p>
+              <details class="rg-collapse rg-dsc-subcoll">
+                <summary class="rg-collapse__summary rg-dsc-subcoll__summary">
+                  <span class="rg-dsc-grp rg-dsc-grp--60" style="margin: 0">60% 할인 대상</span>
+                </summary>
+                <div class="rg-dsc-subcoll__body">
               <div class="rg-dsc-checkrow">
                 <input
                   type="checkbox"
@@ -294,8 +293,14 @@
                   <p class="rg-dsc-checkrow__desc">다문화가족지원법에 따른 가족 범위에 해당하는 경우</p>
                 </div>
               </div>
+                </div>
+              </details>
 
-              <p class="rg-dsc-grp rg-dsc-grp--40">40% 할인 대상</p>
+              <details class="rg-collapse rg-dsc-subcoll">
+                <summary class="rg-collapse__summary rg-dsc-subcoll__summary">
+                  <span class="rg-dsc-grp rg-dsc-grp--40" style="margin: 0">40% 할인 대상</span>
+                </summary>
+                <div class="rg-dsc-subcoll__body">
               <div class="rg-dsc-checkrow">
                 <input
                   type="checkbox"
@@ -411,6 +416,8 @@
                   <p class="rg-dsc-checkrow__desc">직계존비속 세대원 중 1인 이상이 의사상자 예우·지원 법에 따른 대상</p>
                 </div>
               </div>
+                </div>
+              </details>
             </div>
 
             <div class="rg-discount-block">
@@ -504,6 +511,6 @@
       <div class="footer-note">입력값은 서버로 전송되지 않으며 브라우저 내에서만 계산됩니다.</div>
     </footer>
 
-    <script src="app.js?v=hug-disc-9"></script>
+    <script src="app.js?v=hug-disc-10"></script>
   </body>
 </html>
