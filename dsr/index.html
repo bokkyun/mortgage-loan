@@ -154,6 +154,35 @@
       flex-shrink: 0;
     }
 
+    .repay-pill-group {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .repay-pill {
+      flex: 1;
+      min-width: 120px;
+      height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid #d8d8d0;
+      border-radius: 8px;
+      background: #fafaf8;
+      color: #555;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s, box-shadow 0.12s;
+    }
+    .repay-pill:hover { border-color: #356b5e; color: #2a4a3f; }
+    .repay-pill.active {
+      border-color: #356b5e;
+      background: linear-gradient(165deg, #e8f2ef, #d8ebe3);
+      color: #1a1a1a;
+      box-shadow: 0 1px 4px rgba(32, 72, 62, 0.12);
+    }
+
     .sub-section-title {
       font-size: 12px;
       color: #888;
@@ -366,6 +395,17 @@
       <input type="number" id="main_grace" placeholder="3" min="0" />
       <span class="unit">년</span>
     </div>
+    <div id="main_repay_pills" class="row" style="display: none" aria-label="분할상환 액면방식">
+      <label>분할 상환</label>
+      <div class="repay-pill-group" role="group" aria-label="원리금균등·원금균등">
+        <button type="button" class="repay-pill active" data-repay="pni" id="main_repay_pni">원리금균등</button>
+        <button type="button" class="repay-pill" data-repay="pp" id="main_repay_pp">원금균등</button>
+      </div>
+    </div>
+    <p class="note" id="main_repay_note" style="display: none; margin-top: 0">
+      ※ 원리금균등: DSR·월 납부는 매월 일정(표준 PMT) 가정. 원금균등: 첫 12개월 연 원리금 합으로 연간 부담을 잡고, 월 납부(참고)는
+      <strong>1회차(최대)</strong> 기준. 초기 월이 커 DSR이 원리금보다 <strong>높게</strong> 나올 수 있습니다.
+    </p>
     <p class="note">※ 일시상환은 DSR 원금 산정 시 대출기간을 최대 10년으로 적용합니다.</p>
   </div>
 
@@ -534,6 +574,9 @@
 
       <div class="result-detail">
         <div class="detail-row"><span>연소득</span><span id="r_income">-</span></div>
+        <div class="detail-row muted" id="r_repay_mode_row" style="display: none">
+          <span>본건분할 방식</span><span id="r_repay_mode">-</span>
+        </div>
         <div class="detail-row"><span>본건대출 연간 원리금</span><span id="r_main">-</span></div>
         <div class="detail-row"><span>타 대출 연간 원리금 합계</span><span id="r_others">-</span></div>
         <div class="detail-row total"><span>연간 원리금 합계</span><span id="r_total">-</span></div>
@@ -569,7 +612,12 @@
           <tr>
             <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (원리금균등)</td>
             <td style="padding: 7px 8px; border: 1px solid #e5e5e0">PMT(원금, 금리, 기간) × 12</td>
-            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">실제 월상환액 기준</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">실제 월상환액 기준(매월 일정)</td>
+          </tr>
+          <tr>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (원금균등)</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">첫 12개월 월(원금/n+잔액이자) 합계</td>
+            <td style="padding: 7px 8px; border: 1px solid #e5e5e0">초기 월이 커 1년차 DSR이 원리금 대비 높을 수 있음</td>
           </tr>
           <tr>
             <td style="padding: 7px 8px; border: 1px solid #e5e5e0">본건 주담대 (부분분할·거치)</td>
@@ -750,6 +798,11 @@
   function onMainTypeChange() {
     const t = document.getElementById("main_type").value;
     document.getElementById("grace_row").style.display = (t === "partial") ? "flex" : "none";
+    const showRepay = t === "full" || t === "partial";
+    const rr = document.getElementById("main_repay_pills");
+    const rn = document.getElementById("main_repay_note");
+    if (rr) rr.style.display = showRepay ? "flex" : "none";
+    if (rn) rn.style.display = showRepay ? "block" : "none";
   }
 
   function onCreditTypeChange() {
@@ -791,8 +844,70 @@
   function pmt(principal, annualRate, years) {
     const r = annualRate / 100 / 12;
     const n = years * 12;
+    if (n <= 0) return 0;
     if (r === 0) return principal / n;
     return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+
+  /** 첫 12개월(또는 잔여 만기) 연간 원이자 합 — 원금균등(분할) DSR용 */
+  function year1EqualPrincipal(amt, annualRate, years) {
+    if (amt <= 0 || years <= 0) return 0;
+    const n = Math.floor(years * 12);
+    if (n <= 0) return 0;
+    const M = Math.min(12, n);
+    const r = annualRate / 100 / 12;
+    const principalPart = (amt / n) * M;
+    let interestSum = 0;
+    for (let m = 0; m < M; m++) {
+      const bal = amt * (1 - m / n);
+      interestSum += bal * r;
+    }
+    return principalPart + interestSum;
+  }
+
+  /** 1회차(최대) 월 납입 — 표시용 */
+  function firstMonthEqualPrincipal(amt, annualRate, years) {
+    if (amt <= 0 || years <= 0) return 0;
+    const n = Math.floor(years * 12);
+    if (n <= 0) return 0;
+    const r = annualRate / 100 / 12;
+    return amt / n + amt * r;
+  }
+
+  /** y1(원금균등) = 대출원 × 계수(선형) — 역산용 */
+  function y1EqualPrincipalCoef(annualRate, years) {
+    if (years <= 0) return 0;
+    const n = Math.floor(years * 12);
+    if (n <= 0) return 0;
+    const M = Math.min(12, n);
+    const r = annualRate / 100 / 12;
+    let sumI = 0;
+    for (let m = 0; m < M; m++) sumI += 1 - m / n;
+    return M / n + (r / 12) * sumI;
+  }
+
+  function maxLoanFromAnnualAnnuity(maxAnnual, annualRate, years) {
+    const r = annualRate / 100 / 12;
+    const n = years * 12;
+    if (n <= 0) return 0;
+    if (r === 0) return (maxAnnual / 12) * n;
+    return (maxAnnual / 12) * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n));
+  }
+
+  function getMainRepayMode() {
+    const a = document.querySelector(".repay-pill.active");
+    return a && a.getAttribute("data-repay") === "pp" ? "pp" : "pni";
+  }
+
+  function wireRepayPills() {
+    const g = document.querySelector(".repay-pill-group");
+    if (!g) return;
+    g.querySelectorAll(".repay-pill").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        g.querySelectorAll(".repay-pill").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
   }
 
   function num(id) {
@@ -818,19 +933,32 @@
       return;
     }
 
+    const mainRepay = mainType === "full" || mainType === "partial" ? getMainRepayMode() : "pni";
+    const repayLabel = mainRepay === "pp" ? "원금균등 (1년차)" : "원리금균등";
+
     let mainAnnual = 0;
     let monthlyPayment = 0;
 
     if (mainType === "full") {
-      const monthly = pmt(mainAmt, mainRate, mainTerm);
-      monthlyPayment = monthly;
-      mainAnnual = monthly * 12;
+      if (mainRepay === "pp") {
+        mainAnnual = year1EqualPrincipal(mainAmt, mainRate, mainTerm);
+        monthlyPayment = firstMonthEqualPrincipal(mainAmt, mainRate, mainTerm);
+      } else {
+        const monthly = pmt(mainAmt, mainRate, mainTerm);
+        monthlyPayment = monthly;
+        mainAnnual = monthly * 12;
+      }
     } else if (mainType === "partial") {
       const repayTerm = mainTerm - mainGrace;
       if (repayTerm <= 0) { alert("거치기간이 대출기간 이상입니다."); return; }
-      const monthly = pmt(mainAmt, mainRate, repayTerm);
-      monthlyPayment = monthly;
-      mainAnnual = monthly * 12;
+      if (mainRepay === "pp") {
+        mainAnnual = year1EqualPrincipal(mainAmt, mainRate, repayTerm);
+        monthlyPayment = firstMonthEqualPrincipal(mainAmt, mainRate, repayTerm);
+      } else {
+        const monthly = pmt(mainAmt, mainRate, repayTerm);
+        monthlyPayment = monthly;
+        mainAnnual = monthly * 12;
+      }
     } else {
       const effTerm = Math.min(mainTerm, 10);
       const annualPrincipal = mainAmt / effTerm;
@@ -911,10 +1039,18 @@
     fill.style.background = dsr > 40 ? "#E24B4A" : "#356b5e";
 
     document.getElementById("r_income").textContent = fmt(income) + " / 년";
+    const modeRow = document.getElementById("r_repay_mode_row");
+    if (mainType === "full" || mainType === "partial") {
+      modeRow.style.display = "flex";
+      document.getElementById("r_repay_mode").textContent = repayLabel;
+    } else {
+      modeRow.style.display = "none";
+    }
     document.getElementById("r_main").textContent = fmt(mainAnnual) + " / 년";
     document.getElementById("r_others").textContent = fmt(othersTotal) + " / 년";
     document.getElementById("r_total").textContent = fmt(totalAnnual) + " / 년";
-    document.getElementById("r_monthly").textContent = fmt(monthlyPayment) + " / 월";
+    const monNote = mainRepay === "pp" && (mainType === "full" || mainType === "partial") ? " (1회차·최대)" : "";
+    document.getElementById("r_monthly").textContent = fmt(monthlyPayment) + " / 월" + monNote;
 
     let warnHTML = "";
     if (dsr > 40) {
@@ -925,16 +1061,34 @@
         <strong>DSR ${dsr.toFixed(1)}%</strong>로 40% 한도를 초과합니다.<br>
         연간 원리금을 약 <strong>${fmt(overAmt)}</strong> 줄여야 통과 가능합니다.<br>`;
       if (maxMain > 0) {
-        const r = mainRate / 100 / 12;
-        const n = mainTerm * 12;
         let maxLoanAmt = 0;
-        if (r === 0) {
-          maxLoanAmt = (maxMain / 12) * n;
+        if (mainType === "full" || mainType === "partial") {
+          const effTerm = mainType === "partial" ? mainTerm - mainGrace : mainTerm;
+          if (effTerm > 0) {
+            if (mainRepay === "pp") {
+              const c = y1EqualPrincipalCoef(mainRate, effTerm);
+              maxLoanAmt = c > 0 ? maxMain / c : 0;
+            } else {
+              maxLoanAmt = maxLoanFromAnnualAnnuity(maxMain, mainRate, effTerm);
+            }
+            maxLoanAmt = Math.floor(maxLoanAmt / 100) * 100;
+            warnHTML += `본건대출(${repayLabel}) 기준: 약 <strong>${fmt(maxLoanAmt)} 이하</strong>로 조정 필요<br>`;
+          }
         } else {
-          maxLoanAmt = (maxMain / 12) * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n));
+          const r = mainRate / 100 / 12;
+          const n = Math.min(mainTerm, 10) * 12;
+          if (n <= 0) {
+            /* skip */
+          } else if (r === 0) {
+            maxLoanAmt = (maxMain / 12) * n;
+            maxLoanAmt = Math.floor(maxLoanAmt / 100) * 100;
+            warnHTML += `본건대출 기준: 약 <strong>${fmt(maxLoanAmt)} 이하</strong>로 조정 필요<br>`;
+          } else {
+            maxLoanAmt = (maxMain / 12) * (Math.pow(1 + r, n) - 1) / (r * Math.pow(1 + r, n));
+            maxLoanAmt = Math.floor(maxLoanAmt / 100) * 100;
+            warnHTML += `본건대출 기준: 약 <strong>${fmt(maxLoanAmt)} 이하</strong>로 조정 필요<br>`;
+          }
         }
-        maxLoanAmt = Math.floor(maxLoanAmt / 100) * 100;
-        warnHTML += `본건대출 기준: 약 <strong>${fmt(maxLoanAmt)} 이하</strong>로 조정 필요<br>`;
       }
       const minIncome = Math.ceil(totalAnnual / 0.4);
       warnHTML += `또는 인정소득을 <strong>${fmt(minIncome)} 이상</strong>으로 높여야 합니다.
@@ -952,6 +1106,8 @@
   }
 
   wireMoneyInputs();
+  wireRepayPills();
+  onMainTypeChange();
 </script>
 
 </body>
