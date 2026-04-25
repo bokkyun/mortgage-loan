@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { newAuthorSecret, setQuestionDeleteSecret } from "../js/qa-auth-storage.mjs";
 
 var supabase = null;
 
@@ -47,6 +48,7 @@ async function onSubmitQuestion(e) {
     alert("제목과 내용을 입력하세요.");
     return;
   }
+  var authorSecret = newAuthorSecret();
   var btn = el("qa-q-submit");
   if (btn) {
     btn.disabled = true;
@@ -54,7 +56,14 @@ async function onSubmitQuestion(e) {
   }
   var res = await c
     .from("qa_questions")
-    .insert([{ title: title, body: body, author_nickname: nick || null }])
+    .insert([
+      {
+        title: title,
+        body: body,
+        author_nickname: nick || null,
+        author_secret: authorSecret,
+      },
+    ])
     .select("id")
     .single();
   if (btn) {
@@ -65,6 +74,7 @@ async function onSubmitQuestion(e) {
     alert("등록에 실패했습니다: " + res.error.message);
     return;
   }
+  setQuestionDeleteSecret(res.data.id, authorSecret);
   window.location.href = "index.html?id=" + encodeURIComponent(res.data.id);
 }
 

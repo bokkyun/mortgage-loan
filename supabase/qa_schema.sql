@@ -8,6 +8,7 @@ create table if not exists public.qa_questions (
   title text not null,
   body text not null,
   author_nickname text,
+  author_secret uuid,
   created_at timestamptz not null default now()
 );
 
@@ -16,6 +17,7 @@ create table if not exists public.qa_answers (
   question_id uuid not null references public.qa_questions (id) on delete cascade,
   body text not null,
   author_nickname text,
+  author_secret uuid,
   created_at timestamptz not null default now()
 );
 
@@ -31,3 +33,33 @@ create policy "qa_questions_insert" on public.qa_questions for insert with check
 
 create policy "qa_answers_select" on public.qa_answers for select using (true);
 create policy "qa_answers_insert" on public.qa_answers for insert with check (true);
+
+-- 직접 DELETE는 막고, secret 검증은 RPC(아래)에서만
+create or replace function public.qa_delete_question(p_question_id uuid, p_secret uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.qa_questions
+  where id = p_question_id and author_secret = p_secret;
+  return found;
+end;
+$$;
+
+create or replace function public.qa_delete_answer(p_answer_id uuid, p_secret uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.qa_answers
+  where id = p_answer_id and author_secret = p_secret;
+  return found;
+end;
+$$;
+
+grant execute on function public.qa_delete_question(uuid, uuid) to anon, authenticated, service_role;
+grant execute on function public.qa_delete_answer(uuid, uuid) to anon, authenticated, service_role;

@@ -1,4 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  newAuthorSecret,
+  getQuestionDeleteSecret,
+  setAnswerDeleteSecret,
+  getAnswerDeleteSecret,
+  clearQuestionDeleteSecret,
+  clearAnswerDeleteSecret,
+} from "../js/qa-auth-storage.mjs";
 
 var supabase = null;
 
@@ -356,7 +364,11 @@ async function loadDetail(id) {
   if (!c) return;
   var notFound = el("qa-not-found");
   var article = el("qa-detail-article");
-  var qres = await c.from("qa_questions").select("*").eq("id", id).maybeSingle();
+  var qres = await c
+    .from("qa_questions")
+    .select("id,title,body,author_nickname,created_at")
+    .eq("id", id)
+    .maybeSingle();
   if (qres.error || !qres.data) {
     if (notFound) {
       notFound.style.display = "block";
@@ -364,6 +376,7 @@ async function loadDetail(id) {
     if (article) {
       article.style.display = "none";
     }
+    if (el("qa-question-delete-wrap")) el("qa-question-delete-wrap").setAttribute("hidden", "hidden");
     var back0 = buildBackToListHref();
     if (el("qa-back-to-list")) el("qa-back-to-list").href = back0;
     if (el("qa-not-found-list")) el("qa-not-found-list").href = back0;
@@ -376,6 +389,24 @@ async function loadDetail(id) {
     article.style.display = "block";
   }
   var q = qres.data;
+  if (el("qa-view-question-id")) {
+    el("qa-view-question-id").value = id;
+  }
+  var canDelQ = !!getQuestionDeleteSecret(id);
+  var wrap = el("qa-question-delete-wrap");
+  if (wrap) {
+    if (canDelQ) {
+      wrap.removeAttribute("hidden");
+    } else {
+      wrap.setAttribute("hidden", "hidden");
+    }
+  }
+  var delBtn = el("qa-q-delete");
+  if (delBtn) {
+    delBtn.onclick = function () {
+      onDeleteQuestion(id);
+    };
+  }
   var titleEl = el("qa-detail-title");
   var metaEl = el("qa-detail-meta");
   var bodyEl = el("qa-detail-body");
@@ -386,7 +417,7 @@ async function loadDetail(id) {
 
   var ares = await c
     .from("qa_answers")
-    .select("*")
+    .select("id,question_id,body,author_nickname,created_at")
     .eq("question_id", id)
     .order("created_at", { ascending: true });
   if (answersEl) {
@@ -400,12 +431,20 @@ async function loadDetail(id) {
         var h = "";
         for (var j = 0; j < ans.length; j++) {
           var a = ans[j];
+          var canDelA = !!getAnswerDeleteSecret(a.id);
           h +=
             '<div style="margin-top:0.75rem; padding:0.75rem; border:1px solid var(--border); border-radius:8px; background:var(--surface)">' +
-            '<div class="field-hint" style="margin-bottom:0.35rem; font-size:0.75rem">' +
+            '<div class="qa-answer-hdr">' +
+            "<span class=\"field-hint\" style=\"font-size:0.75rem;\">" +
             escapeHtml(a.author_nickname || "익명") +
             " · " +
             fmtDate(a.created_at) +
+            "</span>" +
+            (canDelA
+              ? '<button type="button" class="qa-answer-del" data-aid="' +
+                escapeHtml(a.id) +
+                '">답글 삭제</button>'
+              : "") +
             "</div>" +
             '<div style="line-height:1.55; font-size:0.9rem">' +
             nl2br(a.body) +
@@ -421,6 +460,53 @@ async function loadDetail(id) {
   var backHref = buildBackToListHref();
   if (el("qa-back-to-list")) el("qa-back-to-list").href = backHref;
   if (el("qa-not-found-list")) el("qa-not-found-list").href = backHref;
+}
+
+async function onDeleteQuestion(questionId) {
+  if (!window.confirm("이 질문과 달린 답글을 모두 삭제할까요?")) return;
+  var c = getClient();
+  if (!c) return;
+  var sec = getQuestionDeleteSecret(questionId);
+  if (!sec) {
+    alert("이 브라우저에 삭제 권한이 없습니다. 글을 등록할 때 사용한 기기·브라우저에서 시도하세요.");
+    return;
+  }
+  var res = await c.rpc("qa_delete_question", { p_question_id: questionId, p_secret: sec });
+  if (res.error) {
+    alert("삭제에 실패했습니다. " + res.error.message);
+    return;
+  }
+  if (!res.data) {
+    alert("삭제할 수 없습니다. (권한을 확인하세요.)");
+    return;
+  }
+  clearQuestionDeleteSecret(questionId);
+  window.location.href = buildBackToListHref();
+}
+
+async function onDeleteAnswer(answerId) {
+  if (!window.confirm("이 답글을 삭제할까요?")) return;
+  var c = getClient();
+  if (!c) return;
+  var qid = getQueryId() || (el("qa-answer-question-id") && el("qa-answer-question-id").value);
+  var sec = getAnswerDeleteSecret(answerId);
+  if (!sec) {
+    alert("이 브라우저에 삭제 권한이 없습니다. 답글을 등록할 때 사용한 기기·브라우저에서 시도하세요.");
+    return;
+  }
+  var res = await c.rpc("qa_delete_answer", { p_answer_id: answerId, p_secret: sec });
+  if (res.error) {
+    alert("삭제에 실패했습니다. " + res.error.message);
+    return;
+  }
+  if (!res.data) {
+    alert("삭제할 수 없습니다. (권한을 확인하세요.)");
+    return;
+  }
+  clearAnswerDeleteSecret(answerId);
+  if (qid) {
+    loadDetail(qid);
+  }
 }
 
 function getQueryId() {
@@ -459,9 +545,12 @@ async function onSubmitAnswer(e) {
     btn.disabled = true;
     btn.textContent = "등록 중…";
   }
+  var authorSecret = newAuthorSecret();
   var res = await c
     .from("qa_answers")
-    .insert([{ question_id: qid, body: body, author_nickname: nick || null }]);
+    .insert([{ question_id: qid, body: body, author_nickname: nick || null, author_secret: authorSecret }])
+    .select("id")
+    .single();
   if (btn) {
     btn.disabled = false;
     btn.textContent = "답변 등록";
@@ -469,6 +558,9 @@ async function onSubmitAnswer(e) {
   if (res.error) {
     alert("답변 등록에 실패했습니다: " + res.error.message);
     return;
+  }
+  if (res.data && res.data.id) {
+    setAnswerDeleteSecret(res.data.id, authorSecret);
   }
   if (el("qa-answer-form")) el("qa-answer-form").reset();
   if (el("qa-a-body")) el("qa-a-body").value = "";
@@ -499,6 +591,16 @@ function boot() {
   initLayout();
   var af = el("qa-answer-form");
   if (af) af.addEventListener("submit", onSubmitAnswer);
+  var an = el("qa-answers");
+  if (an) {
+    an.addEventListener("click", function (e) {
+      var t = e.target && e.target.closest && e.target.closest(".qa-answer-del");
+      if (!t) return;
+      e.preventDefault();
+      var aid = t.getAttribute("data-aid");
+      if (aid) onDeleteAnswer(aid);
+    });
+  }
 }
 
 if (document.readyState === "loading") {
