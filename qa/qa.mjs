@@ -148,7 +148,7 @@ async function loadList(pageNum) {
   renderPagination(pageNum, total);
   if (rows.length === 0) {
     listEl.innerHTML =
-      '<p class="field-hint">아직 질문이 없습니다. 상단 <strong>글쓰기</strong> 또는 아래 양식에서 첫 질문을 남겨 보세요.</p>';
+      '<p class="field-hint">아직 질문이 없습니다. 상단 <strong>글쓰기</strong>에서 첫 질문을 남겨 보세요.</p>';
     if (nav) nav.hidden = true;
     return;
   }
@@ -258,54 +258,16 @@ function getQueryId() {
 function initLayout() {
   var id = getQueryId();
   var listSec = el("qa-section-list");
-  var formSec = el("qa-form-section");
   var detailSec = el("qa-section-detail");
   if (id) {
     if (listSec) listSec.hidden = true;
-    if (formSec) formSec.hidden = true;
     if (detailSec) detailSec.hidden = false;
     loadDetail(id);
   } else {
     if (listSec) listSec.hidden = false;
-    if (formSec) formSec.hidden = false;
     if (detailSec) detailSec.hidden = true;
     loadList(getListPage());
   }
-}
-
-async function onSubmitQuestion(e) {
-  e.preventDefault();
-  var c = getClient();
-  if (!c) return;
-  var title = (el("qa-q-title") && el("qa-q-title").value) || "";
-  var body = (el("qa-q-body") && el("qa-q-body").value) || "";
-  var nick = (el("qa-q-nick") && el("qa-q-nick").value) || "";
-  title = title.trim();
-  body = body.trim();
-  if (!title || !body) {
-    alert("제목과 내용을 입력하세요.");
-    return;
-  }
-  var btn = el("qa-q-submit");
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "등록 중…";
-  }
-  var res = await c
-    .from("qa_questions")
-    .insert([{ title: title, body: body, author_nickname: nick || null }])
-    .select("id")
-    .single();
-  if (btn) {
-    btn.disabled = false;
-    btn.textContent = "질문 등록";
-  }
-  if (res.error) {
-    alert("등록에 실패했습니다: " + res.error.message);
-    return;
-  }
-  if (el("qa-q-form")) el("qa-q-form").reset();
-  window.location.href = "?id=" + encodeURIComponent(res.data.id);
 }
 
 async function onSubmitAnswer(e) {
@@ -349,8 +311,6 @@ function boot() {
   if (el("qa-config-banner")) el("qa-config-banner").hidden = true;
   if (el("qa-main")) el("qa-main").hidden = false;
   initLayout();
-  var qf = el("qa-q-form");
-  if (qf) qf.addEventListener("submit", onSubmitQuestion);
   var af = el("qa-answer-form");
   if (af) af.addEventListener("submit", onSubmitAnswer);
 }

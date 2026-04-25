@@ -127,30 +127,11 @@
         <section class="card" id="qa-section-list" style="margin-bottom: 1rem">
           <div class="qa-list-toolbar">
             <h2 class="rg-panel-title" style="margin-top: 0; border: 0; padding: 0">질문 목록</h2>
-            <a class="qa-write-top" href="#qa-write">글쓰기</a>
+            <a class="qa-write-top" href="write.html">글쓰기</a>
           </div>
           <p id="qa-list-error" class="field-hint" style="color: var(--bad)" hidden></p>
           <div id="qa-list"></div>
           <nav id="qa-pagination" class="qa-pagination" aria-label="페이지" hidden></nav>
-        </section>
-
-        <section class="card" id="qa-form-section" style="margin-bottom: 1rem">
-          <h2 class="rg-panel-title" id="qa-write" style="margin-top: 0; scroll-margin-top: 0.5rem">질문 남기기</h2>
-          <form id="qa-q-form" class="grid" style="gap: 0.75rem">
-            <div>
-              <label for="qa-q-title">제목</label>
-              <input type="text" id="qa-q-title" maxlength="200" required placeholder="한 줄로 요약" autocomplete="off" />
-            </div>
-            <div>
-              <label for="qa-q-nick">닉네임 (선택)</label>
-              <input type="text" id="qa-q-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
-            </div>
-            <div>
-              <label for="qa-q-body">내용</label>
-              <textarea id="qa-q-body" required rows="6" placeholder="질문 내용"></textarea>
-            </div>
-            <button type="submit" class="btn-primary" id="qa-q-submit" style="margin-top: 0.25rem">질문 등록</button>
-          </form>
         </section>
 
         <section class="card" id="qa-section-detail" hidden>
