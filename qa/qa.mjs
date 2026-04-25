@@ -23,8 +23,8 @@ function hasClient() {
 }
 
 function showConfigMissing() {
-  var b = el("qa-config-banner");
-  if (b) b.hidden = false;
+  var n = el("qa-unavailable-notice");
+  if (n) n.hidden = false;
   var main = el("qa-main");
   if (main) main.hidden = true;
 }
@@ -63,12 +63,70 @@ function getListPage() {
   return n;
 }
 
-function hrefPage(n) {
-  if (n <= 1) return "./";
-  return "?page=" + n;
+function getSearchQuery() {
+  return (new URLSearchParams(window.location.search).get("q") || "").trim();
 }
 
-function renderPagination(pageNum, total) {
+function sanitizeIlikeInput(raw) {
+  if (raw == null) return "";
+  return String(raw)
+    .trim()
+    .replace(/[%_\\]/g, " ")
+    .replace(/[,]/g, " ")
+    .replace(/\s+/g, " ")
+    .slice(0, 200);
+}
+
+function buildBackToListHref() {
+  var p = new URLSearchParams(window.location.search);
+  p.delete("id");
+  var s = p.toString();
+  return s ? "?" + s : "./";
+}
+
+function listPageHref(pageNum, searchQ) {
+  var q = (searchQ != null && searchQ !== undefined ? String(searchQ) : getSearchQuery()).trim();
+  if (q) {
+    if (pageNum <= 1) return "?q=" + encodeURIComponent(q);
+    return "?q=" + encodeURIComponent(q) + "&page=" + pageNum;
+  }
+  if (pageNum <= 1) return "./";
+  return "?page=" + pageNum;
+}
+
+function listDetailHref(pageNum, searchQ, id) {
+  var p = new URLSearchParams();
+  var q = (searchQ != null && searchQ !== undefined ? String(searchQ) : getSearchQuery()).trim();
+  if (q) p.set("q", q);
+  if (pageNum > 1) p.set("page", String(pageNum));
+  p.set("id", id);
+  return "?" + p.toString();
+}
+
+function setSearchSummary(on, line) {
+  var s = el("qa-search-summary");
+  if (!s) return;
+  if (on && line) {
+    s.textContent = line;
+    s.removeAttribute("hidden");
+  } else {
+    s.textContent = "";
+    s.setAttribute("hidden", "hidden");
+  }
+}
+
+function syncSearchChrome() {
+  var p = new URLSearchParams(window.location.search);
+  var qRaw = p.get("q") || "";
+  var inp = el("qa-search-input");
+  if (inp) inp.value = qRaw;
+  var reset = el("qa-search-reset");
+  if (reset) {
+    reset.hidden = !qRaw.trim();
+  }
+}
+
+function renderPagination(pageNum, total, listSearchQ) {
   var nav = el("qa-pagination");
   if (!nav) return;
   var totalPages = Math.max(1, total === 0 ? 1 : Math.ceil(total / PAGE_SIZE));
@@ -80,8 +138,9 @@ function renderPagination(pageNum, total) {
   nav.hidden = false;
   var prevN = pageNum - 1;
   var nextN = pageNum + 1;
-  var prevHref = hrefPage(prevN);
-  var nextHref = hrefPage(nextN);
+  var sq = listSearchQ != null && listSearchQ !== undefined ? listSearchQ : getSearchQuery();
+  var prevHref = listPageHref(prevN, sq);
+  var nextHref = listPageHref(nextN, sq);
   var prevAttr = pageNum <= 1 ? ' aria-disabled="true" href="#"' : ' href="' + prevHref + '"';
   var nextAttr = pageNum >= totalPages ? ' aria-disabled="true" href="#"' : ' href="' + nextHref + '"';
   nav.innerHTML =
@@ -100,13 +159,19 @@ function renderPagination(pageNum, total) {
     ">다음</a>";
 }
 
-async function loadList(pageNum) {
+async function loadSearchList(pageNum, qRaw) {
   if (pageNum == null || !Number.isFinite(pageNum)) pageNum = 1;
   var c = getClient();
   var listEl = el("qa-list");
   var errEl = el("qa-list-error");
   if (!c || !listEl) return;
-  listEl.innerHTML = '<p class="field-hint">불러오는 중…</p>';
+  var safe = sanitizeIlikeInput(qRaw);
+  if (!safe) {
+    window.location.replace("./");
+    return;
+  }
+  var pat = "%" + safe + "%";
+  listEl.innerHTML = '<p class="field-hint">검색 중…</p>';
   var nav = el("qa-pagination");
   if (nav) {
     nav.hidden = true;
@@ -116,48 +181,81 @@ async function loadList(pageNum) {
     errEl.textContent = "";
     errEl.hidden = true;
   }
-  var from = (pageNum - 1) * PAGE_SIZE;
-  var to = from + PAGE_SIZE - 1;
-  var res = await c
-    .from("qa_questions")
-    .select("id,title,author_nickname,created_at", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, to);
-  if (res.error) {
+  setSearchSummary(false, "");
+  var t1 = await c.from("qa_questions").select("id,title,author_nickname,created_at").ilike("title", pat);
+  var t2 = await c.from("qa_questions").select("id,title,author_nickname,created_at").ilike("body", pat);
+  if (t1.error || t2.error) {
+    var e = t1.error || t2.error;
     if (errEl) {
-      errEl.textContent =
-        "목록을 불러오지 못했습니다. 테이블·RLS·`js/supabase-config.js`를 확인하세요. (" +
-        res.error.message +
-        ")";
+      errEl.textContent = "검색에 실패했습니다. (" + (e && e.message ? e.message : "오류") + ")";
       errEl.hidden = false;
     }
     listEl.innerHTML = "";
     return;
   }
-  var total = res.count != null ? res.count : 0;
+  var byId = new Map();
+  function addRows(arr) {
+    (arr || []).forEach(function (row) {
+      if (row && row.id) byId.set(row.id, row);
+    });
+  }
+  addRows(t1.data);
+  addRows(t2.data);
+  var tAns = await c.from("qa_answers").select("question_id").ilike("body", pat).limit(3000);
+  if (tAns.error) {
+    if (errEl) {
+      errEl.textContent = "답변 검색에 실패했습니다. (" + tAns.error.message + ")";
+      errEl.hidden = false;
+    }
+    listEl.innerHTML = "";
+    return;
+  }
+  var need = [];
+  var seenN = new Set();
+  (tAns.data || []).forEach(function (a) {
+    if (a && a.question_id && !byId.has(a.question_id) && !seenN.has(a.question_id)) {
+      seenN.add(a.question_id);
+      need.push(a.question_id);
+    }
+  });
+  for (var bi = 0; bi < need.length; bi += 100) {
+    var batch = need.slice(bi, bi + 100);
+    var t3 = await c.from("qa_questions").select("id,title,author_nickname,created_at").in("id", batch);
+    if (t3.error) {
+      if (errEl) {
+        errEl.textContent = "질문 정보를 불러오지 못했습니다. (" + t3.error.message + ")";
+        errEl.hidden = false;
+      }
+      listEl.innerHTML = "";
+      return;
+    }
+    addRows(t3.data);
+  }
+  var rows = Array.from(byId.values());
+  rows.sort(function (a, b) {
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+  var total = rows.length;
   var totalPages = Math.max(1, total === 0 ? 1 : Math.ceil(total / PAGE_SIZE));
   if (pageNum > totalPages) {
-    window.location.replace(totalPages <= 1 ? "./" : "?page=" + totalPages);
+    window.location.replace(listPageHref(totalPages, qRaw));
     return;
   }
-  var rows = res.data || [];
-  if (rows.length === 0 && total > 0 && pageNum > 1) {
-    window.location.replace("./");
-    return;
-  }
-  renderPagination(pageNum, total);
-  if (rows.length === 0) {
+  setSearchSummary(true, "「" + (getSearchQuery() || qRaw) + "」 검색 · " + total + "건");
+  var slice = rows.slice((pageNum - 1) * PAGE_SIZE, pageNum * PAGE_SIZE);
+  renderPagination(pageNum, total, qRaw);
+  if (total === 0) {
     listEl.innerHTML =
-      '<p class="field-hint">아직 질문이 없습니다. 상단 <strong>글쓰기</strong>에서 첫 질문을 남겨 보세요.</p>';
+      '<p class="field-hint">검색 조건에 맞는 질문이 없습니다. 다른 키워드로 시도하거나 <a href="./">전체 목록</a>을 보세요.</p>';
     if (nav) nav.hidden = true;
+    syncSearchChrome();
     return;
   }
   var html = '<ul class="doc-list" style="margin:0; list-style:none; padding:0">';
-  for (var i = 0; i < rows.length; i++) {
-    var r = rows[i];
+  for (var i = 0; i < slice.length; i++) {
+    var r = slice[i];
     var nick = r.author_nickname ? escapeHtml(r.author_nickname) : "익명";
-    var link =
-      (pageNum > 1 ? "?page=" + pageNum + "&id=" : "?id=") + encodeURIComponent(r.id);
+    var link = listDetailHref(pageNum, qRaw, r.id);
     html +=
       '<li style="margin:0.5rem 0; padding:0.65rem 0.75rem; border:1px solid var(--border); border-radius:8px; background:var(--surface2)">' +
       '<a href="' +
@@ -173,6 +271,84 @@ async function loadList(pageNum) {
   }
   html += "</ul>";
   listEl.innerHTML = html;
+  syncSearchChrome();
+}
+
+async function loadList(pageNum) {
+  if (pageNum == null || !Number.isFinite(pageNum)) pageNum = 1;
+  if (getSearchQuery()) {
+    return loadSearchList(pageNum, getSearchQuery());
+  }
+  var c = getClient();
+  var listEl = el("qa-list");
+  var errEl = el("qa-list-error");
+  if (!c || !listEl) return;
+  listEl.innerHTML = '<p class="field-hint">불러오는 중…</p>';
+  var nav = el("qa-pagination");
+  if (nav) {
+    nav.hidden = true;
+    nav.innerHTML = "";
+  }
+  if (errEl) {
+    errEl.textContent = "";
+    errEl.hidden = true;
+  }
+  setSearchSummary(false, "");
+  var from = (pageNum - 1) * PAGE_SIZE;
+  var to = from + PAGE_SIZE - 1;
+  var res = await c
+    .from("qa_questions")
+    .select("id,title,author_nickname,created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  if (res.error) {
+    if (errEl) {
+      errEl.textContent = "목록을 불러오지 못했습니다. (" + res.error.message + ")";
+      errEl.hidden = false;
+    }
+    listEl.innerHTML = "";
+    return;
+  }
+  var total = res.count != null ? res.count : 0;
+  var totalPages = Math.max(1, total === 0 ? 1 : Math.ceil(total / PAGE_SIZE));
+  if (pageNum > totalPages) {
+    window.location.replace(listPageHref(totalPages, ""));
+    return;
+  }
+  var rows = res.data || [];
+  if (rows.length === 0 && total > 0 && pageNum > 1) {
+    window.location.replace("./");
+    return;
+  }
+  renderPagination(pageNum, total, "");
+  if (rows.length === 0) {
+    listEl.innerHTML =
+      '<p class="field-hint">아직 질문이 없습니다. 상단 <strong>글쓰기</strong>에서 첫 질문을 남겨 보세요.</p>';
+    if (nav) nav.hidden = true;
+    syncSearchChrome();
+    return;
+  }
+  var html = '<ul class="doc-list" style="margin:0; list-style:none; padding:0">';
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var nick = r.author_nickname ? escapeHtml(r.author_nickname) : "익명";
+    var link = listDetailHref(pageNum, "", r.id);
+    html +=
+      '<li style="margin:0.5rem 0; padding:0.65rem 0.75rem; border:1px solid var(--border); border-radius:8px; background:var(--surface2)">' +
+      '<a href="' +
+      link +
+      '" style="font-weight:700; text-decoration:none; color:var(--text)">' +
+      escapeHtml(r.title) +
+      "</a><br />" +
+      '<span class="field-hint" style="font-size:0.75rem">' +
+      nick +
+      " · " +
+      fmtDate(r.created_at) +
+      "</span></li>";
+  }
+  html += "</ul>";
+  listEl.innerHTML = html;
+  syncSearchChrome();
 }
 
 async function loadDetail(id) {
@@ -188,6 +364,9 @@ async function loadDetail(id) {
     if (article) {
       article.style.display = "none";
     }
+    var back0 = buildBackToListHref();
+    if (el("qa-back-to-list")) el("qa-back-to-list").href = back0;
+    if (el("qa-not-found-list")) el("qa-not-found-list").href = back0;
     return;
   }
   if (notFound) {
@@ -239,16 +418,9 @@ async function loadDetail(id) {
   if (el("qa-answer-question-id")) {
     el("qa-answer-question-id").value = id;
   }
-  var pageParam = new URLSearchParams(window.location.search).get("page");
-  var back = el("qa-back-to-list");
-  if (back) {
-    var pn = pageParam != null ? parseInt(pageParam, 10) : 1;
-    if (Number.isFinite(pn) && pn > 1) {
-      back.href = "?page=" + pn;
-    } else {
-      back.href = "./";
-    }
-  }
+  var backHref = buildBackToListHref();
+  if (el("qa-back-to-list")) el("qa-back-to-list").href = backHref;
+  if (el("qa-not-found-list")) el("qa-not-found-list").href = backHref;
 }
 
 function getQueryId() {
@@ -308,8 +480,22 @@ function boot() {
     showConfigMissing();
     return;
   }
-  if (el("qa-config-banner")) el("qa-config-banner").hidden = true;
+  if (el("qa-unavailable-notice")) el("qa-unavailable-notice").hidden = true;
   if (el("qa-main")) el("qa-main").hidden = false;
+  var sf = el("qa-search-form");
+  if (sf) {
+    sf.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = (el("qa-search-input") && el("qa-search-input").value) || "";
+      v = v.trim();
+      if (!v) {
+        window.location.href = "./";
+        return;
+      }
+      window.location.href = listPageHref(1, v);
+    });
+  }
+  syncSearchChrome();
   initLayout();
   var af = el("qa-answer-form");
   if (af) af.addEventListener("submit", onSubmitAnswer);

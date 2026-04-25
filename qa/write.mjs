@@ -24,11 +24,11 @@ function hasClient() {
 
 function boot() {
   if (!hasClient() || !getClient()) {
-    if (el("qa-write-config-banner")) el("qa-write-config-banner").hidden = false;
+    if (el("qa-write-unavailable-notice")) el("qa-write-unavailable-notice").hidden = false;
     if (el("qa-write-main")) el("qa-write-main").hidden = true;
     return;
   }
-  if (el("qa-write-config-banner")) el("qa-write-config-banner").hidden = true;
+  if (el("qa-write-unavailable-notice")) el("qa-write-unavailable-notice").hidden = true;
   if (el("qa-write-main")) el("qa-write-main").hidden = false;
   var qf = el("qa-q-form");
   if (qf) qf.addEventListener("submit", onSubmitQuestion);
