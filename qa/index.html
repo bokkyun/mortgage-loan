@@ -31,6 +31,70 @@
       crossorigin
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
     />
+    <style>
+      .qa-list-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        margin-bottom: 0.75rem;
+      }
+      .qa-list-toolbar h2 {
+        margin: 0;
+      }
+      .qa-write-top {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #f4faf8 !important;
+        border: 1px solid rgba(18, 44, 38, 0.38);
+        background: linear-gradient(165deg, #4a8274 0%, #356b5e 48%, #2a554a 100%);
+        box-shadow: 0 8px 22px rgba(32, 72, 62, 0.2);
+      }
+      .qa-write-top:hover {
+        filter: brightness(1.05);
+        color: #f4faf8 !important;
+      }
+      .qa-pagination {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem 0.65rem;
+        margin-top: 0.85rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .qa-pagination a,
+      .qa-pagination span {
+        display: inline-block;
+      }
+      .qa-pagination a {
+        color: var(--btn-primary-mid);
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.2rem 0.45rem;
+        border-radius: 6px;
+      }
+      .qa-pagination a:hover {
+        background: var(--accent-dim);
+        text-decoration: underline;
+      }
+      .qa-pagination a[aria-disabled="true"] {
+        pointer-events: none;
+        opacity: 0.4;
+        text-decoration: none;
+      }
+      .qa-pagination__info {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -61,13 +125,17 @@
 
       <div id="qa-main" style="max-width: 720px; margin: 0 auto" hidden>
         <section class="card" id="qa-section-list" style="margin-bottom: 1rem">
-          <h2 class="rg-panel-title" style="margin-top: 0">질문 목록</h2>
+          <div class="qa-list-toolbar">
+            <h2 class="rg-panel-title" style="margin-top: 0; border: 0; padding: 0">질문 목록</h2>
+            <a class="qa-write-top" href="#qa-write">글쓰기</a>
+          </div>
           <p id="qa-list-error" class="field-hint" style="color: var(--bad)" hidden></p>
           <div id="qa-list"></div>
+          <nav id="qa-pagination" class="qa-pagination" aria-label="페이지" hidden></nav>
         </section>
 
         <section class="card" id="qa-form-section" style="margin-bottom: 1rem">
-          <h2 class="rg-panel-title" style="margin-top: 0">질문 남기기</h2>
+          <h2 class="rg-panel-title" id="qa-write" style="margin-top: 0; scroll-margin-top: 0.5rem">질문 남기기</h2>
           <form id="qa-q-form" class="grid" style="gap: 0.75rem">
             <div>
               <label for="qa-q-title">제목</label>
@@ -87,7 +155,11 @@
 
         <section class="card" id="qa-section-detail" hidden>
           <p style="margin: 0 0 0.75rem">
-            <a href="./" class="hub-btn-secondary" style="display: inline-block; padding: 0.4rem 0.8rem; text-decoration: none"
+            <a
+              href="./"
+              id="qa-back-to-list"
+              class="hub-btn-secondary"
+              style="display: inline-block; padding: 0.4rem 0.8rem; text-decoration: none"
               >← 목록</a
             >
           </p>
