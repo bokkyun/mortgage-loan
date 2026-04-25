@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J1JQSVPNM6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-J1JQSVPNM6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.svg" />
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#2a554a" />
+    <link rel="manifest" href="../site.webmanifest" />
+    <meta name="theme-color" content="#2a554a" />
+    <title>Q&amp;A | Mortgage Loan Lab</title>
+    <meta
+      name="description"
+      content="주택자금·대출 관련 질문과 답변을 남기는 Q&A 공간입니다. (Supabase 연동)"
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://mortgage-loan.uk/qa/" />
+    <link rel="stylesheet" href="../css/styles.css?v=mobile-1" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Q&amp;A</h1>
+      <p>
+        디딤돌·버팀목·DSR·반환보증 등 <strong>주택자금</strong>이나 사이트 이용에 관한 질문을 남기고, 다른 분의 답변을 참고할
+        수 있습니다. (욕설·광고·개인정보는 삼가 주세요.)
+      </p>
+      <nav class="quick-nav" aria-label="빠른 이동">
+        <a href="../">홈</a>
+        <a href="../didimdol/">디딤돌</a>
+        <a href="../dsr/">DSR</a>
+        <a href="../beotimmok/">버팀목</a>
+        <a href="../return-guarantee/">반환보증</a>
+      </nav>
+      <div class="disclaimer" style="margin-top: 0.75rem">
+        본 Q&amp;A는 Supabase에 저장됩니다. <strong>운영·삭제·스팸 대응</strong>은 사이트 운영 정책에 따릅니다. 금융 법률
+        상담은 전문가를 찾으세요.
+      </div>
+    </header>
+
+    <main>
+      <div id="qa-config-banner" class="disclaimer" style="max-width: 920px; margin: 0 auto 1rem" hidden>
+        <strong>Supabase 연결이 필요합니다.</strong> 저장소 루트의
+        <code>js/supabase-config.js</code>에 Project URL·anon public API Key를 넣고,
+        <code>supabase/qa_schema.sql</code>을 SQL Editor에서 실행해 테이블을 만든 뒤 새로고침하세요.
+      </div>
+
+      <div id="qa-main" style="max-width: 720px; margin: 0 auto" hidden>
+        <section class="card" id="qa-section-list" style="margin-bottom: 1rem">
+          <h2 class="rg-panel-title" style="margin-top: 0">질문 목록</h2>
+          <p id="qa-list-error" class="field-hint" style="color: var(--bad)" hidden></p>
+          <div id="qa-list"></div>
+        </section>
+
+        <section class="card" id="qa-form-section" style="margin-bottom: 1rem">
+          <h2 class="rg-panel-title" style="margin-top: 0">질문 남기기</h2>
+          <form id="qa-q-form" class="grid" style="gap: 0.75rem">
+            <div>
+              <label for="qa-q-title">제목</label>
+              <input type="text" id="qa-q-title" maxlength="200" required placeholder="한 줄로 요약" autocomplete="off" />
+            </div>
+            <div>
+              <label for="qa-q-nick">닉네임 (선택)</label>
+              <input type="text" id="qa-q-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
+            </div>
+            <div>
+              <label for="qa-q-body">내용</label>
+              <textarea id="qa-q-body" required rows="6" placeholder="질문 내용"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="qa-q-submit" style="margin-top: 0.25rem">질문 등록</button>
+          </form>
+        </section>
+
+        <section class="card" id="qa-section-detail" hidden>
+          <p style="margin: 0 0 0.75rem">
+            <a href="./" class="hub-btn-secondary" style="display: inline-block; padding: 0.4rem 0.8rem; text-decoration: none"
+              >← 목록</a
+            >
+          </p>
+          <div id="qa-not-found" style="display: none" aria-live="polite">
+            <p>질문을 찾을 수 없습니다. <a href="./">목록으로</a></p>
+          </div>
+          <div id="qa-detail-article">
+            <h2 class="rg-panel-title" id="qa-detail-title" style="margin-top: 0; border: 0; padding: 0"></h2>
+            <p class="field-hint" id="qa-detail-meta" style="margin: 0 0 0.75rem"></p>
+            <div id="qa-detail-body" style="line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.25rem"></div>
+            <h3 class="subsection-title" style="margin-top: 0">답변</h3>
+            <div id="qa-answers" style="margin-bottom: 1rem"></div>
+            <h3 class="subsection-title" style="margin-top: 0.5rem">답변 남기기</h3>
+            <form id="qa-answer-form" class="grid" style="gap: 0.65rem">
+              <input type="hidden" id="qa-answer-question-id" value="" />
+              <div>
+                <label for="qa-a-nick">닉네임 (선택)</label>
+                <input type="text" id="qa-a-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
+              </div>
+              <div>
+                <label for="qa-a-body">답변</label>
+                <textarea id="qa-a-body" required rows="4" placeholder="답변 내용"></textarea>
+              </div>
+              <button type="submit" class="btn-primary" id="qa-a-submit" style="margin-top: 0.15rem">답변 등록</button>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-main" style="max-width: 920px; margin: 0 auto; padding: 0 1.25rem">
+        <span>© Mortgage Loan Lab · Q&amp;A</span>
+      </div>
+      <div class="footer-links" style="max-width: 920px; margin: 0.35rem auto 0; padding: 0 1.25rem">
+        <a href="../">홈</a>
+        <a href="../about/">About</a>
+        <a href="../guides/">가이드</a>
+        <a href="../contact/">문의</a>
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../disclaimer/">면책 조항</a>
+      </div>
+      <div class="footer-note" style="max-width: 920px; margin: 0.5rem auto 2rem; padding: 0 1.25rem">
+        Q&amp;A 글·답변은 Supabase에 저장됩니다. 입력·열람에 따른 책임은 작성자 본인에게 있습니다.
+      </div>
+    </footer>
+
+    <script src="../js/supabase-config.js"></script>
+    <script type="module" src="qa.mjs"></script>
+  </body>
+</html>
