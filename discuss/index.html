@@ -31,13 +31,183 @@
       crossorigin
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
     />
+    <style>
+      .disc-list-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.6rem;
+        margin-bottom: 0.75rem;
+      }
+      .disc-list-toolbar h2 {
+        margin: 0;
+      }
+      .disc-write-top {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        text-decoration: none;
+        color: #f4faf8 !important;
+        border: 1px solid rgba(18, 44, 38, 0.38);
+        background: linear-gradient(165deg, #4a8274 0%, #356b5e 48%, #2a554a 100%);
+        box-shadow: 0 8px 22px rgba(32, 72, 62, 0.2);
+      }
+      .disc-write-top:hover {
+        filter: brightness(1.05);
+        color: #f4faf8 !important;
+      }
+      .disc-cat-pills {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35rem 0.5rem;
+        margin: 0 0 0.85rem;
+        font-size: 0.82rem;
+      }
+      .disc-cat-pills a {
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .disc-cat-pills a:hover {
+        background: var(--accent-dim);
+      }
+      .disc-cat-pill--active {
+        border-color: rgba(18, 44, 38, 0.45) !important;
+        background: rgba(74, 130, 116, 0.18) !important;
+        font-weight: 700 !important;
+        color: var(--btn-primary-mid) !important;
+      }
+      .disc-pagination {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem 0.65rem;
+        margin-top: 0.85rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed var(--border);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .disc-pagination a,
+      .disc-pagination span {
+        display: inline-block;
+      }
+      .disc-pagination a {
+        color: var(--btn-primary-mid);
+        font-weight: 600;
+        text-decoration: none;
+        padding: 0.2rem 0.45rem;
+        border-radius: 6px;
+      }
+      .disc-pagination a:hover {
+        background: var(--accent-dim);
+        text-decoration: underline;
+      }
+      .disc-pagination a[aria-disabled="true"] {
+        pointer-events: none;
+        opacity: 0.4;
+        text-decoration: none;
+      }
+      .disc-pagination__info {
+        font-variant-numeric: tabular-nums;
+      }
+      .disc-search-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.9rem;
+        width: 100%;
+      }
+      .disc-search-bar input[type="search"] {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        padding: 0 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: #fff;
+      }
+      .disc-search-bar .disc-search-go {
+        height: 40px;
+        padding: 0 1rem;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid rgba(18, 44, 38, 0.38);
+        background: linear-gradient(165deg, #4a8274 0%, #356b5e 48%, #2a554a 100%);
+        color: #f4faf8;
+      }
+      .disc-search-bar .disc-search-reset {
+        height: 40px;
+        padding: 0 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--btn-primary-mid);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface2);
+        line-height: 38px;
+        box-sizing: border-box;
+      }
+      .disc-search-bar .disc-search-reset[hidden] {
+        display: none !important;
+      }
+      #disc-search-summary:not([hidden]) {
+        margin: 0 0 0.6rem;
+        font-size: 0.86rem;
+        color: var(--muted);
+      }
+      .disc-thread-actions {
+        margin: 0 0 0.5rem;
+        font-size: 0.85rem;
+      }
+      .disc-del-btn,
+      .disc-reply-del {
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.2rem 0.45rem;
+        border-radius: 6px;
+        border: 1px solid #c4a0a0;
+        background: #fff5f5;
+        color: #8b2e2e;
+        text-decoration: none;
+      }
+      .disc-reply-del {
+        background: var(--surface2);
+        border-color: var(--border);
+        color: var(--btn-primary-mid);
+        flex-shrink: 0;
+      }
+      .disc-reply-hdr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.35rem 0.5rem;
+        margin-bottom: 0.35rem;
+      }
+    </style>
   </head>
   <body>
     <header>
       <h1>은행 상품 토론방</h1>
       <p>
         <strong>IRP</strong>, <strong>예·적금</strong>, <strong>신용카드</strong>, <strong>페이</strong>,
-        <strong>통신</strong> 등 상품·혜택 정보를 주제별로 나누는 공간입니다. (욕설·광고·개인정보는 삼가 주세요.)
+        <strong>통신</strong> 등 상품·혜택 정보를 주제별로 나눕니다. (욕설·광고·개인정보는 삼가 주세요.)
       </p>
       <nav class="quick-nav" aria-label="빠른 이동">
         <a href="../">홈</a>
@@ -52,14 +222,76 @@
       </div>
     </header>
 
-    <main style="max-width: 720px; margin: 0 auto; padding: 0 0.5rem 2rem">
-      <section class="card">
-        <h2 class="rg-panel-title" style="margin-top: 0">준비 중</h2>
-        <p style="margin: 0; line-height: 1.65">
-          카테고리별 글쓰기·목록 기능을 연결하면 이 페이지에서 바로 이용하실 수 있습니다. 주택자금 Q&amp;A는
-          <a href="../qa/">Q&amp;A</a>를 이용해 주세요.
-        </p>
-      </section>
+    <main>
+      <p id="disc-unavailable-notice" class="disclaimer" style="max-width: 720px; margin: 0 auto 1rem; padding: 0 0.5rem" hidden>
+        토론방을 불러올 수 없습니다. Supabase에 <code>discuss_threads</code> 테이블이 있는지 확인하거나 잠시 후 다시 시도해 주세요.
+      </p>
+
+      <div id="disc-main" style="max-width: 720px; margin: 0 auto" hidden>
+        <section class="card" id="disc-section-list" style="margin-bottom: 1rem">
+          <div class="disc-list-toolbar">
+            <h2 class="rg-panel-title" style="margin-top: 0; border: 0; padding: 0">토론 목록</h2>
+            <a class="disc-write-top" href="write.html">글쓰기</a>
+          </div>
+          <div class="disc-cat-pills" aria-label="카테고리 필터">
+            <span class="field-hint" style="margin: 0; font-size: 0.78rem">주제:</span>
+            <a href="./" data-disc-cat="">전체</a>
+            <a href="?cat=irp" data-disc-cat="irp">IRP</a>
+            <a href="?cat=deposit" data-disc-cat="deposit">예·적금</a>
+            <a href="?cat=card" data-disc-cat="card">신용카드</a>
+            <a href="?cat=pay" data-disc-cat="pay">페이</a>
+            <a href="?cat=telecom" data-disc-cat="telecom">통신</a>
+          </div>
+          <form id="disc-search-form" class="disc-search-bar" role="search" action="index.html" method="get">
+            <input type="search" id="disc-search-input" name="q" placeholder="제목·본문·댓글 검색" maxlength="200" autocomplete="off" enterkeyhint="search" />
+            <button type="submit" class="disc-search-go">검색</button>
+            <a id="disc-search-reset" class="disc-search-reset" href="./" hidden>검색 해제</a>
+          </form>
+          <p id="disc-search-summary" class="field-hint" hidden></p>
+          <p id="disc-list-error" class="field-hint" style="color: var(--bad)" hidden></p>
+          <div id="disc-list"></div>
+          <nav id="disc-pagination" class="disc-pagination" aria-label="페이지" hidden></nav>
+        </section>
+
+        <section class="card" id="disc-section-detail" hidden>
+          <p style="margin: 0 0 0.75rem">
+            <a
+              href="./"
+              id="disc-back-to-list"
+              class="hub-btn-secondary"
+              style="display: inline-block; padding: 0.4rem 0.8rem; text-decoration: none"
+              >← 목록</a
+            >
+          </p>
+          <div id="disc-not-found" style="display: none" aria-live="polite">
+            <p>글을 찾을 수 없습니다. <a id="disc-not-found-list" href="./">목록으로</a></p>
+          </div>
+          <div id="disc-detail-article">
+            <input type="hidden" id="disc-view-thread-id" value="" />
+            <h2 class="rg-panel-title" id="disc-detail-title" style="margin-top: 0; border: 0; padding: 0"></h2>
+            <p class="field-hint" id="disc-detail-meta" style="margin: 0 0 0.75rem"></p>
+            <p class="disc-thread-actions" id="disc-thread-delete-wrap" hidden>
+              <button type="button" class="disc-del-btn" id="disc-t-delete">이 글 삭제</button>
+            </p>
+            <div id="disc-detail-body" style="line-height: 1.6; font-size: 0.95rem; margin-bottom: 1.25rem"></div>
+            <h3 class="subsection-title" style="margin-top: 0">댓글</h3>
+            <div id="disc-replies" style="margin-bottom: 1rem"></div>
+            <h3 class="subsection-title" style="margin-top: 0.5rem">댓글 남기기</h3>
+            <form id="disc-reply-form" class="grid" style="gap: 0.65rem">
+              <input type="hidden" id="disc-reply-thread-id" value="" />
+              <div>
+                <label for="disc-r-nick">닉네임 (선택)</label>
+                <input type="text" id="disc-r-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
+              </div>
+              <div>
+                <label for="disc-r-body">댓글</label>
+                <textarea id="disc-r-body" required rows="4" placeholder="댓글 내용"></textarea>
+              </div>
+              <button type="submit" class="btn-primary" id="disc-r-submit" style="margin-top: 0.15rem">댓글 등록</button>
+            </form>
+          </div>
+        </section>
+      </div>
     </main>
 
     <footer>
@@ -70,11 +302,17 @@
         <a href="../">홈</a>
         <a href="../qa/">Q&amp;A</a>
         <a href="../about/">About</a>
+        <a href="../guides/">가이드</a>
+        <a href="../contact/">문의</a>
+        <a href="../privacy/">개인정보 처리방침</a>
         <a href="../disclaimer/">면책 조항</a>
       </div>
       <div class="footer-note" style="max-width: 920px; margin: 0.5rem auto 2rem; padding: 0 1.25rem">
         입력·열람에 따른 책임은 작성자 본인에게 있습니다.
       </div>
     </footer>
+
+    <script src="../js/supabase-config.js"></script>
+    <script type="module" src="discuss.mjs"></script>
   </body>
 </html>

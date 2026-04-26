@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J1JQSVPNM6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-J1JQSVPNM6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.svg" />
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#2a554a" />
+    <link rel="manifest" href="../site.webmanifest" />
+    <meta name="theme-color" content="#2a554a" />
+    <title>글 작성 | 은행 상품 토론방 | Mortgage Loan Lab</title>
+    <meta name="description" content="은행·금융 상품 토론 글을 작성합니다." />
+    <meta name="robots" content="noindex,follow" />
+    <link rel="stylesheet" href="../css/styles.css?v=mobile-1" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>토론 글 작성</h1>
+      <p>IRP·예적금·카드·페이·통신 등 주제를 골라 글을 남깁니다. 등록 후 해당 글 보기로 이동합니다.</p>
+      <nav class="quick-nav" aria-label="빠른 이동">
+        <a href="index.html">토론 목록</a>
+        <a href="../">홈</a>
+        <a href="../didimdol/">디딤돌</a>
+        <a href="../beotimmok/">버팀목</a>
+        <a href="../dsr/">DSR</a>
+        <a href="../return-guarantee/">반환보증</a>
+        <a href="../qa/">Q&amp;A</a>
+      </nav>
+    </header>
+
+    <main>
+      <p id="disc-write-unavailable-notice" class="disclaimer" style="max-width: 720px; margin: 0 auto 1rem" hidden>
+        토론방을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.
+      </p>
+
+      <div id="disc-write-main" style="max-width: 720px; margin: 0 auto" hidden>
+        <p style="margin: 0 0 0.75rem">
+          <a
+            class="hub-btn-secondary"
+            href="index.html"
+            style="display: inline-block; padding: 0.4rem 0.8rem; text-decoration: none"
+            >← 목록</a
+          >
+        </p>
+        <section class="card">
+          <h2 class="rg-panel-title" style="margin-top: 0">글 남기기</h2>
+          <form id="disc-post-form" class="grid" style="gap: 0.75rem">
+            <div>
+              <label for="disc-p-category">카테고리</label>
+              <select id="disc-p-category" required>
+                <option value="" disabled selected>선택하세요</option>
+                <option value="irp">IRP</option>
+                <option value="deposit">예·적금</option>
+                <option value="card">신용카드</option>
+                <option value="pay">페이</option>
+                <option value="telecom">통신</option>
+              </select>
+            </div>
+            <div>
+              <label for="disc-p-title">제목</label>
+              <input type="text" id="disc-p-title" maxlength="200" required placeholder="한 줄로 요약" autocomplete="off" />
+            </div>
+            <div>
+              <label for="disc-p-nick">닉네임 (선택)</label>
+              <input type="text" id="disc-p-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
+            </div>
+            <div>
+              <label for="disc-p-body">내용</label>
+              <textarea id="disc-p-body" required rows="8" placeholder="토론 내용"></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="disc-p-submit" style="margin-top: 0.25rem">글 등록</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="footer-main" style="max-width: 720px; margin: 0 auto; padding: 0 1.25rem">
+        <span>© Mortgage Loan Lab</span>
+      </div>
+      <div class="footer-links" style="max-width: 720px; margin: 0.35rem auto 2rem; padding: 0 1.25rem">
+        <a href="index.html">토론방</a>
+        <a href="../qa/">Q&amp;A</a>
+        <a href="../">홈</a>
+        <a href="../disclaimer/">면책 조항</a>
+      </div>
+    </footer>
+
+    <script src="../js/supabase-config.js"></script>
+    <script type="module" src="write.mjs"></script>
+  </body>
+</html>
