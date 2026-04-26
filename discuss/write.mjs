@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { newAuthorSecret, setThreadDeleteSecret, DISCUSS_CATEGORY_SLUGS } from "../js/discuss-auth-storage.mjs";
+import { buildMarkdownTable, insertAtCursor } from "../js/discuss-markdown-table.mjs";
 
 var supabase = null;
 var DISCUSS_MEDIA_BUCKET = "discuss-media";
@@ -37,6 +38,15 @@ function boot() {
   if (qf) qf.addEventListener("submit", onSubmitPost);
   var imgIn = el("disc-p-image");
   if (imgIn) imgIn.addEventListener("change", onPickImage);
+  var tbtn = el("disc-insert-table");
+  if (tbtn) {
+    tbtn.addEventListener("click", function () {
+      var ta = el("disc-p-body");
+      var dr = parseInt((el("disc-p-table-rows") && el("disc-p-table-rows").value) || "3", 10);
+      var co = parseInt((el("disc-p-table-cols") && el("disc-p-table-cols").value) || "3", 10);
+      insertAtCursor(ta, buildMarkdownTable(dr, co));
+    });
+  }
 }
 
 function extFromMime(mime) {

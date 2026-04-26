@@ -353,7 +353,22 @@
               </div>
               <div>
                 <label for="disc-r-body">댓글</label>
-                <textarea id="disc-r-body" required rows="4" placeholder="댓글 (마크다운·표·![](이미지주소) 가능)"></textarea>
+                <textarea id="disc-r-body" required rows="4" placeholder="댓글 (아래 표 넣기·마크다운·이미지 URL 가능)"></textarea>
+                <div style="margin: 0.4rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.65rem">
+                  <span class="field-hint" style="margin: 0; font-size: 0.8rem">표:</span>
+                  <label style="font-size: 0.8rem"
+                    >행
+                    <input type="number" id="disc-r-table-rows" min="1" max="20" value="2" style="width: 2.8rem; margin-left: 0.2rem" title="데이터 행 수"
+                    />
+                  </label>
+                  <label style="font-size: 0.8rem"
+                    >열
+                    <input type="number" id="disc-r-table-cols" min="2" max="10" value="3" style="width: 2.8rem; margin-left: 0.2rem" />
+                  </label>
+                  <button type="button" class="hub-btn-secondary" id="disc-r-insert-table" style="padding: 0.25rem 0.65rem; font-size: 0.8rem">
+                    표 넣기
+                  </button>
+                </div>
               </div>
               <button type="submit" class="btn-primary" id="disc-r-submit" style="margin-top: 0.15rem">댓글 등록</button>
             </form>
