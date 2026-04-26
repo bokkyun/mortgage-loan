@@ -80,8 +80,21 @@
               <input type="text" id="disc-p-nick" maxlength="40" placeholder="익명 가능" autocomplete="off" />
             </div>
             <div>
-              <label for="disc-p-body">내용</label>
-              <textarea id="disc-p-body" required rows="8" placeholder="토론 내용"></textarea>
+              <label for="disc-p-body">내용 (마크다운: 표·이미지·링크)</label>
+              <textarea
+                id="disc-p-body"
+                required
+                rows="10"
+                placeholder="토론 내용. 표는 | 열1 | 열2 | 형식, 사진은 ![](주소) 또는 아래 파일 첨부."
+              ></textarea>
+            </div>
+            <div>
+              <label for="disc-p-image">이미지 파일 첨부 (선택, 약 5MB 이하)</label>
+              <input type="file" id="disc-p-image" accept="image/jpeg,image/png,image/gif,image/webp" />
+              <p id="disc-p-image-hint" class="field-hint" style="margin: 0.35rem 0 0" hidden></p>
+              <p class="field-hint" style="margin: 0.35rem 0 0">
+                업로드가 안 되면 Supabase에 <code>discuss-media</code> 버킷·정책을 추가하세요. (<code>supabase/discuss_storage.sql</code>)
+              </p>
             </div>
             <button type="submit" class="btn-primary" id="disc-p-submit" style="margin-top: 0.25rem">글 등록</button>
           </form>

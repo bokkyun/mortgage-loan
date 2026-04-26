@@ -200,6 +200,74 @@
         gap: 0.35rem 0.5rem;
         margin-bottom: 0.35rem;
       }
+      .disc-rich-body {
+        overflow-wrap: break-word;
+        word-break: break-word;
+      }
+      .disc-rich-body :first-child {
+        margin-top: 0;
+      }
+      .disc-rich-body :last-child {
+        margin-bottom: 0;
+      }
+      .disc-rich-body table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.75rem 0;
+        font-size: 0.88rem;
+        display: block;
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      .disc-rich-body thead,
+      .disc-rich-body tbody {
+        display: table;
+        width: 100%;
+        min-width: 280px;
+      }
+      .disc-rich-body th,
+      .disc-rich-body td {
+        border: 1px solid var(--border);
+        padding: 0.35rem 0.5rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      .disc-rich-body th {
+        background: var(--surface2);
+        font-weight: 600;
+      }
+      .disc-rich-body img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0.65rem 0;
+        border-radius: 6px;
+      }
+      .disc-rich-body pre {
+        margin: 0.65rem 0;
+        padding: 0.65rem 0.75rem;
+        border-radius: 8px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        overflow-x: auto;
+        font-size: 0.82rem;
+      }
+      .disc-rich-body code {
+        font-size: 0.88em;
+      }
+      .disc-rich-body pre code {
+        font-size: 0.82rem;
+      }
+      .disc-rich-body blockquote {
+        margin: 0.65rem 0;
+        padding: 0.35rem 0 0.35rem 0.85rem;
+        border-left: 3px solid var(--btn-primary-mid);
+        color: var(--muted);
+      }
+      .disc-rich-body a {
+        color: var(--btn-primary-mid);
+        font-weight: 600;
+      }
     </style>
   </head>
   <body>
@@ -285,7 +353,7 @@
               </div>
               <div>
                 <label for="disc-r-body">댓글</label>
-                <textarea id="disc-r-body" required rows="4" placeholder="댓글 내용"></textarea>
+                <textarea id="disc-r-body" required rows="4" placeholder="댓글 (마크다운·표·![](이미지주소) 가능)"></textarea>
               </div>
               <button type="submit" class="btn-primary" id="disc-r-submit" style="margin-top: 0.15rem">댓글 등록</button>
             </form>

@@ -2,6 +2,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { newAuthorSecret, setThreadDeleteSecret, DISCUSS_CATEGORY_SLUGS } from "../js/discuss-auth-storage.mjs";
 
 var supabase = null;
+var DISCUSS_MEDIA_BUCKET = "discuss-media";
+var MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 function el(id) {
   return document.getElementById(id);
@@ -33,6 +35,63 @@ function boot() {
   if (el("disc-write-main")) el("disc-write-main").hidden = false;
   var qf = el("disc-post-form");
   if (qf) qf.addEventListener("submit", onSubmitPost);
+  var imgIn = el("disc-p-image");
+  if (imgIn) imgIn.addEventListener("change", onPickImage);
+}
+
+function extFromMime(mime) {
+  if (mime === "image/png") return "png";
+  if (mime === "image/gif") return "gif";
+  if (mime === "image/webp") return "webp";
+  return "jpg";
+}
+
+async function onPickImage(e) {
+  var input = e.target;
+  var file = input.files && input.files[0];
+  if (!file) return;
+  input.value = "";
+  if (file.size > MAX_IMAGE_BYTES) {
+    alert("이미지는 5MB 이하만 업로드할 수 있습니다.");
+    return;
+  }
+  var c = getClient();
+  if (!c) return;
+  var hint = el("disc-p-image-hint");
+  if (hint) {
+    hint.hidden = false;
+    hint.textContent = "업로드 중…";
+  }
+  var uid = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+  var ext = extFromMime(file.type || "");
+  var path = "u/" + uid + "." + ext;
+  var up = await c.storage.from(DISCUSS_MEDIA_BUCKET).upload(path, file, {
+    contentType: file.type || "image/jpeg",
+    upsert: false,
+  });
+  if (hint) {
+    hint.hidden = true;
+    hint.textContent = "";
+  }
+  if (up.error) {
+    alert(
+      "이미지 업로드에 실패했습니다. " +
+        up.error.message +
+        "\nSupabase Storage에 버킷 discuss-media와 업로드 정책이 있는지 확인하세요. (supabase/discuss_storage.sql)"
+    );
+    return;
+  }
+  var pub = c.storage.from(DISCUSS_MEDIA_BUCKET).getPublicUrl(path);
+  var url = pub.data && pub.data.publicUrl;
+  if (!url) {
+    alert("공개 URL을 가져오지 못했습니다.");
+    return;
+  }
+  var ta = el("disc-p-body");
+  if (ta) {
+    ta.value = (ta.value || "") + "\n\n![](" + url + ")\n\n";
+    ta.focus();
+  }
 }
 
 async function onSubmitPost(e) {

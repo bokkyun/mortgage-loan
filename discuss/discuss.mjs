@@ -9,6 +9,7 @@ import {
   categoryLabel,
   DISCUSS_CATEGORY_SLUGS,
 } from "../js/discuss-auth-storage.mjs";
+import { renderDiscussBody } from "../js/discuss-body-render.mjs";
 
 var supabase = null;
 
@@ -57,10 +58,6 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-}
-
-function nl2br(s) {
-  return escapeHtml(s).replace(/\r\n|\r|\n/g, "<br />");
 }
 
 var PAGE_SIZE = 20;
@@ -468,7 +465,7 @@ async function loadDetail(id) {
     metaEl.textContent =
       "[" + categoryLabel(q.category) + "] " + (q.author_nickname || "익명") + " · " + fmtDate(q.created_at);
   }
-  if (bodyEl) bodyEl.innerHTML = nl2br(q.body);
+  if (bodyEl) bodyEl.innerHTML = '<div class="disc-rich-body">' + renderDiscussBody(q.body) + "</div>";
 
   var ares = await c
     .from("discuss_replies")
@@ -501,8 +498,8 @@ async function loadDetail(id) {
                 '">댓글 삭제</button>'
               : "") +
             "</div>" +
-            '<div style="line-height:1.55; font-size:0.9rem">' +
-            nl2br(a.body) +
+            '<div style="line-height:1.55; font-size:0.9rem" class="disc-rich-body">' +
+            renderDiscussBody(a.body) +
             "</div></div>";
         }
         repliesEl.innerHTML = h;
