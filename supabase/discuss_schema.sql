@@ -1,5 +1,6 @@
 -- Mortgage Loan Lab — 은행상품 토론방 (Supabase SQL Editor에서 1회 실행)
 -- 테이블: discuss_threads, discuss_replies
+-- 이미지 파일 첨부: supabase/discuss_storage.sql 도 실행하세요.
 
 create extension if not exists "pgcrypto";
 
