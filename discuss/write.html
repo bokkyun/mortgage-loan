@@ -85,50 +85,8 @@
                 id="disc-p-body"
                 required
                 rows="10"
-                placeholder="토론 내용. 아래 「표 넣기」로 표 틀을 넣거나, 사진은 ![](주소) 또는 파일 첨부."
+                placeholder="토론 내용. 마크다운 표·![](이미지주소)·링크 등. 사진은 아래 파일 첨부 가능."
               ></textarea>
-              <div class="disc-table-tool" style="margin: 0.45rem 0 0">
-                <p class="field-hint" style="margin: 0 0 0.4rem; line-height: 1.5">
-                  네이버 블로그·워드처럼 표를 “그리는” UI는 아니지만, <strong>행·열 개수를 정한 뒤 「표 넣기」</strong>를 누르면
-                  본문에 빈 표 틀이 들어갑니다. <code>|</code> 사이 칸에 글자만 채우면 됩니다.
-                </p>
-                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem">
-                  <span style="font-size: 0.88rem; font-weight: 700">표 삽입</span>
-                  <label style="font-size: 0.85rem"
-                    >내용 행
-                    <input
-                      type="number"
-                      id="disc-p-table-rows"
-                      min="1"
-                      max="20"
-                      value="3"
-                      style="width: 3.2rem; margin-left: 0.25rem"
-                      title="머리말 아래 데이터 줄 수"
-                    />
-                  </label>
-                  <label style="font-size: 0.85rem"
-                    >열
-                    <input
-                      type="number"
-                      id="disc-p-table-cols"
-                      min="2"
-                      max="10"
-                      value="3"
-                      style="width: 3.2rem; margin-left: 0.25rem"
-                    />
-                  </label>
-                  <button type="button" class="hub-btn-secondary" id="disc-insert-table" style="padding: 0.35rem 0.85rem; font-size: 0.88rem">
-                    표 넣기
-                  </button>
-                </div>
-                <details style="margin-top: 0.55rem; font-size: 0.82rem; color: var(--muted)">
-                  <summary style="cursor: pointer; color: var(--btn-primary-mid); font-weight: 600">직접 쓰고 싶을 때 (표 문법)</summary>
-                  <pre style="margin: 0.5rem 0 0; padding: 0.6rem 0.75rem; background: var(--surface2); border-radius: 8px; overflow-x: auto; font-size: 0.78rem; line-height: 1.45">| 은행 | 금리 |
-| --- | --- |
-| A | 3.5% |
-| B | 3.2% |</pre>
-                </details>
-              </div>
             </div>
             <div>
               <label for="disc-p-image">이미지 파일 첨부 (선택, 약 5MB 이하)</label>

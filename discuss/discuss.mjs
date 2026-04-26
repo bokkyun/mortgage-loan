@@ -10,7 +10,6 @@ import {
   DISCUSS_CATEGORY_SLUGS,
 } from "../js/discuss-auth-storage.mjs";
 import { renderDiscussBody } from "../js/discuss-body-render.mjs";
-import { buildMarkdownTable, insertAtCursor } from "../js/discuss-markdown-table.mjs";
 
 var supabase = null;
 
@@ -652,15 +651,6 @@ function boot() {
       e.preventDefault();
       var rid = t.getAttribute("data-rid");
       if (rid) onDeleteReply(rid);
-    });
-  }
-  var rtbl = el("disc-r-insert-table");
-  if (rtbl) {
-    rtbl.addEventListener("click", function () {
-      var ta = el("disc-r-body");
-      var dr = parseInt((el("disc-r-table-rows") && el("disc-r-table-rows").value) || "2", 10);
-      var co = parseInt((el("disc-r-table-cols") && el("disc-r-table-cols").value) || "3", 10);
-      insertAtCursor(ta, buildMarkdownTable(dr, co));
     });
   }
 }
