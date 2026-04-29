@@ -1,0 +1,393 @@
+﻿
+    :root {
+      --navy:   #0f1b2d;
+      --navy2:  #162338;
+      --navy3:  #1e304a;
+      --gold:   #c9a84c;
+      --gold2:  #e6c96e;
+      --cream:  #f5f0e8;
+      --red:    #c0392b;
+      --green:  #1a7a4a;
+      --blue:   #2563a8;
+      --text:   #1a1a2e;
+      --muted:  #6b7280;
+      --border: #d4c9b0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    .deunggi-guide {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--navy);
+      color: #fff;
+      padding: 80px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,168,76,.07) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,168,76,.07) 40px);
+    }
+    .hero-inner {
+      max-width: 900px; margin: 0 auto; position: relative; z-index: 1;
+    }
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 11px; letter-spacing: 3px;
+      padding: 4px 14px; margin-bottom: 24px;
+      font-family: 'DM Mono', monospace;
+    }
+    .hero h1 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--gold); }
+    .hero p {
+      font-size: 1.05rem; color: rgba(255,255,255,.75);
+      max-width: 600px;
+    }
+    .hero-nav {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 40px;
+    }
+    .hero-nav a {
+      background: rgba(201,168,76,.15);
+      border: 1px solid rgba(201,168,76,.4);
+      color: var(--gold2);
+      padding: 8px 20px;
+      text-decoration: none;
+      font-size: .85rem; font-weight: 500;
+      border-radius: 2px;
+      transition: background .2s;
+    }
+    .hero-nav a:hover { background: rgba(201,168,76,.3); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    .deunggi-guide section { padding: 72px 0; }
+    .deunggi-guide section + section { border-top: 1px solid var(--border); }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+    .section-desc {
+      color: var(--muted); max-width: 640px;
+      margin-bottom: 48px;
+      font-size: .95rem;
+    }
+
+    /* ── REGISTRY SAMPLE CARD ── */
+    .registry-doc {
+      background: #fff;
+      border: 2px solid #222;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 #ccc;
+      margin-bottom: 48px;
+    }
+    .doc-header {
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .doc-header-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1rem; font-weight: 700;
+    }
+    .doc-header-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem; color: rgba(255,255,255,.6);
+    }
+    .doc-section-header {
+      background: var(--navy3);
+      color: var(--gold);
+      padding: 8px 20px;
+      font-size: .8rem; font-weight: 700;
+      letter-spacing: 1px;
+      border-top: 1px solid rgba(255,255,255,.1);
+    }
+    .doc-table { width: 100%; border-collapse: collapse; }
+    .doc-table th {
+      background: #f8f5ef;
+      font-size: .75rem; font-weight: 600;
+      padding: 8px 14px;
+      text-align: left;
+      border: 1px solid #ddd;
+      white-space: nowrap;
+      color: #444;
+    }
+    .doc-table td {
+      padding: 9px 14px;
+      font-size: .8rem;
+      border: 1px solid #e5e5e5;
+      vertical-align: top;
+    }
+    .doc-table tr:nth-child(even) td { background: #fafaf8; }
+    .highlight-red { color: var(--red); font-weight: 600; }
+    .highlight-blue { color: var(--blue); font-weight: 600; }
+    .highlight-green { color: var(--green); font-weight: 600; }
+    .stamp {
+      display: inline-block;
+      border: 2px solid var(--red);
+      color: var(--red);
+      font-size: .7rem; padding: 1px 6px;
+      transform: rotate(-5deg);
+      opacity: .8;
+    }
+    .doc-notice {
+      background: #fff8e8;
+      border-left: 3px solid var(--gold);
+      padding: 8px 14px;
+      font-size: .75rem; color: #555;
+    }
+
+    /* ── SECTION CARDS (갑구/을구/표제부) ── */
+    .parts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 56px;
+    }
+    .part-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .part-card-head {
+      padding: 18px 20px 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .part-icon {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .part-card-head h3 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.05rem; font-weight: 700;
+    }
+    .part-card-head p { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+    .part-card-.deunggi-guide { padding: 0 20px 20px; }
+    .part-item {
+      display: flex; gap: 8px; align-items: flex-start;
+      padding: 7px 0;
+      border-bottom: 1px dashed #e8e2d8;
+    }
+    .part-item:last-child { border-bottom: none; }
+    .part-item-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-top: 7px; flex-shrink: 0;
+    }
+    .part-item-text { font-size: .85rem; }
+    .part-item-text strong { font-weight: 600; display: block; }
+    .part-item-text span { color: var(--muted); font-size: .78rem; }
+
+    /* card color variants */
+    .card-표제부 .part-card-head { background: #f0f4ff; }
+    .card-표제부 .part-icon { background: #dce6ff; color: var(--blue); }
+    .card-표제부 .part-item-dot { background: var(--blue); }
+    .card-갑구 .part-card-head { background: #fff4f4; }
+    .card-갑구 .part-icon { background: #ffe0e0; color: var(--red); }
+    .card-갑구 .part-item-dot { background: var(--red); }
+    .card-을구 .part-card-head { background: #f0fff6; }
+    .card-을구 .part-icon { background: #c6f0d8; color: var(--green); }
+    .card-을구 .part-item-dot { background: var(--green); }
+
+    /* ── CHECK TIPS ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 24px;
+    }
+    .tip-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .tip-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .tip-매매::after { background: var(--blue); }
+    .tip-전세::after { background: var(--red); }
+    .tip-월세::after { background: var(--green); }
+    .tip-type-badge {
+      display: inline-block;
+      font-size: .7rem; font-weight: 700; letter-spacing: 1px;
+      padding: 3px 10px; border-radius: 2px;
+      margin-bottom: 14px;
+    }
+    .tip-매매 .tip-type-badge { background: #e8f0ff; color: var(--blue); }
+    .tip-전세 .tip-type-badge { background: #ffe8e8; color: var(--red); }
+    .tip-월세 .tip-type-badge { background: #e8fff2; color: var(--green); }
+    .tip-card h3 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .tip-list { list-style: none; }
+    .tip-list li {
+      display: flex; gap: 10px;
+      font-size: .84rem; padding: 6px 0;
+      border-bottom: 1px solid #f0ebe0;
+    }
+    .tip-list li:last-child { border-bottom: none; }
+    .tip-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem; font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .tip-매매 .tip-num { background: var(--blue); color: #fff; }
+    .tip-전세 .tip-num { background: var(--red); color: #fff; }
+    .tip-월세 .tip-num { background: var(--green); color: #fff; }
+
+    /* ── WARNING BOX ── */
+    .warning-box {
+      background: #fff8e1;
+      border: 1px solid #f0c040;
+      border-left: 4px solid #e6a800;
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin: 32px 0;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .warning-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .warning-box h4 { font-size: .9rem; font-weight: 700; margin-bottom: 6px; }
+    .warning-box p { font-size: .84rem; color: #555; }
+
+    /* ── CHECKLIST ── */
+    .checklist-wrapper {
+      background: var(--navy);
+      color: #fff;
+      border-radius: 8px;
+      padding: 40px;
+    }
+    .checklist-title {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.2rem; font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 28px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(201,168,76,.3);
+    }
+    .cl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 28px;
+    }
+    .cl-group h4 {
+      font-size: .8rem; letter-spacing: 2px;
+      color: var(--gold2); margin-bottom: 12px;
+      font-family: 'DM Mono', monospace;
+    }
+    .cl-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 6px 0;
+    }
+    .cl-check {
+      width: 16px; height: 16px;
+      border: 1px solid var(--gold);
+      border-radius: 3px;
+      flex-shrink: 0; margin-top: 3px;
+    }
+    .cl-item span { font-size: .82rem; color: rgba(255,255,255,.8); }
+
+    /* ── GLOSSARY ── */
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .gloss-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+    .gloss-term {
+      font-weight: 700; font-size: .9rem;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .gloss-def { font-size: .8rem; color: #555; }
+
+    /* ── FOOTER ── */
+    .dg-guide-footer {
+      background: var(--navy);
+      color: rgba(255,255,255,.5);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: .78rem;
+    }
+    .dg-guide-footer strong { color: var(--gold); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .checklist-wrapper { padding: 24px 20px; }
+      .doc-table th, .doc-table td { font-size: .7rem; padding: 6px 8px; }
+    }
+
+    /* ── SCROLL ANIMATION ── */
+    .fade-in {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: none; }
+  
+/* Site toolbar above guide */
+.registry-guide-toolbar {
+  padding: 1rem 1.25rem 1.25rem;
+  max-width: 920px;
+  margin: 0 auto;
+}
+.registry-guide-toolbar p {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: #456d5b;
+}
+.registry-guide-toolbar a {
+  color: inherit;
+  text-decoration: none;
+}
+.registry-guide-toolbar a:hover {
+  text-decoration: underline;
+}
+.registry-guide-toolbar .quick-nav {
+  margin-top: 0.5rem;
+}
