@@ -93,6 +93,34 @@ header p {
   background: var(--accent-dim);
 }
 
+/* 헤더: 등기부등본 가이드 강조 */
+.quick-nav a.quick-nav__registry {
+  font-weight: 800;
+  font-size: 0.84rem;
+  letter-spacing: -0.02em;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(45, 106, 79, 0.55);
+  background: linear-gradient(165deg, #eaf6ef 0%, #d4ebe1 100%);
+  color: #0f3d26;
+  box-shadow:
+    0 2px 8px rgba(45, 106, 79, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.quick-nav a.quick-nav__registry:hover {
+  border-color: #1b4332;
+  background: linear-gradient(165deg, #dff3ea 0%, #c5e5d4 100%);
+  color: #082818;
+  box-shadow:
+    0 4px 14px rgba(45, 106, 79, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.quick-nav a.quick-nav__registry:focus-visible {
+  outline: 2px solid var(--btn-primary-mid);
+  outline-offset: 3px;
+}
+
 .cross-nav-row {
   margin-top: 0.8rem;
 }
@@ -784,77 +812,99 @@ footer .footer-note {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: #f0f5f2;
-  border: 0.5px solid #b8d4c4;
-  border-left: 3px solid #2d6a4f;
-  border-radius: 8px;
-  padding: 14px 18px;
-  margin-bottom: 12px;
+  background: linear-gradient(125deg, #dff3ea 0%, #f0faf5 42%, #e8f5ee 100%);
+  border: 1px solid rgba(45, 106, 79, 0.38);
+  border-left: 5px solid #1b4332;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  box-shadow:
+    0 6px 22px rgba(27, 67, 50, 0.12),
+    0 2px 8px rgba(27, 67, 50, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .hub-registry-banner__inner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
   min-width: 0;
 }
 
 .hub-registry-banner__icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
-  background: #2d6a4f;
-  border-radius: 6px;
+  background: linear-gradient(155deg, #2d6a4f 0%, #1b4332 100%);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 0 3px 10px rgba(27, 67, 50, 0.35);
 }
 
 .hub-registry-banner__title {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1a3d2b;
-  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f291d;
+  margin-bottom: 4px;
   line-height: 1.35;
 }
 
 .hub-registry-banner__sub {
-  font-size: 12px;
-  color: #4a7c62;
-  line-height: 1.4;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #2d5440;
+  line-height: 1.45;
 }
 
 .hub-registry-banner__cta {
   flex-shrink: 0;
-  font-size: 12px;
-  font-weight: 500;
-  color: #2d6a4f;
-  background: #fff;
-  border: 0.5px solid #b8d4c4;
-  border-radius: 6px;
-  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f4faf8;
+  background: linear-gradient(165deg, #3d8368 0%, #2d6a4f 48%, #1b4332 100%);
+  border: 1px solid rgba(15, 41, 29, 0.35);
+  border-radius: 10px;
+  padding: 10px 18px;
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+  box-shadow:
+    0 4px 14px rgba(27, 67, 50, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: filter 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .hub-registry-banner__cta:hover {
-  background: #f7faf8;
-  border-color: #2d6a4f;
-  filter: brightness(1.02);
+  color: #fff;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 18px rgba(27, 67, 50, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.hub-registry-banner__cta:focus-visible {
+  outline: 2px solid #1b4332;
+  outline-offset: 3px;
 }
 
 @media (max-width: 560px) {
   .hub-registry-banner {
     flex-wrap: wrap;
+    padding: 14px 14px;
   }
 
   .hub-registry-banner__cta {
     width: 100%;
     text-align: center;
     white-space: normal;
+    padding: 11px 16px;
   }
 }
 
@@ -1405,6 +1455,12 @@ span.hub-soon {
   .quick-nav a {
     font-size: 0.75rem;
     padding: 0.28rem 0.5rem;
+  }
+
+  .quick-nav a.quick-nav__registry {
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 0.36rem 0.72rem;
   }
 
   .cross-nav-cta {
