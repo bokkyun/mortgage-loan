@@ -778,6 +778,86 @@ footer .footer-note {
   padding-bottom: 2.5rem;
 }
 
+/* 등기부등본 가이드 배너 (메인 허브 상단) */
+.hub-registry-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #f0f5f2;
+  border: 0.5px solid #b8d4c4;
+  border-left: 3px solid #2d6a4f;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 12px;
+}
+
+.hub-registry-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-registry-banner__icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background: #2d6a4f;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.hub-registry-banner__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a3d2b;
+  margin-bottom: 2px;
+  line-height: 1.35;
+}
+
+.hub-registry-banner__sub {
+  font-size: 12px;
+  color: #4a7c62;
+  line-height: 1.4;
+}
+
+.hub-registry-banner__cta {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2d6a4f;
+  background: #fff;
+  border: 0.5px solid #b8d4c4;
+  border-radius: 6px;
+  padding: 6px 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
+}
+
+.hub-registry-banner__cta:hover {
+  background: #f7faf8;
+  border-color: #2d6a4f;
+  filter: brightness(1.02);
+}
+
+@media (max-width: 560px) {
+  .hub-registry-banner {
+    flex-wrap: wrap;
+  }
+
+  .hub-registry-banner__cta {
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
 /* 반환보증보험 계산기 2열 */
 .return-guarantee-grid {
   display: grid;
