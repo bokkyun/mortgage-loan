@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>버팀목 전세자금대출 완벽 가이드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1f3d;
+    --navy-mid: #1a3460;
+    --blue: #2255a4;
+    --accent: #e8a020;
+    --accent-light: #f5c842;
+    --cream: #faf7f2;
+    --warm: #f0ebe0;
+    --text: #1a1a2e;
+    --text-muted: #5a6070;
+    --border: #d8cfc0;
+    --green: #2a7a4b;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --timeline-w: 3px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--navy);
+    color: white;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -60px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(34,85,164,.35);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(232,160,32,.18);
+  }
+  .header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 52px 24px 44px;
+    position: relative; z-index: 1;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: .72rem;
+    letter-spacing: .12em;
+    padding: 4px 12px;
+    border-radius: 3px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  header h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.28;
+    margin-bottom: 14px;
+  }
+  header h1 span { color: var(--accent-light); }
+  header p {
+    color: rgba(255,255,255,.75);
+    font-size: .95rem;
+    max-width: 520px;
+  }
+  .header-meta {
+    margin-top: 28px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 40px;
+    padding: 6px 16px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.85);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .meta-pill .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    flex-shrink: 0;
+  }
+
+  /* ── Layout ── */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── Section titles ── */
+  .sec-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-title::before {
+    content: '';
+    display: block;
+    width: 4px; height: 1.35rem;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .sec-sub {
+    color: var(--text-muted);
+    font-size: .88rem;
+    margin-bottom: 28px;
+    padding-left: 14px;
+  }
+
+  /* ── Overview cards ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 36px 0 48px;
+  }
+  .ov-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 18px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .ov-card:hover { box-shadow: 0 6px 24px rgba(15,31,61,.09); }
+  .ov-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: var(--accent);
+  }
+  .ov-card .label { font-size: .76rem; color: var(--text-muted); margin-bottom: 6px; letter-spacing: .04em; }
+  .ov-card .value { font-family: 'Noto Serif KR', serif; font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+  .ov-card .sub { font-size: .78rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── Timeline / Schedule ── */
+  .section { margin-top: 52px; }
+
+  .timeline-wrap {
+    position: relative;
+    padding-left: 0;
+  }
+
+  /* D-day axis bar */
+  .dday-axis {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .axis-label {
+    writing-mode: horizontal-tb;
+    padding: 0 14px;
+    font-size: .72rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: .06em;
+    flex-shrink: 0;
+  }
+  .axis-track {
+    flex: 1;
+    height: 52px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .axis-line {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, #d0d8e8 0%, var(--blue) 60%, var(--accent) 100%);
+    transform: translateY(-50%);
+  }
+  .axis-tick {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateX(-50%);
+  }
+  .axis-tick .tick-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+    z-index: 1;
+    margin-bottom: 4px;
+  }
+  .axis-tick .tick-label {
+    font-size: .65rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--navy);
+  }
+  .tick-contract { left: 0%; }
+  .tick-contract .tick-dot { background: #7b94c4; }
+  .tick-d40 { left: 30%; }
+  .tick-d40 .tick-dot { background: var(--blue); }
+  .tick-d30 { left: 50%; }
+  .tick-d30 .tick-dot { background: var(--navy); }
+  .tick-d20 { left: 68%; }
+  .tick-d20 .tick-dot { background: var(--navy-mid); }
+  .tick-d0 { left: 100%; }
+  .tick-d0 .tick-dot { background: var(--accent); width: 13px; height: 13px; }
+  .tick-d0 .tick-label { color: var(--accent); }
+
+  /* Steps */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 0; bottom: 0;
+    width: var(--timeline-w);
+    background: linear-gradient(180deg, #d0d8e8, var(--blue) 50%, var(--accent));
+  }
+
+  .step {
+    display: flex;
+    gap: 0;
+    position: relative;
+    padding-bottom: 8px;
+    animation: fadeUp .5s ease both;
+  }
+  .step:nth-child(1) { animation-delay: .05s; }
+  .step:nth-child(2) { animation-delay: .1s; }
+  .step:nth-child(3) { animation-delay: .15s; }
+  .step:nth-child(4) { animation-delay: .2s; }
+  .step:nth-child(5) { animation-delay: .25s; }
+  .step:nth-child(6) { animation-delay: .3s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-icon-col {
+    width: 56px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .step-num {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .88rem;
+    flex-shrink: 0;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    margin-top: 20px;
+  }
+  .step-line {
+    width: 2px;
+    flex: 1;
+    background: transparent;
+    min-height: 20px;
+  }
+
+  .step-body {
+    flex: 1;
+    padding: 18px 0 18px 16px;
+  }
+  .step-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    transition: box-shadow .2s, transform .2s;
+  }
+  .step-card:hover {
+    box-shadow: 0 8px 28px rgba(15,31,61,.1);
+    transform: translateY(-2px);
+  }
+  .step-card::before {
+    content: '';
+    position: absolute;
+    left: -8px; top: 22px;
+    width: 8px; height: 2px;
+  }
+
+  .step-dday {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .step-desc {
+    font-size: .87rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+  }
+  .step-desc b { color: var(--text); font-weight: 600; }
+
+  .step-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .tag {
+    font-size: .72rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .tag-blue { background: #e8eef8; color: var(--blue); }
+  .tag-amber { background: #fef3d8; color: #9a6800; }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+
+  /* Color coding per step */
+  .step-0 .step-num { background: #7b94c4; color: white; }
+  .step-0 .step-dday { background: #edf1fb; color: #4a6cb5; }
+  .step-1 .step-num { background: #4a78c8; color: white; }
+  .step-1 .step-dday { background: #e5ecfa; color: #2255a4; }
+  .step-2 .step-num { background: var(--blue); color: white; }
+  .step-2 .step-dday { background: #dde7f8; color: #1a4080; }
+  .step-3 .step-num { background: var(--navy-mid); color: white; }
+  .step-3 .step-dday { background: #d8e2f0; color: #1a3460; }
+  .step-4 .step-num { background: var(--navy); color: white; }
+  .step-4 .step-dday { background: #d2dced; color: #0f1f3d; }
+  .step-5 .step-num { background: var(--accent); color: var(--navy); }
+  .step-5 .step-dday { background: #fef3d8; color: #9a6800; }
+  .step-5 .step-card { border-color: var(--accent); }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 10px 0 0;
+    font-size: .86rem;
+    line-height: 1.7;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .callout-tip { background: var(--green-light); border-left: 3px solid var(--green); }
+  .callout-warn { background: #fff8e1; border-left: 3px solid #f0b429; }
+  .callout-info { background: #e8f0fb; border-left: 3px solid var(--blue); }
+
+  /* ── Docs table ── */
+  .docs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  @media (max-width: 580px) {
+    .docs-grid { grid-template-columns: 1fr; }
+  }
+  .docs-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .docs-card h4 {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .docs-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .docs-card ul li {
+    font-size: .8rem;
+    color: var(--text-muted);
+    display: flex; align-items: flex-start; gap: 6px;
+  }
+  .docs-card ul li::before {
+    content: '·';
+    color: var(--accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Tips section ── */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+  }
+  .tip-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: box-shadow .2s;
+  }
+  .tip-card:hover { box-shadow: 0 4px 16px rgba(15,31,61,.08); }
+  .tip-icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .tip-card h4 { font-size: .88rem; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .tip-card p { font-size: .8rem; color: var(--text-muted); line-height: 1.65; }
+
+  /* ── Schedule visual chart ── */
+  .schedule-chart {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .chart-header {
+    background: var(--navy);
+    color: white;
+    padding: 14px 20px;
+    font-size: .82rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-body {
+    padding: 0;
+  }
+  .chart-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid #f0ebe0;
+    min-height: 52px;
+  }
+  .chart-row:last-child { border-bottom: none; }
+  .chart-label {
+    width: 130px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--navy);
+    border-right: 1px solid var(--border);
+    background: var(--warm);
+    line-height: 1.35;
+  }
+  .chart-track {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .chart-block {
+    position: absolute;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: .7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* 10 columns = D-50 to D-0 */
+  /* positions are % of track width */
+  /* col indices: D-50=0 D-45=10 D-40=20 D-35=28 D-30=40 D-25=52 D-20=62 D-15=72 D-10=82 D-5=90 D-0=100 */
+
+  .col-header {
+    display: flex;
+    margin-left: 130px;
+    border-bottom: 1px solid var(--border);
+    background: var(--warm);
+  }
+  .col-h {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    font-size: .67rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-right: 1px solid #ede6d8;
+  }
+  .col-h:last-child { border-right: none; }
+  .col-h.highlight { color: var(--accent); font-weight: 700; background: #fdf5e0; }
+
+  /* ── Footer ── */
+  footer {
+    background: var(--navy);
+    color: rgba(255,255,255,.55);
+    text-align: center;
+    padding: 28px 24px;
+    font-size: .78rem;
+    line-height: 1.8;
+  }
+  footer a { color: var(--accent-light); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    .steps::before { left: 22px; }
+    .step-icon-col { width: 44px; }
+    .step-num { width: 32px; height: 32px; font-size: .78rem; }
+    .header-meta { flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="mlab-guide-topnav" aria-label="사이트 이동">
+  <a href="../">Mortgage Lab 홈</a>
+  <span aria-hidden="true">·</span>
+  <a href="../beotimmok/">버팀목 계산기</a>
+  <span aria-hidden="true">·</span>
+  <a href="../docs/beotimmok/">필요서류 안내</a>
+</nav>
+<style>
+  .mlab-guide-topnav {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #0f1f3d;
+    color: rgba(255,255,255,.88);
+    padding: 10px 20px;
+    font-size: 0.82rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(232,160,32,.35);
+  }
+  .mlab-guide-topnav a {
+    color: #f5c842;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0 4px;
+  }
+  .mlab-guide-topnav a:hover { text-decoration: underline; }
+  .mlab-guide-topnav span { color: rgba(255,255,255,.35); margin: 0 2px; }
+</style>
+
+<header>
+  <div class="header-inner">
+    <div class="badge">주택도시기금 · 2025-2026 기준</div>
+    <h1>버팀목 전세자금대출<br><span>신청 절차 & 일정 가이드</span></h1>
+    <p>계약 전 은행 상담부터 잔금일 대출 실행까지, 단계별 프로세스와 핵심 타임라인을 한눈에 정리했습니다.</p>
+    <div class="header-meta">
+      <div class="meta-pill"><span class="dot"></span>무주택 세대주 대상</div>
+      <div class="meta-pill"><span class="dot"></span>금리 연 2.1~3.3% 수준</div>
+      <div class="meta-pill"><span class="dot"></span>기금e든든 온라인 신청 가능</div>
+      <div class="meta-pill"><span class="dot"></span>수탁은행 5개 취급</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Overview -->
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="label">전체 소요 기간</div>
+      <div class="value">약 4~6주</div>
+      <div class="sub">계약 체결 → 대출 실행</div>
+    </div>
+    <div class="ov-card">
+      <div class="label">기금e든든 신청 타이밍</div>
+      <div class="value">입주 D-40~30일</div>
+      <div class="sub">잔금일 기준, 늦을수록 위험</div>
+    </div>
+    <div class="ov-card">
+      <div class="label">은행 방문 횟수</div>
+      <div class="value">보통 2회</div>
+      <div class="sub">서류 제출 + 대출 약정</div>
+    </div>
+    <div class="ov-card">
+      <div class="label">취급 수탁은행</div>
+      <div class="value">5개 은행</div>
+      <div class="sub">우리·국민·기업·농협·신한</div>
+    </div>
+  </div>
+
+  <!-- Schedule Chart -->
+  <div class="section">
+    <div class="sec-title">📅 전체 일정 타임라인</div>
+    <div class="sec-sub">잔금일(D-Day)을 기준으로 역산한 권장 일정입니다</div>
+
+    <div class="schedule-chart">
+      <div class="chart-header">⏱ 잔금일(D-Day) 기준 역산 타임라인</div>
+      <div class="col-header">
+        <div class="col-h">D-50</div>
+        <div class="col-h">D-45</div>
+        <div class="col-h highlight">D-40</div>
+        <div class="col-h">D-35</div>
+        <div class="col-h highlight">D-30</div>
+        <div class="col-h">D-25</div>
+        <div class="col-h highlight">D-20</div>
+        <div class="col-h highlight">D-15</div>
+        <div class="col-h">D-10</div>
+        <div class="col-h">D-5</div>
+        <div class="col-h highlight">D-Day</div>
+      </div>
+      <div class="chart-body">
+
+        <div class="chart-row">
+          <div class="chart-label">① 은행<br>사전 상담</div>
+          <div class="chart-track">
+            <!-- D-50 ~ D-40: 0% ~ 20% -->
+            <div class="chart-block" style="left:0%;width:22%;background:#c8d7f0;color:#1a3460;">
+              계약 전 대출 가능 여부 확인
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">② 전세<br>계약 체결</div>
+          <div class="chart-track">
+            <div class="chart-block" style="left:18%;width:10%;background:#4a78c8;color:white;border-radius:50px;">
+              계약
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">③ 기금e든든<br>온라인 신청</div>
+          <div class="chart-track">
+            <!-- D-40 ~ D-30 : 20%~40% -->
+            <div class="chart-block" style="left:20%;width:20%;background:#2255a4;color:white;">
+              자산심사 신청 (D-40~30)
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">④ 1차 은행<br>방문 (서류)</div>
+          <div class="chart-track">
+            <!-- D-30: 40% -->
+            <div class="chart-block" style="left:40%;width:18%;background:#1a3460;color:white;">
+              서류 제출 (D-30 전후)
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">⑤ 2차 은행<br>방문 (약정)</div>
+          <div class="chart-track">
+            <!-- D-20~D-15: 62%~72% -->
+            <div class="chart-block" style="left:62%;width:14%;background:#0f1f3d;color:white;">
+              대출 약정 (D-20~15)
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">⑥ 대출 실행<br>(잔금일)</div>
+          <div class="chart-track">
+            <div class="chart-block" style="left:88%;width:12%;background:var(--accent);color:var(--navy);font-weight:800;">
+              🎉 D-Day
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Step-by-step -->
+  <div class="section">
+    <div class="sec-title">📋 단계별 상세 프로세스</div>
+    <div class="sec-sub">각 단계의 핵심 내용과 주의사항을 확인하세요</div>
+
+    <div class="timeline-wrap">
+      <div class="steps">
+
+        <!-- Step 0 -->
+        <div class="step step-0">
+          <div class="step-icon-col">
+            <div class="step-num">0</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">계약 전 (선행 단계)</div>
+              <div class="step-title">🏦 은행 방문 — 대출 가능 여부 사전 확인</div>
+              <div class="step-desc">
+                기금e든든 신청 전에 <b>먼저 은행 지점을 방문</b>하는 것을 권장합니다.
+                지점마다 버팀목 취급 여부와 가능 금액이 다를 수 있으므로, 원하는 은행·지점에서
+                <b>자격 충족 여부와 예상 대출 금액</b>을 상담받아 두면 계약 조건 협상에 유리합니다.
+              </div>
+              <div class="step-tags">
+                <span class="tag tag-blue">선택 사항이지만 강력 권장</span>
+                <span class="tag tag-amber">지점별 취급 여부 상이</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="step step-1">
+          <div class="step-icon-col">
+            <div class="step-num">1</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">D-50 ~ D-40 전후</div>
+              <div class="step-title">📄 전세 계약 체결 + 확정일자 수령</div>
+              <div class="step-desc">
+                임대인과 <b>전세 계약서를 작성</b>하고, 주민센터 또는 공인중개사를 통해 <b>확정일자</b>를 받습니다.
+                기금e든든 신청 시 <b>본계약의 확정일자</b>가 필요합니다.<br>
+                계약서 작성 시 <b>"대출 불승인 시 계약금 반환" 특약</b>을 반드시 넣는 것이 좋습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step step-2">
+          <div class="step-icon-col">
+            <div class="step-num">2</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">잔금일 D-40 ~ D-30</div>
+              <div class="step-title">💻 기금e든든 온라인 신청 (자산심사)</div>
+              <div class="step-desc">
+                <b>기금e든든 홈페이지(enhuf.molit.go.kr)</b> 또는 앱에서 공동인증서로 로그인 후 전세대출 신청을 합니다.
+                각종 개인정보는 위탁 동의 처리되어 <b>별도 서류 준비 없이</b> 대부분 온라인에서 처리됩니다.<br>
+                심사 결과는 보통 <b>1~2 근무일</b> 이내에 안내됩니다.
+              </div>
+              <div class="step-tags">
+                <span class="tag tag-blue">온라인 비대면 신청</span>
+                <span class="tag tag-green">1~2 근무일 내 결과</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step step-3">
+          <div class="step-icon-col">
+            <div class="step-num">3</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">잔금일 D-30 전후 (1차 은행 방문)</div>
+              <div class="step-title">🏢 은행 방문 — 서류 제출 & 대출 심사</div>
+              <div class="step-desc">
+                기금e든든 자산심사 적격 판정 후, 수탁 은행 영업점을 방문해 <b>서류를 제출</b>합니다.
+                은행에서 서류 심사 → HUG(주택도시보증공사) 또는 HF(한국주택금융공사) <b>보증 심사</b>까지 진행됩니다.<br>
+                <b>서류가 미비하면 재방문</b>해야 하므로 한 번에 완벽히 준비해 가는 것이 중요합니다.
+              </div>
+              <div class="step-tags">
+                <span class="tag tag-blue">신분증 필수</span>
+                <span class="tag tag-amber">소득·재직 증명 서류</span>
+                <span class="tag tag-amber">임대차계약서 원본</span>
+                <span class="tag tag-amber">계약금 영수증</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step step-4">
+          <div class="step-icon-col">
+            <div class="step-num">4</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">잔금일 D-20 ~ D-15 (2차 은행 방문)</div>
+              <div class="step-title">✍️ 은행 방문 — 대출 약정 체결</div>
+              <div class="step-desc">
+                대출 승인 통보를 받은 후 은행을 재방문하여 <b>대출 약정서를 작성</b>합니다.
+                이 시점에 정확한 대출 금액과 금리가 확정됩니다.<br>
+                <b>은행·지점별로 일정이 상이</b>하며, 은행 담당자가 안내하는 날짜에 방문하면 됩니다.
+              </div>
+              <div class="step-tags">
+                <span class="tag tag-blue">케바케 — 은행 직원 안내 따를 것</span>
+                <span class="tag tag-green">금리 최종 확정</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step step-5">
+          <div class="step-icon-col">
+            <div class="step-num">🎉</div>
+          </div>
+          <div class="step-body">
+            <div class="step-card">
+              <div class="step-dday">D-Day (잔금일)</div>
+              <div class="step-title">🏠 대출 실행 — 임대인에게 대출금 지급</div>
+              <div class="step-desc">
+                잔금일에 <b>대출금이 임대인의 계좌로 직접 지급</b>됩니다.
+                임차인(본인)이 납부해야 할 잔금(보증금 - 대출금)은 <b>별도로 자비 준비</b>해야 합니다.
+                입주 후 <b>전입신고</b>를 신속히 하면 대항력이 유지됩니다.
+              </div>
+              <div class="step-tags">
+                <span class="tag tag-amber">대출금 = 임대인 직접 지급</span>
+                <span class="tag tag-blue">잔금 = 대출금 + 자비</span>
+                <span class="tag tag-red">입주 후 전입신고 필수</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 필요 서류 -->
+  <div class="section">
+    <div class="sec-title">📁 은행 방문 시 주요 준비 서류</div>
+    <div class="sec-sub">서류는 은행·상황별로 다를 수 있으니 사전에 담당 지점에 확인하세요</div>
+    <div class="docs-grid">
+      <div class="docs-card">
+        <h4>👤 신분·주소 확인</h4>
+        <ul>
+          <li>신분증 (주민등록증 / 운전면허증)</li>
+          <li>주민등록등본 (전 세대원 포함)</li>
+          <li>가족관계증명서</li>
+        </ul>
+      </div>
+      <div class="docs-card">
+        <h4>💼 소득·재직 증명</h4>
+        <ul>
+          <li>근로소득원천징수영수증 (직전 연도)</li>
+          <li>재직증명서 또는 사업자등록증명원</li>
+          <li>건강보험료 납부확인서</li>
+        </ul>
+      </div>
+      <div class="docs-card">
+        <h4>🏘️ 임대차 관련</h4>
+        <ul>
+          <li>확정일자 받은 임대차계약서 원본</li>
+          <li>계약금 영수증 (이체 내역)</li>
+          <li>임대인 신분증 사본</li>
+        </ul>
+      </div>
+      <div class="docs-card">
+        <h4>🏠 주택 관련</h4>
+        <ul>
+          <li>등기사항전부증명서 (등기부등본)</li>
+          <li>건물 전용면적 확인 서류</li>
+          <li>부동산 매매·임대차 계약서 사본</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:16px;">
+      <span class="callout-icon">⚠️</span>
+      <span>2025년 최신 필요 서류 목록은 <b>주택도시기금 공식 홈페이지(기금e든든)</b> 또는 신청 예정 은행에 문의하여 정확히 확인하세요. 미비 서류 발생 시 재방문이 필요합니다.</span>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="section">
+    <div class="sec-title">⭐ 핵심 유의사항</div>
+    <div class="sec-sub">실제 진행 시 많이 겪는 함정을 미리 파악하세요</div>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-icon">📅</div>
+        <h4>최소 한 달 전 시작</h4>
+        <p>이사 최소 한 달 전에는 대출 가능 여부를 확인하고 신청을 시작해야 합니다. 늦을수록 일정 여유가 없어집니다.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🏦</div>
+        <h4>은행별 케바케</h4>
+        <p>일정과 요구 서류는 은행·지점별로 다릅니다. 은행 직원이 안내하는 방문 날짜를 따르면 됩니다. 임의로 서두르지 마세요.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔍</div>
+        <h4>서류 한 번에 준비</h4>
+        <p>은행 방문 전 빠진 서류 없이 완벽하게 준비해야 심사 기간을 단축할 수 있습니다. 재방문은 시간 손실입니다.</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>본 안내는 참고용이며, 정책 및 금리는 변경될 수 있습니다.</p>
+  <p>최신 정보는 <a href="https://enhuf.molit.go.kr" target="_blank">기금e든든(enhuf.molit.go.kr)</a> · 주택도시보증공사 1566-9009 에서 확인하세요.</p>
+</footer>
+
+</body>
+</html>
