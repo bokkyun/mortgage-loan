@@ -1052,15 +1052,6 @@ footer .footer-note {
   color: #fbbf24;
 }
 
-.hub-promo-moneycal__domain {
-  padding: 0.15rem 0.45rem;
-  border-radius: 6px;
-  background: rgba(251, 191, 36, 0.12);
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  color: #fef3c7;
-  font-weight: 800;
-}
-
 @media (max-width: 560px) {
   .hub-promo-moneycal__card {
     flex-direction: column;
