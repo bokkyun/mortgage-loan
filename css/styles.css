@@ -1014,6 +1014,8 @@ footer .footer-note {
 }
 
 .hub-promo-moneycal__chip--brand {
+  text-transform: none;
+  letter-spacing: 0.02em;
   background: rgba(251, 191, 36, 0.26);
   border-color: rgba(251, 191, 36, 0.55);
   color: #fffbeb;
@@ -1021,12 +1023,44 @@ footer .footer-note {
 }
 
 .hub-promo-moneycal__title {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.55rem;
   font-size: 1.02rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.35;
   color: #fff;
+}
+
+.hub-promo-moneycal__signal-block {
+  margin: 0 0 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+}
+
+.hub-promo-moneycal__signal-head {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: rgba(253, 224, 71, 0.98);
+}
+
+.hub-promo-moneycal__signal-names {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.hub-promo-moneycal__signals-cta-note {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: #cbd5e1;
 }
 
 .hub-promo-moneycal__desc {
