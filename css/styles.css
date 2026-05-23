@@ -908,7 +908,7 @@ footer .footer-note {
   }
 }
 
-/* MoneyCal 스폰서 광고 (등기부 배너 아래) */
+/* MoneyPlan 스폰서 광고 블록 (등기부 배너 아래, 클래스명은 호환 유지) */
 .hub-promo-moneycal {
   position: relative;
   margin-bottom: 14px;
