@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-J1JQSVPNM6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-J1JQSVPNM6");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.svg" />
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#2a554a" />
+    <link rel="manifest" href="../site.webmanifest" />
+    <meta name="theme-color" content="#2a554a" />
+    <title>서류 정보 추출 | Mortgage Loan Lab</title>
+    <meta
+      name="description"
+      content="재직증명서, 원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표 등 대출 서류를 업로드하면 AI가 핵심 정보를 추출해 정리합니다."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://mortgage-loan.uk/paperwork/" />
+    <link rel="stylesheet" href="../css/styles.css?v=mobile-6" />
+    <link rel="stylesheet" href="paperwork.css" />
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>서류 정보 추출</h1>
+      <p>
+        대출 심사에 필요한 <strong>재직·소득·가족·대출</strong> 서류를 한번에 올리면 AI가 핵심 항목만 추출해
+        보여줍니다. 계산기 입력 전 참고용으로 활용하세요.
+      </p>
+      <nav class="quick-nav pw-quick-nav" aria-label="빠른 이동">
+        <a href="../">홈</a>
+        <a href="../qa/">Q&amp;A</a>
+        <a class="pw-quick-nav__active" href="./">서류 정보 추출</a>
+        <a href="../didimdol/">디딤돌</a>
+        <a href="../beotimmok/">버팀목</a>
+        <a href="../dsr/">DSR</a>
+      </nav>
+      <div class="disclaimer" style="margin-top: 0.75rem">
+        업로드된 서류는 <strong>분석 후 서버에 저장되지 않습니다</strong>. 추출 결과는 이 브라우저에만 보관되며,
+        참고용이며 실제 심사와 다를 수 있습니다.
+      </div>
+    </header>
+
+    <main class="pw-main">
+      <div id="pw-global-error" class="pw-error" hidden></div>
+
+      <div class="pw-grid">
+        <section class="pw-panel" aria-label="서류 업로드">
+          <h2>서류 일괄 업로드</h2>
+          <p class="pw-hint">
+            재직증명서, 사업자등록증, 원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표 등
+          </p>
+
+          <div id="pw-dropzone" class="pw-dropzone" role="button" tabindex="0" aria-label="파일 선택">
+            <div id="pw-drop-content">
+              <div class="pw-dropzone__icon">📎</div>
+              <p class="pw-dropzone__title">파일을 드래그하거나 클릭하여 선택</p>
+              <p class="pw-dropzone__sub">JPG, PNG, PDF · 여러 파일 동시 선택 가능</p>
+            </div>
+            <div id="pw-drop-busy" hidden>
+              <div class="pw-spinner" aria-hidden="true"></div>
+              <p id="pw-drop-step" class="pw-dropzone__title">AI가 서류를 분석하고 있습니다...</p>
+            </div>
+          </div>
+
+          <input
+            id="pw-file-input"
+            type="file"
+            accept="image/*,.pdf"
+            multiple
+            hidden
+          />
+
+          <div id="pw-file-list" class="pw-file-list" hidden></div>
+          <div id="pw-upload-error" class="pw-error" hidden></div>
+
+          <div class="pw-actions">
+            <button id="pw-submit" type="button" class="hub-btn-primary" hidden disabled>
+              서류 분석 시작
+            </button>
+          </div>
+        </section>
+
+        <section class="pw-panel" aria-label="추출 결과">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:0.35rem">
+            <button id="pw-clear" type="button" class="hub-btn-secondary" hidden style="font-size:0.8rem;padding:0.4rem 0.75rem">
+              결과 초기화
+            </button>
+          </div>
+          <div id="pw-result"></div>
+        </section>
+      </div>
+
+      <p class="pw-note">
+        본 도구는 Mortgage Loan Lab 계산기 이용 전 서류 내용을 빠르게 확인하기 위한 참고용입니다.
+        주민등록번호 등 민감 정보가 포함될 수 있으니 공용 PC에서는 사용 후 결과를 초기화해 주세요.
+      </p>
+    </main>
+
+    <footer>
+      <div class="footer-main">
+        <span>© Mortgage Loan Lab · 서류 정보 추출 (참고용)</span>
+      </div>
+      <div class="footer-links">
+        <a href="../">홈</a>
+        <a href="../qa/">Q&amp;A</a>
+        <a href="../privacy/">개인정보 처리방침</a>
+        <a href="../disclaimer/">면책 조항</a>
+      </div>
+      <div class="footer-note">
+        분석 시 이미지가 OpenAI API로 전송됩니다. API 키는 서버 환경 변수로만 보관됩니다.
+      </div>
+    </footer>
+
+    <script type="module" src="paperwork.mjs"></script>
+  </body>
+</html>
