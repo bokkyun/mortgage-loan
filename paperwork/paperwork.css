@@ -296,3 +296,31 @@
   border-color: var(--btn-primary-mid);
   background: var(--accent-dim);
 }
+
+.pw-calc-links {
+  margin-bottom: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: linear-gradient(165deg, rgba(29, 158, 117, 0.1), rgba(29, 158, 117, 0.03));
+}
+
+.pw-calc-links__title {
+  margin: 0 0 0.55rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #114533;
+}
+
+.pw-calc-links__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.pw-calc-links__hint {
+  margin: 0.55rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}

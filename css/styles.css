@@ -1763,3 +1763,54 @@ span.hub-soon {
     min-width: 4.5rem;
   }
 }
+
+/* 서류 추출 → 계산기 자동 입력 안내 */
+.paperwork-prefill-banner {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(165deg, #eaf6ef 0%, #f5faf7 100%);
+  box-shadow: 0 4px 14px rgba(32, 72, 62, 0.08);
+}
+
+.paperwork-prefill-banner__inner {
+  position: relative;
+  padding-right: 4rem;
+}
+
+.paperwork-prefill-banner strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.92rem;
+  color: #114533;
+}
+
+.paperwork-prefill-banner p {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.paperwork-prefill-banner__note {
+  font-size: 0.78rem !important;
+}
+
+.paperwork-prefill-banner__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+.paperwork-prefill-banner__close:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}

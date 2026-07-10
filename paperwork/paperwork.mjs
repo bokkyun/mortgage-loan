@@ -1,6 +1,9 @@
 const STORAGE_KEY = "mortgage-loan-paperwork-summary";
-const MAX_PAGES_PER_PDF = 10;
-const MAX_TOTAL_PAGES = 20;
+const MAX_PAGES_PER_PDF = 5;
+const MAX_TOTAL_PAGES = 15;
+const API_CHUNK_SIZE = 4;
+const PDF_RENDER_SCALE = 1.25;
+const JPEG_QUALITY = 0.65;
 const VALID_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -143,7 +146,7 @@ async function pdfToImages(file) {
 
   for (let i = 1; i <= pageCount; i++) {
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2 });
+    const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
     canvas.height = viewport.height;
@@ -151,7 +154,7 @@ async function pdfToImages(file) {
     if (!context) continue;
 
     await page.render({ canvasContext: context, viewport }).promise;
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    const dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
     pages.push({
       fileName: file.name,
       fileBase64: dataUrl.split(",")[1],
@@ -178,6 +181,87 @@ async function processFilesForUpload(files) {
     if (result.length >= MAX_TOTAL_PAGES) break;
   }
   return result.slice(0, MAX_TOTAL_PAGES);
+}
+
+async function parseApiResponse(response) {
+  const text = await response.text();
+  if (!text.trim()) {
+    if (response.status === 404) {
+      throw new Error(
+        "분석 API(/api/extract)를 찾을 수 없습니다. Cloudflare Pages에 배포되어 있는지 확인해 주세요."
+      );
+    }
+    if (response.status === 413) {
+      throw new Error("요청 용량이 너무 큽니다. 파일 수를 줄이거나 다시 시도해 주세요.");
+    }
+    if (response.status >= 502) {
+      throw new Error(
+        `서버 오류 또는 시간 초과 (HTTP ${response.status}). 잠시 후 다시 시도해 주세요.`
+      );
+    }
+    throw new Error(`서버 응답이 비었습니다 (HTTP ${response.status}).`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`서버 응답 형식 오류 (HTTP ${response.status}): ${text.slice(0, 300)}`);
+  }
+}
+
+function mergeExtractionResults(target, source) {
+  if (!source) return target;
+  const out = target ? { ...target } : {};
+
+  const scalarKeys = [
+    "name",
+    "residentId",
+    "withholdingFinalIncome",
+    "withholdingTaxYear",
+    "withholdingTypeAFinalIncome",
+    "withholdingTypeATaxYear",
+    "incomeCertificateAmount",
+    "incomeCertificateYear",
+  ];
+
+  for (const key of scalarKeys) {
+    if ((out[key] === null || out[key] === undefined) && source[key] != null) {
+      out[key] = source[key];
+    }
+  }
+
+  if ((source.familyMembers?.length || 0) > (out.familyMembers?.length || 0)) {
+    out.familyMembers = source.familyMembers;
+  }
+
+  if (source.loans) {
+    out.loans = out.loans || {};
+    for (const key of ["creditLoanAmount", "collateralLoanAmount", "totalLoanAmount"]) {
+      const current = out.loans[key];
+      const incoming = source.loans[key];
+      if (incoming != null && (current == null || incoming > current)) {
+        out.loans[key] = incoming;
+      }
+    }
+    const details = [...(out.loans.loanDetails || []), ...(source.loans.loanDetails || [])];
+    if (details.length) out.loans.loanDetails = [...new Set(details)];
+  }
+
+  out.detectedDocuments = [...(out.detectedDocuments || []), ...(source.detectedDocuments || [])];
+  return out;
+}
+
+async function extractChunk(files, chunkIndex, totalChunks) {
+  const response = await fetch("/api/extract", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ files }),
+  });
+  const result = await parseApiResponse(response);
+  if (!result.success || !result.data) {
+    throw new Error(result.error || `분석 실패 (${chunkIndex + 1}/${totalChunks}배치)`);
+  }
+  return result.data;
 }
 
 function setBusy(busy, step = "") {
@@ -370,6 +454,15 @@ function renderSummary() {
         <p>${summary.uploadedFiles.length}개 파일 · ${new Date(summary.extractedAt).toLocaleString("ko-KR")}</p>
       </div>
     </div>
+    <div class="pw-calc-links">
+      <p class="pw-calc-links__title">계산기로 보내기 — 소득·대출 잔액 등을 자동 입력합니다</p>
+      <div class="pw-calc-links__actions">
+        <a class="hub-btn-primary" href="../beotimmok/?from=paperwork">버팀목 전세자금 금리</a>
+        <a class="hub-btn-secondary" href="../didimdol/?from=paperwork">디딤돌 DTI·금리</a>
+        <a class="hub-btn-secondary" href="../dsr/?from=paperwork">DSR 계산</a>
+      </div>
+      <p class="pw-calc-links__hint">전세보증금·신규 대출금액·금리는 직접 입력해 주세요.</p>
+    </div>
     ${groupsHtml}
     ${loanDetails}
     ${detected}`;
@@ -417,33 +510,33 @@ async function handleSubmit() {
 
   try {
     const processed = await processFilesForUpload(state.files);
-    setBusy(true, `${processed.length}페이지 AI 분석 중...`);
-
-    const response = await fetch("/api/extract", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ files: processed }),
-    });
-
-    const result = await response.json();
-
-    if (!result.success || !result.data) {
-      state.summary = {
-        id,
-        extractedAt: new Date().toISOString(),
-        uploadedFiles: fileNames,
-        status: "error",
-        errorMessage: result.error || "분석에 실패했습니다.",
-      };
-    } else {
-      state.summary = {
-        id,
-        extractedAt: new Date().toISOString(),
-        uploadedFiles: fileNames,
-        status: "success",
-        ...result.data,
-      };
+    if (processed.length === 0) {
+      throw new Error("파일을 읽을 수 없습니다. PDF 또는 이미지 형식을 확인해 주세요.");
     }
+
+    const chunks = [];
+    for (let i = 0; i < processed.length; i += API_CHUNK_SIZE) {
+      chunks.push(processed.slice(i, i + API_CHUNK_SIZE));
+    }
+
+    let merged = null;
+    for (let i = 0; i < chunks.length; i++) {
+      setBusy(
+        true,
+        chunks.length > 1
+          ? `AI 분석 중... (${i + 1}/${chunks.length}배치 · ${processed.length}페이지)`
+          : `${processed.length}페이지 AI 분석 중...`
+      );
+      merged = mergeExtractionResults(merged, await extractChunk(chunks[i], i, chunks.length));
+    }
+
+    state.summary = {
+      id,
+      extractedAt: new Date().toISOString(),
+      uploadedFiles: fileNames,
+      status: "success",
+      ...merged,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
     els.globalError.hidden = false;

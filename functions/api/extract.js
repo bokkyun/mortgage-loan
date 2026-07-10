@@ -1,6 +1,7 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "openai/gpt-4o";
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
+const MAX_FILES_PER_REQUEST = 8;
 
 const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 전문가입니다.
 첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
@@ -108,11 +109,34 @@ export async function onRequestPost(context) {
     const model = context.env.OPENROUTER_MODEL || DEFAULT_MODEL;
     const siteUrl = context.env.OPENROUTER_SITE_URL || DEFAULT_SITE_URL;
 
-    const body = await context.request.json();
+    let body;
+    try {
+      body = await context.request.json();
+    } catch {
+      return jsonResponse(
+        {
+          success: false,
+          error:
+            "요청 데이터를 읽을 수 없습니다. 파일 용량이 너무 크거나 형식이 잘못되었습니다.",
+        },
+        400
+      );
+    }
+
     const files = body?.files;
 
     if (!Array.isArray(files) || files.length === 0) {
       return jsonResponse({ success: false, error: "업로드된 파일이 없습니다." }, 400);
+    }
+
+    if (files.length > MAX_FILES_PER_REQUEST) {
+      return jsonResponse(
+        {
+          success: false,
+          error: `한 번에 ${MAX_FILES_PER_REQUEST}페이지까지 분석할 수 있습니다.`,
+        },
+        400
+      );
     }
 
     const prompt = buildBatchPrompt(files);
@@ -120,7 +144,7 @@ export async function onRequestPost(context) {
       type: "image_url",
       image_url: {
         url: `data:${file.mimeType};base64,${file.fileBase64}`,
-        detail: "high",
+        detail: "low",
       },
     }));
 
@@ -148,13 +172,24 @@ export async function onRequestPost(context) {
     if (!aiRes.ok) {
       const errText = await aiRes.text();
       console.error("OpenRouter API error:", aiRes.status, errText);
+      const detail = errText ? `: ${errText.slice(0, 200)}` : "";
       return jsonResponse(
-        { success: false, error: `AI 분석 요청 실패 (${aiRes.status})` },
+        { success: false, error: `AI 분석 요청 실패 (${aiRes.status})${detail}` },
         500
       );
     }
 
-    const aiJson = await aiRes.json();
+    const aiText = await aiRes.text();
+    if (!aiText.trim()) {
+      return jsonResponse({ success: false, error: "AI 응답이 비어있습니다." }, 500);
+    }
+
+    let aiJson;
+    try {
+      aiJson = JSON.parse(aiText);
+    } catch {
+      return jsonResponse({ success: false, error: "AI 응답 형식이 올바르지 않습니다." }, 500);
+    }
     const content = aiJson.choices?.[0]?.message?.content;
     if (!content) {
       return jsonResponse({ success: false, error: "AI 응답이 비어있습니다." }, 500);

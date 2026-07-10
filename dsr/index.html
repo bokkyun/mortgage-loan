@@ -876,6 +876,7 @@
   </div>
 </template>
 
+<script src="../js/paperwork-prefill.js"></script>
 <script>
   function toggleSection(id, btn) {
     const el = document.getElementById(id);
@@ -1296,6 +1297,7 @@
   wireRepayPills();
   onMainTypeChange();
   initDsrMultiRows();
+  window.PaperworkPrefill?.initFor("dsr");
 </script>
 
 </body>

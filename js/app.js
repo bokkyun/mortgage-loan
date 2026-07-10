@@ -1084,4 +1084,5 @@
   wireAnnualPreviews();
   updatePanels("self", document.querySelector('input[name="emp-self"]:checked')?.value || "A");
   updatePanels("spouse", document.querySelector('input[name="emp-spouse"]:checked')?.value || "A");
+  window.PaperworkPrefill?.initFor("didimdol");
 })();
