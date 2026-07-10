@@ -186,6 +186,11 @@ async function processFilesForUpload(files) {
 async function parseApiResponse(response) {
   const text = await response.text();
   if (!text.trim()) {
+    if (response.status === 405) {
+      throw new Error(
+        "분석 API가 POST를 처리하지 못합니다. Cloudflare Pages Functions가 배포되지 않았을 수 있습니다. 잠시 후 다시 시도하거나 관리자에게 문의해 주세요."
+      );
+    }
     if (response.status === 404) {
       throw new Error(
         "분석 API(/api/extract)를 찾을 수 없습니다. Cloudflare Pages에 배포되어 있는지 확인해 주세요."
