@@ -1,3 +1,7 @@
+const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const DEFAULT_MODEL = "openai/gpt-4o";
+const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
+
 const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 전문가입니다.
 첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
 
@@ -89,17 +93,20 @@ function jsonResponse(body, status = 200) {
 
 export async function onRequestPost(context) {
   try {
-    const apiKey = context.env.OPENAI_API_KEY;
+    const apiKey = context.env.OPENROUTER_API_KEY;
     if (!apiKey) {
       return jsonResponse(
         {
           success: false,
           error:
-            "OPENAI_API_KEY가 설정되지 않았습니다. Cloudflare Pages 환경 변수를 확인해주세요.",
+            "OPENROUTER_API_KEY가 설정되지 않았습니다. Cloudflare Pages 환경 변수를 확인해주세요.",
         },
         500
       );
     }
+
+    const model = context.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+    const siteUrl = context.env.OPENROUTER_SITE_URL || DEFAULT_SITE_URL;
 
     const body = await context.request.json();
     const files = body?.files;
@@ -117,14 +124,16 @@ export async function onRequestPost(context) {
       },
     }));
 
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const aiRes = await fetch(OPENROUTER_API_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": siteUrl,
+        "X-Title": "Mortgage Loan Lab",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model,
         messages: [
           {
             role: "user",
@@ -136,17 +145,17 @@ export async function onRequestPost(context) {
       }),
     });
 
-    if (!openaiRes.ok) {
-      const errText = await openaiRes.text();
-      console.error("OpenAI API error:", openaiRes.status, errText);
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
+      console.error("OpenRouter API error:", aiRes.status, errText);
       return jsonResponse(
-        { success: false, error: `AI 분석 요청 실패 (${openaiRes.status})` },
+        { success: false, error: `AI 분석 요청 실패 (${aiRes.status})` },
         500
       );
     }
 
-    const openaiJson = await openaiRes.json();
-    const content = openaiJson.choices?.[0]?.message?.content;
+    const aiJson = await aiRes.json();
+    const content = aiJson.choices?.[0]?.message?.content;
     if (!content) {
       return jsonResponse({ success: false, error: "AI 응답이 비어있습니다." }, 500);
     }
