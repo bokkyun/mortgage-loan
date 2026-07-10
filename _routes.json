@@ -1,24 +1,5 @@
 {
   "version": 1,
-  "include": ["/*"],
-  "exclude": [
-    "/css/*",
-    "/js/*",
-    "/guides/*",
-    "/docs/*",
-    "/*.svg",
-    "/*.png",
-    "/*.jpg",
-    "/*.webp",
-    "/*.xml",
-    "/*.txt",
-    "/*.webmanifest",
-    "/*.css",
-    "/*.js",
-    "/*.mjs",
-    "/ads.txt",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/og-image.png"
-  ]
+  "include": ["/api/*"],
+  "exclude": []
 }
