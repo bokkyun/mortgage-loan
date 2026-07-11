@@ -1,5 +1,5 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "openai/gpt-4o";
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
 
@@ -83,6 +83,21 @@ function parseExtractionResult(raw) {
     throw new Error("AI 응답에서 JSON을 찾을 수 없습니다.");
   }
   return JSON.parse(jsonMatch[0]);
+}
+
+function formatOpenRouterError(status, errText) {
+  try {
+    const parsed = JSON.parse(errText);
+    const message = parsed?.error?.message || parsed?.message;
+    if (message?.includes("not available in your region")) {
+      return `선택한 AI 모델이 이 지역에서 사용할 수 없습니다. Cloudflare 환경 변수 OPENROUTER_MODEL을 google/gemini-2.5-flash 등으로 변경해 주세요. (${message})`;
+    }
+    if (message) return `AI 분석 요청 실패 (${status}): ${message}`;
+  } catch {
+    /* fall through */
+  }
+  const detail = errText ? errText.slice(0, 200) : "";
+  return `AI 분석 요청 실패 (${status})${detail ? `: ${detail}` : ""}`;
 }
 
 function jsonResponse(body, status = 200) {
@@ -189,9 +204,8 @@ export async function onRequestPost(context) {
     if (!aiRes.ok) {
       const errText = await aiRes.text();
       console.error("OpenRouter API error:", aiRes.status, errText);
-      const detail = errText ? `: ${errText.slice(0, 200)}` : "";
       return jsonResponse(
-        { success: false, error: `AI 분석 요청 실패 (${aiRes.status})${detail}` },
+        { success: false, error: formatOpenRouterError(aiRes.status, errText) },
         500
       );
     }
