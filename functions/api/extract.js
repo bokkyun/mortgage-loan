@@ -1,8 +1,9 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemini-2.0-flash-001";
+const DEFAULT_MODEL = "google/gemini-2.5-flash";
 const VISION_MODEL_FALLBACK = [
-  "google/gemini-2.0-flash-001",
-  "google/gemini-flash-1.5-8b",
+  "google/gemini-2.5-flash",
+  "google/gemini-flash-1.5",
+  "google/gemini-2.5-flash-preview-09-2025",
   "anthropic/claude-3-haiku",
 ];
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
@@ -109,8 +110,10 @@ function resolveVisionModels(envModel) {
   return models.length ? models : [DEFAULT_MODEL];
 }
 
-function isRegionBlockedError(status, errText) {
-  return status === 403 && /not available in your region/i.test(errText);
+function isRetryableModelError(status, errText) {
+  if (status === 403 && /not available in your region/i.test(errText)) return true;
+  if (status === 404 && /no endpoints found/i.test(errText)) return true;
+  return false;
 }
 
 async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageContents }) {
@@ -234,7 +237,7 @@ export async function onRequestPost(context) {
 
     let aiRes = null;
     let aiText = "";
-    let lastRegionError = "";
+    let lastRetryableError = "";
 
     for (const model of visionModels) {
       aiRes = await requestVisionExtraction({
@@ -249,8 +252,8 @@ export async function onRequestPost(context) {
       if (aiRes.ok) break;
 
       console.error("OpenRouter API error:", aiRes.status, model, aiText);
-      if (isRegionBlockedError(aiRes.status, aiText)) {
-        lastRegionError = aiText;
+      if (isRetryableModelError(aiRes.status, aiText)) {
+        lastRetryableError = aiText;
         continue;
       }
 
@@ -264,8 +267,8 @@ export async function onRequestPost(context) {
       return jsonResponse(
         {
           success: false,
-          error: lastRegionError
-            ? formatOpenRouterError(403, lastRegionError)
+          error: lastRetryableError
+            ? formatOpenRouterError(aiRes.status, lastRetryableError)
             : "AI 분석 요청에 실패했습니다.",
         },
         500
