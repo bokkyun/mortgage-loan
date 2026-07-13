@@ -33,9 +33,11 @@ const FIELD_GROUPS = [
     icon: "💰",
     source: "각 소득 서류",
     fields: [
-      { key: "withholdingFinalIncome", label: "원천징수영수증 최종소득", type: "currency" },
-      { key: "withholdingTypeAFinalIncome", label: "갑종근로소득원천징수영수증 최종소득", type: "currency" },
-      { key: "incomeCertificateAmount", label: "소득금액증명원 소득금액", type: "currency" },
+      { key: "incomes.self.withholdingFinalIncome", label: "본인 원천징수 최종소득", type: "currency" },
+      { key: "incomes.spouse.withholdingFinalIncome", label: "배우자 원천징수 최종소득", type: "currency" },
+      { key: "combinedIncome", label: "부부합산 연소득", type: "currency" },
+      { key: "incomes.self.incomeCertificateAmount", label: "본인 소득금액증명원", type: "currency" },
+      { key: "incomes.spouse.incomeCertificateAmount", label: "배우자 소득금액증명원", type: "currency" },
     ],
   },
   {
@@ -109,6 +111,18 @@ function formatSize(bytes) {
 }
 
 function getYearLabel(summary, key) {
+  if (key === "incomes.self.withholdingFinalIncome" && summary.incomes?.self?.withholdingTaxYear) {
+    return `${summary.incomes.self.withholdingTaxYear}년`;
+  }
+  if (key === "incomes.spouse.withholdingFinalIncome" && summary.incomes?.spouse?.withholdingTaxYear) {
+    return `${summary.incomes.spouse.withholdingTaxYear}년`;
+  }
+  if (key === "incomes.self.incomeCertificateAmount" && summary.incomes?.self?.incomeCertificateYear) {
+    return `${summary.incomes.self.incomeCertificateYear}년`;
+  }
+  if (key === "incomes.spouse.incomeCertificateAmount" && summary.incomes?.spouse?.incomeCertificateYear) {
+    return `${summary.incomes.spouse.incomeCertificateYear}년`;
+  }
   if (key === "withholdingFinalIncome" && summary.withholdingTaxYear) {
     return `${summary.withholdingTaxYear}년`;
   }
@@ -119,6 +133,93 @@ function getYearLabel(summary, key) {
     return `${summary.incomeCertificateYear}년`;
   }
   return null;
+}
+
+function getNestedValue(summary, key) {
+  if (key === "combinedIncome") return summary.combinedIncome;
+  const parts = key.split(".");
+  let cur = summary;
+  for (const part of parts) {
+    if (cur == null) return null;
+    cur = cur[part];
+  }
+  return cur ?? null;
+}
+
+function pickRecognizedIncome(person) {
+  if (!person) return null;
+  const candidates = [
+    person.withholdingFinalIncome,
+    person.withholdingTypeAFinalIncome,
+    person.incomeCertificateAmount,
+  ].filter((v) => typeof v === "number" && v > 0);
+  if (!candidates.length) return null;
+  return Math.max(...candidates);
+}
+
+function emptyPersonIncome() {
+  return {
+    withholdingFinalIncome: null,
+    withholdingTaxYear: null,
+    withholdingTypeAFinalIncome: null,
+    withholdingTypeATaxYear: null,
+    incomeCertificateAmount: null,
+    incomeCertificateYear: null,
+  };
+}
+
+const INCOME_PERSON_KEYS = [
+  "withholdingFinalIncome",
+  "withholdingTaxYear",
+  "withholdingTypeAFinalIncome",
+  "withholdingTypeATaxYear",
+  "incomeCertificateAmount",
+  "incomeCertificateYear",
+];
+
+function mergePersonIncome(base, incoming, legacy = null) {
+  const out = { ...emptyPersonIncome(), ...(base || {}) };
+  for (const source of [incoming, legacy].filter(Boolean)) {
+    for (const key of INCOME_PERSON_KEYS) {
+      if (source[key] != null && (out[key] == null || out[key] === "")) {
+        out[key] = source[key];
+      }
+    }
+  }
+  return out;
+}
+
+function normalizeSummaryIncome(summary) {
+  if (!summary) return summary;
+  const legacySelf = {
+    withholdingFinalIncome: summary.withholdingFinalIncome,
+    withholdingTaxYear: summary.withholdingTaxYear,
+    withholdingTypeAFinalIncome: summary.withholdingTypeAFinalIncome,
+    withholdingTypeATaxYear: summary.withholdingTypeATaxYear,
+    incomeCertificateAmount: summary.incomeCertificateAmount,
+    incomeCertificateYear: summary.incomeCertificateYear,
+  };
+  const self = mergePersonIncome(summary.incomes?.self, null, legacySelf);
+  const spouse = mergePersonIncome(summary.incomes?.spouse, null, null);
+  const selfIncome = pickRecognizedIncome(self);
+  const spouseIncome = pickRecognizedIncome(spouse);
+  let combinedIncome =
+    typeof summary.combinedIncome === "number" && summary.combinedIncome > 0 ? summary.combinedIncome : null;
+  if (!combinedIncome) {
+    if (selfIncome && spouseIncome) combinedIncome = selfIncome + spouseIncome;
+    else combinedIncome = selfIncome || spouseIncome || null;
+  }
+  return {
+    ...summary,
+    incomes: { self, spouse },
+    combinedIncome,
+    withholdingFinalIncome: self.withholdingFinalIncome ?? summary.withholdingFinalIncome ?? null,
+    withholdingTaxYear: self.withholdingTaxYear ?? summary.withholdingTaxYear ?? null,
+    withholdingTypeAFinalIncome: self.withholdingTypeAFinalIncome ?? summary.withholdingTypeAFinalIncome ?? null,
+    withholdingTypeATaxYear: self.withholdingTypeATaxYear ?? summary.withholdingTypeATaxYear ?? null,
+    incomeCertificateAmount: self.incomeCertificateAmount ?? summary.incomeCertificateAmount ?? null,
+    incomeCertificateYear: self.incomeCertificateYear ?? summary.incomeCertificateYear ?? null,
+  };
 }
 
 function getLoanValue(summary, key) {
@@ -245,12 +346,6 @@ function mergeExtractionResults(target, source) {
   const scalarKeys = [
     "name",
     "residentId",
-    "withholdingFinalIncome",
-    "withholdingTaxYear",
-    "withholdingTypeAFinalIncome",
-    "withholdingTypeATaxYear",
-    "incomeCertificateAmount",
-    "incomeCertificateYear",
     "housingSubscriptionProductType",
   ];
 
@@ -259,6 +354,19 @@ function mergeExtractionResults(target, source) {
       out[key] = source[key];
     }
   }
+
+  const legacySelf = {
+    withholdingFinalIncome: source.withholdingFinalIncome,
+    withholdingTaxYear: source.withholdingTaxYear,
+    withholdingTypeAFinalIncome: source.withholdingTypeAFinalIncome,
+    withholdingTypeATaxYear: source.withholdingTypeATaxYear,
+    incomeCertificateAmount: source.incomeCertificateAmount,
+    incomeCertificateYear: source.incomeCertificateYear,
+  };
+  out.incomes = {
+    self: mergePersonIncome(out.incomes?.self, source.incomes?.self, legacySelf),
+    spouse: mergePersonIncome(out.incomes?.spouse, source.incomes?.spouse, null),
+  };
 
   const srcCount = Number(source.housingSubscriptionPaymentCount);
   const outCount = Number(out.housingSubscriptionPaymentCount);
@@ -284,7 +392,7 @@ function mergeExtractionResults(target, source) {
   }
 
   out.detectedDocuments = [...(out.detectedDocuments || []), ...(source.detectedDocuments || [])];
-  return out;
+  return normalizeSummaryIncome(out);
 }
 
 async function extractChunk(files, chunkIndex, totalChunks) {
@@ -433,6 +541,8 @@ function renderSummary() {
           value = getLoanValue(summary, field.key);
         } else if (field.type === "subsidy-tier") {
           value = getHousingSubscriptionDiscountLabel(summary.housingSubscriptionPaymentCount);
+        } else if (field.key.startsWith("incomes.") || field.key === "combinedIncome") {
+          value = getNestedValue(summary, field.key);
         } else {
           value = summary[field.key];
         }
@@ -574,13 +684,13 @@ async function handleSubmit() {
       merged = mergeExtractionResults(merged, await extractChunk(chunks[i], i, chunks.length));
     }
 
-    state.summary = {
+    state.summary = normalizeSummaryIncome({
       id,
       extractedAt: new Date().toISOString(),
       uploadedFiles: fileNames,
       status: "success",
       ...merged,
-    };
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
     els.globalError.hidden = false;
@@ -642,6 +752,11 @@ function bindEvents() {
 
 function init() {
   state.summary = loadSummary();
+  if (state.summary?.status === "success") {
+    const normalized = normalizeSummaryIncome(state.summary);
+    state.summary = normalized;
+    saveSummary(normalized);
+  }
   bindEvents();
   renderFileList();
   renderSummary();

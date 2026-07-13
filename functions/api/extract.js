@@ -25,13 +25,15 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
   - residentId: 주민등록번호
   - relation: 세대주와의 관계 (본인, 배우자, 자녀, 부, 모 등)
 
-### 소득 정보 (각 서류에서 해당 항목만)
-- withholdingFinalIncome: 근로소득원천징수영수증의 최종 근로소득/총급여 (숫자)
-- withholdingTaxYear: 근로소득원천징수영수증 귀속연도
-- withholdingTypeAFinalIncome: 갑종근로소득원천징수영수증의 최종 근로소득/총급여 (숫자)
-- withholdingTypeATaxYear: 갑종근로소득원천징수영수증 귀속연도
-- incomeCertificateAmount: 소득금액증명원의 소득금액/합계 소득금액 (숫자)
-- incomeCertificateYear: 소득금액증명원 해당 연도
+### 소득 정보 (본인·배우자 각각 구분)
+주민등록등본 세대원 이름·관계와 소득 서류의 성명(수급자)을 대조해 본인(self)과 배우자(spouse)를 구분하세요.
+- incomes: 객체
+  - self: 본인 소득
+    - withholdingFinalIncome, withholdingTaxYear (근로소득원천징수영수증)
+    - withholdingTypeAFinalIncome, withholdingTypeATaxYear (갑종근로소득원천징수영수증)
+    - incomeCertificateAmount, incomeCertificateYear (소득금액증명원)
+  - spouse: 배우자 소득 (동일 필드, 배우자 서류가 없으면 모두 null)
+- combinedIncome: 부부합산 연소득 (본인·배우자 각각의 최신 인정 연소득을 합산, 한 명만 있으면 그 값)
 
 ### 청약저축 정보 (청약저축납입증명서에서)
 - housingSubscriptionPaymentCount: 납입 횟수/회차 합계 (숫자, 예: 120)
@@ -56,18 +58,33 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 4. 주민등록번호는 문서에 표기된 그대로 추출하세요.
 5. 여러 서류에 같은 정보가 있으면 가장 공식적인 서류(등본, 증명원)를 우선하세요.
 6. familyMembers는 주민등록등본의 세대원 전체를 포함하세요.
+7. 본인·배우자 원천징수영수증이 모두 있으면 incomes.self와 incomes.spouse에 각각 넣고 combinedIncome에 합산하세요.
+8. 소득 서류 성명이 등본 관계 '본인'과 일치하면 self, '배우자'·'남편'·'아내'와 일치하면 spouse에 넣으세요.
 
 ## 응답 형식 (JSON만)
 {
   "name": null,
   "residentId": null,
   "familyMembers": null,
-  "withholdingFinalIncome": null,
-  "withholdingTaxYear": null,
-  "withholdingTypeAFinalIncome": null,
-  "withholdingTypeATaxYear": null,
-  "incomeCertificateAmount": null,
-  "incomeCertificateYear": null,
+  "incomes": {
+    "self": {
+      "withholdingFinalIncome": null,
+      "withholdingTaxYear": null,
+      "withholdingTypeAFinalIncome": null,
+      "withholdingTypeATaxYear": null,
+      "incomeCertificateAmount": null,
+      "incomeCertificateYear": null
+    },
+    "spouse": {
+      "withholdingFinalIncome": null,
+      "withholdingTaxYear": null,
+      "withholdingTypeAFinalIncome": null,
+      "withholdingTypeATaxYear": null,
+      "incomeCertificateAmount": null,
+      "incomeCertificateYear": null
+    }
+  },
+  "combinedIncome": null,
   "housingSubscriptionPaymentCount": null,
   "housingSubscriptionProductType": null,
   "loans": null,
@@ -96,6 +113,88 @@ function parseExtractionResult(raw) {
     throw new Error("AI 응답에서 JSON을 찾을 수 없습니다.");
   }
   return JSON.parse(jsonMatch[0]);
+}
+
+const INCOME_PERSON_KEYS = [
+  "withholdingFinalIncome",
+  "withholdingTaxYear",
+  "withholdingTypeAFinalIncome",
+  "withholdingTypeATaxYear",
+  "incomeCertificateAmount",
+  "incomeCertificateYear",
+];
+
+function emptyPersonIncome() {
+  return {
+    withholdingFinalIncome: null,
+    withholdingTaxYear: null,
+    withholdingTypeAFinalIncome: null,
+    withholdingTypeATaxYear: null,
+    incomeCertificateAmount: null,
+    incomeCertificateYear: null,
+  };
+}
+
+function pickRecognizedIncome(person) {
+  if (!person) return null;
+  const candidates = [
+    person.withholdingFinalIncome,
+    person.withholdingTypeAFinalIncome,
+    person.incomeCertificateAmount,
+  ].filter((v) => typeof v === "number" && v > 0);
+  if (!candidates.length) return null;
+  return Math.max(...candidates);
+}
+
+function mergePersonIncome(base, incoming, legacy = null) {
+  const out = { ...emptyPersonIncome(), ...(base || {}) };
+  const sources = [incoming, legacy].filter(Boolean);
+  for (const source of sources) {
+    for (const key of INCOME_PERSON_KEYS) {
+      if (source[key] != null && (out[key] == null || out[key] === "")) {
+        out[key] = source[key];
+      }
+    }
+  }
+  return out;
+}
+
+function normalizeExtraction(raw) {
+  const legacySelf = {
+    withholdingFinalIncome: raw.withholdingFinalIncome,
+    withholdingTaxYear: raw.withholdingTaxYear,
+    withholdingTypeAFinalIncome: raw.withholdingTypeAFinalIncome,
+    withholdingTypeATaxYear: raw.withholdingTypeATaxYear,
+    incomeCertificateAmount: raw.incomeCertificateAmount,
+    incomeCertificateYear: raw.incomeCertificateYear,
+  };
+  const self = mergePersonIncome(raw.incomes?.self, null, legacySelf);
+  const spouse = mergePersonIncome(raw.incomes?.spouse, null, null);
+  const selfIncome = pickRecognizedIncome(self);
+  const spouseIncome = pickRecognizedIncome(spouse);
+  let combinedIncome = typeof raw.combinedIncome === "number" && raw.combinedIncome > 0 ? raw.combinedIncome : null;
+  if (!combinedIncome) {
+    if (selfIncome && spouseIncome) combinedIncome = selfIncome + spouseIncome;
+    else combinedIncome = selfIncome || spouseIncome || null;
+  }
+
+  return {
+    name: raw.name ?? null,
+    residentId: raw.residentId ?? null,
+    familyMembers: raw.familyMembers ?? null,
+    incomes: { self, spouse },
+    combinedIncome,
+    withholdingFinalIncome: self.withholdingFinalIncome ?? null,
+    withholdingTaxYear: self.withholdingTaxYear ?? null,
+    withholdingTypeAFinalIncome: self.withholdingTypeAFinalIncome ?? null,
+    withholdingTypeATaxYear: self.withholdingTypeATaxYear ?? null,
+    incomeCertificateAmount: self.incomeCertificateAmount ?? null,
+    incomeCertificateYear: self.incomeCertificateYear ?? null,
+    housingSubscriptionPaymentCount: raw.housingSubscriptionPaymentCount ?? null,
+    housingSubscriptionProductType: raw.housingSubscriptionProductType ?? null,
+    loans: raw.loans ?? null,
+    detectedDocuments: raw.detectedDocuments ?? [],
+  };
 }
 
 function resolveVisionModels(envModel) {
@@ -301,21 +400,7 @@ export async function onRequestPost(context) {
     }
 
     const raw = parseExtractionResult(content);
-    const data = {
-      name: raw.name ?? null,
-      residentId: raw.residentId ?? null,
-      familyMembers: raw.familyMembers ?? null,
-      withholdingFinalIncome: raw.withholdingFinalIncome ?? null,
-      withholdingTaxYear: raw.withholdingTaxYear ?? null,
-      withholdingTypeAFinalIncome: raw.withholdingTypeAFinalIncome ?? null,
-      withholdingTypeATaxYear: raw.withholdingTypeATaxYear ?? null,
-      incomeCertificateAmount: raw.incomeCertificateAmount ?? null,
-      incomeCertificateYear: raw.incomeCertificateYear ?? null,
-      housingSubscriptionPaymentCount: raw.housingSubscriptionPaymentCount ?? null,
-      housingSubscriptionProductType: raw.housingSubscriptionProductType ?? null,
-      loans: raw.loans ?? null,
-      detectedDocuments: raw.detectedDocuments ?? [],
-    };
+    const data = normalizeExtraction(raw);
 
     return jsonResponse({ success: true, data });
   } catch (error) {

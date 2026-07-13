@@ -34,6 +34,7 @@
   }
 
   function hasSpouse(summary) {
+    if (getSpouseIncome(summary)) return true;
     const members = summary.familyMembers;
     if (!Array.isArray(members)) return false;
     return members.some((m) => {
@@ -42,7 +43,38 @@
     });
   }
 
-  /** 추출 소득 중 계산기에 넣을 대표 연소득(원) */
+  function pickPersonIncome(person) {
+    if (!person) return null;
+    const candidates = [
+      person.withholdingFinalIncome,
+      person.withholdingTypeAFinalIncome,
+      person.incomeCertificateAmount,
+    ].filter((v) => typeof v === "number" && v > 0);
+    if (!candidates.length) return null;
+    return Math.max(...candidates);
+  }
+
+  function getSelfIncome(summary) {
+    const fromPerson = pickPersonIncome(summary.incomes?.self);
+    if (fromPerson) return fromPerson;
+    return pickPrimaryIncome(summary);
+  }
+
+  function getSpouseIncome(summary) {
+    return pickPersonIncome(summary.incomes?.spouse);
+  }
+
+  function getCombinedIncome(summary) {
+    if (typeof summary.combinedIncome === "number" && summary.combinedIncome > 0) {
+      return summary.combinedIncome;
+    }
+    const self = getSelfIncome(summary);
+    const spouse = getSpouseIncome(summary);
+    if (self && spouse) return self + spouse;
+    return self || spouse || null;
+  }
+
+  /** 추출 소득 중 계산기에 넣을 대표 연소득(원) — 하위 호환 */
   function pickPrimaryIncome(summary) {
     const candidates = [
       summary.withholdingFinalIncome,
@@ -124,13 +156,56 @@
     });
   }
 
-  function mapYearIncomeFields(summary, incomeWon, applied) {
-    const year = String(summary.withholdingTaxYear || "").trim();
-    if (year === "2024" && setMoneyIfEmpty(document.getElementById("self-a-2024"), incomeWon)) {
+  function mapYearIncomeFields(summary, applied) {
+    const self = summary.incomes?.self;
+    const spouse = summary.incomes?.spouse;
+
+    if (self) {
+      const selfYear = String(self.withholdingTaxYear || "").trim();
+      if (selfYear === "2024" && setMoneyIfEmpty(document.getElementById("self-a-2024"), self.withholdingFinalIncome)) {
+        applied.push("본인 2024년 근로소득");
+      }
+      if (selfYear === "2023" && setMoneyIfEmpty(document.getElementById("self-a-2023"), self.withholdingFinalIncome)) {
+        applied.push("본인 2023년 근로소득");
+      }
+    }
+
+    if (spouse && hasSpouse(summary)) {
+      const spouseYear = String(spouse.withholdingTaxYear || "").trim();
+      if (spouseYear === "2024" && setMoneyIfEmpty(document.getElementById("sp-a-2024"), spouse.withholdingFinalIncome)) {
+        applied.push("배우자 2024년 근로소득");
+      }
+      if (spouseYear === "2023" && setMoneyIfEmpty(document.getElementById("sp-a-2023"), spouse.withholdingFinalIncome)) {
+        applied.push("배우자 2023년 근로소득");
+      }
+    }
+
+    const legacyYear = String(summary.withholdingTaxYear || "").trim();
+    const legacyIncome = getSelfIncome(summary);
+    if (!self && legacyYear === "2024" && setMoneyIfEmpty(document.getElementById("self-a-2024"), legacyIncome)) {
       applied.push("본인 2024년 근로소득");
     }
-    if (year === "2023" && setMoneyIfEmpty(document.getElementById("self-a-2023"), incomeWon)) {
+    if (!self && legacyYear === "2023" && setMoneyIfEmpty(document.getElementById("self-a-2023"), legacyIncome)) {
       applied.push("본인 2023년 근로소득");
+    }
+  }
+
+  function applySpouseIncomePanel(summary, applied) {
+    const spouseCb = document.getElementById("has-spouse");
+    if (!hasSpouse(summary)) return;
+
+    if (setCheckboxIfUnchecked(spouseCb, true)) {
+      applied.push("배우자 있음");
+      document.getElementById("spouse-wrap")?.classList.remove("hidden");
+    }
+
+    const spouseIncome = getSpouseIncome(summary);
+    if (!spouseIncome) return;
+
+    const radio = document.querySelector('input[name="emp-spouse"][value="A"]');
+    if (radio && fieldEmpty(document.getElementById("sp-a-2024")) && fieldEmpty(document.getElementById("sp-a-2023"))) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }
 
@@ -138,13 +213,13 @@
     const summary = loadSummary();
     if (!summary) return { applied: [] };
     const applied = [];
-    const income = pickPrimaryIncome(summary);
+    const combined = getCombinedIncome(summary);
 
-    if (income) {
-      if (setMoneyIfEmpty(document.getElementById("bt-income"), income)) {
+    if (combined) {
+      if (setMoneyIfEmpty(document.getElementById("bt-income"), combined)) {
         applied.push("부부합산 연소득");
       }
-      mapYearIncomeFields(summary, income, applied);
+      mapYearIncomeFields(summary, applied);
 
       if (detectedHas(summary, ["원천징수", "근로소득"])) {
         const radio = document.querySelector('input[name="emp-self"][value="A"]');
@@ -154,17 +229,14 @@
         }
       }
       if (detectedHas(summary, ["갑종"])) {
-        if (setMoneyIfEmpty(document.getElementById("self-b-sum"), summary.withholdingTypeAFinalIncome || income)) {
+        const selfTypeA = summary.incomes?.self?.withholdingTypeAFinalIncome;
+        if (setMoneyIfEmpty(document.getElementById("self-b-sum"), selfTypeA || getSelfIncome(summary))) {
           applied.push("신규입사 수령 소득 합계(참고)");
         }
       }
     }
 
-    const spouseCb = document.getElementById("has-spouse");
-    if (hasSpouse(summary) && setCheckboxIfUnchecked(spouseCb, true)) {
-      applied.push("배우자 있음");
-      document.getElementById("spouse-wrap")?.classList.remove("hidden");
-    }
+    applySpouseIncomePanel(summary, applied);
 
     const credit = summary.loans?.creditLoanAmount;
     if (typeof credit === "number" && credit > 0) {
@@ -180,11 +252,11 @@
     const summary = loadSummary();
     if (!summary) return { applied: [] };
     const applied = [];
-    const income = pickPrimaryIncome(summary);
+    const combined = getCombinedIncome(summary);
 
-    if (income) {
-      syncDidimdolRateTabs(income);
-      if (setMoneyIfEmpty(document.getElementById("did-income"), income)) {
+    if (combined) {
+      syncDidimdolRateTabs(combined);
+      if (setMoneyIfEmpty(document.getElementById("did-income"), combined)) {
         applied.push("부부합산 연소득(일반 디딤돌)");
       } else if (
         ["did-income", "nb-income", "fh-income"].some((id) => {
@@ -194,14 +266,10 @@
       ) {
         applied.push("금리 탭 소득란");
       }
-      mapYearIncomeFields(summary, income, applied);
+      mapYearIncomeFields(summary, applied);
     }
 
-    const spouseCb = document.getElementById("has-spouse");
-    if (hasSpouse(summary) && setCheckboxIfUnchecked(spouseCb, true)) {
-      applied.push("배우자 있음");
-      document.getElementById("spouse-wrap")?.classList.remove("hidden");
-    }
+    applySpouseIncomePanel(summary, applied);
 
     const subsidyValue = paymentCountToSubsidyValue(summary.housingSubscriptionPaymentCount);
     if (subsidyValue) {
@@ -220,10 +288,10 @@
     const summary = loadSummary();
     if (!summary) return { applied: [] };
     const applied = [];
-    const income = pickPrimaryIncome(summary);
+    const combined = getCombinedIncome(summary);
 
-    if (income && setManIfEmpty(document.getElementById("income"), income)) {
-      applied.push("연간 소득(만원)");
+    if (combined && setManIfEmpty(document.getElementById("income"), combined)) {
+      applied.push("연간 소득(만원, 부부합산)");
     }
 
     const credit = summary.loans?.creditLoanAmount;
@@ -294,5 +362,8 @@
     applyBeotimmok,
     applyDidimdol,
     applyDsr,
+    getCombinedIncome,
+    getSelfIncome,
+    getSpouseIncome,
   };
 })(window);
