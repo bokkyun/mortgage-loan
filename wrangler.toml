@@ -3,4 +3,4 @@ compatibility_date = "2024-09-23"
 pages_build_output_dir = "."
 
 [vars]
-OPENROUTER_MODEL = "google/gemini-2.5-flash"
+OPENROUTER_MODEL = "google/gemini-2.0-flash-001"

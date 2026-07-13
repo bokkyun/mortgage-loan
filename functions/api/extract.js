@@ -1,5 +1,10 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const DEFAULT_MODEL = "google/gemini-2.0-flash-001";
+const VISION_MODEL_FALLBACK = [
+  "google/gemini-2.0-flash-001",
+  "google/gemini-flash-1.5-8b",
+  "anthropic/claude-3-haiku",
+];
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
 
@@ -91,12 +96,53 @@ function parseExtractionResult(raw) {
   return JSON.parse(jsonMatch[0]);
 }
 
+function resolveVisionModels(envModel) {
+  const candidates = [String(envModel || "").trim(), DEFAULT_MODEL, ...VISION_MODEL_FALLBACK].filter(Boolean);
+  const seen = new Set();
+  const models = [];
+  for (const model of candidates) {
+    if (/^openai\//i.test(model)) continue;
+    if (seen.has(model)) continue;
+    seen.add(model);
+    models.push(model);
+  }
+  return models.length ? models : [DEFAULT_MODEL];
+}
+
+function isRegionBlockedError(status, errText) {
+  return status === 403 && /not available in your region/i.test(errText);
+}
+
+async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageContents }) {
+  return fetch(OPENROUTER_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": siteUrl,
+      "X-Title": "Mortgage Loan Lab",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: "user",
+          content: [{ type: "text", text: prompt }, ...imageContents],
+        },
+      ],
+      max_tokens: 4000,
+      temperature: 0.1,
+      provider: { allow_fallbacks: true },
+    }),
+  });
+}
+
 function formatOpenRouterError(status, errText) {
   try {
     const parsed = JSON.parse(errText);
     const message = parsed?.error?.message || parsed?.message;
     if (message?.includes("not available in your region")) {
-      return `선택한 AI 모델이 이 지역에서 사용할 수 없습니다. Cloudflare 환경 변수 OPENROUTER_MODEL을 google/gemini-2.5-flash 등으로 변경해 주세요. (${message})`;
+      return `사용 가능한 AI 모델을 찾지 못했습니다. 잠시 후 다시 시도해 주세요. (${message})`;
     }
     if (message) return `AI 분석 요청 실패 (${status}): ${message}`;
   } catch {
@@ -144,8 +190,8 @@ export async function onRequestPost(context) {
       );
     }
 
-    const model = context.env.OPENROUTER_MODEL || DEFAULT_MODEL;
     const siteUrl = context.env.OPENROUTER_SITE_URL || DEFAULT_SITE_URL;
+    const visionModels = resolveVisionModels(context.env.OPENROUTER_MODEL);
 
     let body;
     try {
@@ -186,37 +232,46 @@ export async function onRequestPost(context) {
       },
     }));
 
-    const aiRes = await fetch(OPENROUTER_API_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": siteUrl,
-        "X-Title": "Mortgage Loan Lab",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "user",
-            content: [{ type: "text", text: prompt }, ...imageContents],
-          },
-        ],
-        max_tokens: 4000,
-        temperature: 0.1,
-      }),
-    });
+    let aiRes = null;
+    let aiText = "";
+    let lastRegionError = "";
 
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      console.error("OpenRouter API error:", aiRes.status, errText);
+    for (const model of visionModels) {
+      aiRes = await requestVisionExtraction({
+        apiKey,
+        siteUrl,
+        model,
+        prompt,
+        imageContents,
+      });
+      aiText = await aiRes.text();
+
+      if (aiRes.ok) break;
+
+      console.error("OpenRouter API error:", aiRes.status, model, aiText);
+      if (isRegionBlockedError(aiRes.status, aiText)) {
+        lastRegionError = aiText;
+        continue;
+      }
+
       return jsonResponse(
-        { success: false, error: formatOpenRouterError(aiRes.status, errText) },
+        { success: false, error: formatOpenRouterError(aiRes.status, aiText) },
         500
       );
     }
 
-    const aiText = await aiRes.text();
+    if (!aiRes?.ok) {
+      return jsonResponse(
+        {
+          success: false,
+          error: lastRegionError
+            ? formatOpenRouterError(403, lastRegionError)
+            : "AI 분석 요청에 실패했습니다.",
+        },
+        500
+      );
+    }
+
     if (!aiText.trim()) {
       return jsonResponse({ success: false, error: "AI 응답이 비어있습니다." }, 500);
     }
