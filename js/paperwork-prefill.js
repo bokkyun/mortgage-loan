@@ -61,6 +61,30 @@
     });
   }
 
+  function paymentCountToSubsidyValue(count) {
+    const n = Number(count);
+    if (!Number.isFinite(n) || n < 60) return null;
+    if (n >= 180) return "0.5";
+    if (n >= 120) return "0.4";
+    return "0.3";
+  }
+
+  function getHousingSubscriptionDiscountLabel(count) {
+    const n = Number(count);
+    if (!Number.isFinite(n) || n < 60) return null;
+    if (n >= 180) return "15년 (180회차) −0.5%p";
+    if (n >= 120) return "10년 (120회차) −0.4%p";
+    return "5년 (60회차) −0.3%p";
+  }
+
+  function setSelectIfDefault(el, value) {
+    if (!el || value == null) return false;
+    if (el.value !== "0" && el.value !== "") return false;
+    el.value = String(value);
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }
+
   function fieldEmpty(el) {
     if (!el) return true;
     if (el.type === "checkbox") return !el.checked;
@@ -179,6 +203,16 @@
       document.getElementById("spouse-wrap")?.classList.remove("hidden");
     }
 
+    const subsidyValue = paymentCountToSubsidyValue(summary.housingSubscriptionPaymentCount);
+    if (subsidyValue) {
+      const subsidyIds = ["subsidy", "nb-savings", "fh-subsidy"];
+      const filled = subsidyIds.filter((id) => setSelectIfDefault(document.getElementById(id), subsidyValue));
+      if (filled.length) {
+        const tier = getHousingSubscriptionDiscountLabel(summary.housingSubscriptionPaymentCount);
+        applied.push(`청약저축 우대 ${tier}`);
+      }
+    }
+
     return { applied };
   }
 
@@ -230,7 +264,7 @@
       <div class="paperwork-prefill-banner__inner">
         <strong>서류 추출 데이터를 ${calculatorLabel}에 반영했습니다.</strong>
         <p>채운 항목: ${applied.join(", ")}. 빈 칸만 자동 입력했으니 값을 확인한 뒤 계산해 주세요.</p>
-        <p class="paperwork-prefill-banner__note">전세보증금·신규 대출금액·금리 등은 서류에서 추출되지 않아 직접 입력이 필요합니다.</p>
+        <p class="paperwork-prefill-banner__note">디딤돌 금리 탭의 청약저축·소득 등이 자동 입력됩니다. 전세보증금·신규 대출금액은 직접 입력이 필요합니다.</p>
         <button type="button" class="paperwork-prefill-banner__close">닫기</button>
       </div>`;
 

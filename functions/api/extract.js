@@ -4,7 +4,7 @@ const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
 
 const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 전문가입니다.
-첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
+첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
 
 ## 추출 항목
 
@@ -26,6 +26,10 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 - incomeCertificateAmount: 소득금액증명원의 소득금액/합계 소득금액 (숫자)
 - incomeCertificateYear: 소득금액증명원 해당 연도
 
+### 청약저축 정보 (청약저축납입증명서에서)
+- housingSubscriptionPaymentCount: 납입 횟수/회차 합계 (숫자, 예: 120)
+- housingSubscriptionProductType: 저축 종류 (청약저축, 청약종합저축, 청약부금, 청년우대형청약종합저축 등)
+
 ### 대출 정보 (신용정보조회표에서)
 - loans: 대출 정보 객체
   - creditLoanAmount: 신용대출 잔액 합계 (숫자)
@@ -36,7 +40,7 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 ### 참고 정보
 - detectedDocuments: 인식된 서류 목록 배열
   - fileName: 파일명 (첨부된 이미지에 표시된 파일명 참고)
-  - documentType: 서류 종류 (재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 기타)
+  - documentType: 서류 종류 (재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서, 기타)
 
 ## 규칙
 1. 반드시 JSON 형식으로만 응답하세요.
@@ -57,6 +61,8 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
   "withholdingTypeATaxYear": null,
   "incomeCertificateAmount": null,
   "incomeCertificateYear": null,
+  "housingSubscriptionPaymentCount": null,
+  "housingSubscriptionProductType": null,
   "loans": null,
   "detectedDocuments": []
 }`;
@@ -237,6 +243,8 @@ export async function onRequestPost(context) {
       withholdingTypeATaxYear: raw.withholdingTypeATaxYear ?? null,
       incomeCertificateAmount: raw.incomeCertificateAmount ?? null,
       incomeCertificateYear: raw.incomeCertificateYear ?? null,
+      housingSubscriptionPaymentCount: raw.housingSubscriptionPaymentCount ?? null,
+      housingSubscriptionProductType: raw.housingSubscriptionProductType ?? null,
       loans: raw.loans ?? null,
       detectedDocuments: raw.detectedDocuments ?? [],
     };

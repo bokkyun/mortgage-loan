@@ -39,6 +39,16 @@ const FIELD_GROUPS = [
     ],
   },
   {
+    title: "청약저축",
+    icon: "🏠",
+    source: "청약저축납입증명서",
+    fields: [
+      { key: "housingSubscriptionPaymentCount", label: "납입 횟수(회차)", type: "count" },
+      { key: "housingSubscriptionProductType", label: "저축 종류", type: "text" },
+      { key: "housingSubscriptionDiscountTier", label: "디딤돌 금리 우대 구간", type: "subsidy-tier" },
+    ],
+  },
+  {
     title: "대출 정보",
     icon: "🏦",
     source: "신용정보조회표",
@@ -71,6 +81,20 @@ const els = {
   result: document.getElementById("pw-result"),
   clearBtn: document.getElementById("pw-clear"),
 };
+
+function getHousingSubscriptionDiscountLabel(count) {
+  const n = Number(count);
+  if (!Number.isFinite(n) || n < 60) return "우대 해당 없음 (60회차 미만)";
+  if (n >= 180) return "15년 (180회차) −0.5%p";
+  if (n >= 120) return "10년 (120회차) −0.4%p";
+  return "5년 (60회차) −0.3%p";
+}
+
+function formatCount(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return "-";
+  return `${n.toLocaleString("ko-KR")}회`;
+}
 
 function formatCurrency(value) {
   if (value === null || value === undefined || value === "") return "-";
@@ -227,12 +251,19 @@ function mergeExtractionResults(target, source) {
     "withholdingTypeATaxYear",
     "incomeCertificateAmount",
     "incomeCertificateYear",
+    "housingSubscriptionProductType",
   ];
 
   for (const key of scalarKeys) {
     if ((out[key] === null || out[key] === undefined) && source[key] != null) {
       out[key] = source[key];
     }
+  }
+
+  const srcCount = Number(source.housingSubscriptionPaymentCount);
+  const outCount = Number(out.housingSubscriptionPaymentCount);
+  if (Number.isFinite(srcCount) && srcCount > 0 && (!Number.isFinite(outCount) || srcCount > outCount)) {
+    out.housingSubscriptionPaymentCount = srcCount;
   }
 
   if ((source.familyMembers?.length || 0) > (out.familyMembers?.length || 0)) {
@@ -400,12 +431,20 @@ function renderSummary() {
         let value = null;
         if (field.key.startsWith("loans.")) {
           value = getLoanValue(summary, field.key);
+        } else if (field.type === "subsidy-tier") {
+          value = getHousingSubscriptionDiscountLabel(summary.housingSubscriptionPaymentCount);
         } else {
           value = summary[field.key];
         }
         const yearLabel = getYearLabel(summary, field.key);
         const display =
-          field.type === "currency" ? formatCurrency(value) : value != null && value !== "" ? String(value) : "-";
+          field.type === "currency"
+            ? formatCurrency(value)
+            : field.type === "count"
+              ? formatCount(value)
+              : value != null && value !== ""
+                ? String(value)
+                : "-";
 
         return `
           <div class="pw-field">
@@ -466,7 +505,7 @@ function renderSummary() {
         <a class="hub-btn-secondary" href="../didimdol/?from=paperwork">디딤돌 DTI·금리</a>
         <a class="hub-btn-secondary" href="../dsr/?from=paperwork">DSR 계산</a>
       </div>
-      <p class="pw-calc-links__hint">전세보증금·신규 대출금액·금리는 직접 입력해 주세요.</p>
+      <p class="pw-calc-links__hint">디딤돌 금리 탭: 청약저축 납입 회차·소득 자동 입력. 전세보증금·신규 대출금액은 직접 입력해 주세요.</p>
     </div>
     ${groupsHtml}
     ${loanDetails}
