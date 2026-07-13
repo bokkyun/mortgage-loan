@@ -1,10 +1,11 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemini-2.5-flash";
+const DEFAULT_MODEL = "google/gemma-4-31b-it:free";
 const VISION_MODEL_FALLBACK = [
-  "google/gemini-2.5-flash",
-  "google/gemini-flash-1.5",
-  "google/gemini-2.5-flash-preview-09-2025",
-  "anthropic/claude-3-haiku",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+  "nvidia/nemotron-nano-12b-v2-vl:free",
+  "openrouter/free",
 ];
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
@@ -98,7 +99,12 @@ function parseExtractionResult(raw) {
 }
 
 function resolveVisionModels(envModel) {
-  const candidates = [String(envModel || "").trim(), DEFAULT_MODEL, ...VISION_MODEL_FALLBACK].filter(Boolean);
+  const env = String(envModel || "").trim();
+  const candidates = [
+    ...(env.endsWith(":free") ? [env] : []),
+    DEFAULT_MODEL,
+    ...VISION_MODEL_FALLBACK,
+  ].filter(Boolean);
   const seen = new Set();
   const models = [];
   for (const model of candidates) {
@@ -113,6 +119,7 @@ function resolveVisionModels(envModel) {
 function isRetryableModelError(status, errText) {
   if (status === 403 && /not available in your region/i.test(errText)) return true;
   if (status === 404 && /no endpoints found/i.test(errText)) return true;
+  if (status === 429) return true;
   return false;
 }
 
@@ -135,7 +142,10 @@ async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageCo
       ],
       max_tokens: 4000,
       temperature: 0.1,
-      provider: { allow_fallbacks: true },
+      provider: {
+        allow_fallbacks: true,
+        max_price: { prompt: 0, completion: 0, request: 0, image: 0 },
+      },
     }),
   });
 }
