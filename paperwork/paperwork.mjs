@@ -395,17 +395,27 @@ function mergeExtractionResults(target, source) {
   return normalizeSummaryIncome(out);
 }
 
-async function extractChunk(files, chunkIndex, totalChunks) {
+async function extractChunk(files, chunkIndex, totalChunks, jobId, spentUsdSoFar) {
   const response = await fetch("/api/extract", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ files }),
+    body: JSON.stringify({
+      files,
+      jobId,
+      chunkIndex,
+      totalChunks,
+      spentUsdSoFar,
+    }),
   });
   const result = await parseApiResponse(response);
   if (!result.success || !result.data) {
     throw new Error(result.error || `분석 실패 (${chunkIndex + 1}/${totalChunks}배치)`);
   }
-  return result.data;
+  return {
+    data: result.data,
+    spentUsd: Number(result.usage?.spentUsd) || spentUsdSoFar,
+    spentKrw: Number(result.usage?.spentKrw) || 0,
+  };
 }
 
 function setBusy(busy, step = "") {
@@ -605,7 +615,9 @@ function renderSummary() {
     <div class="pw-result-head">
       <div>
         <h2>통합 추출 결과</h2>
-        <p>${summary.uploadedFiles.length}개 파일 · ${new Date(summary.extractedAt).toLocaleString("ko-KR")}</p>
+        <p>${summary.uploadedFiles.length}개 파일 · ${new Date(summary.extractedAt).toLocaleString("ko-KR")}${
+          summary.analysisCostKrw ? ` · AI 분석 약 ${summary.analysisCostKrw.toLocaleString("ko-KR")}원` : ""
+        }</p>
       </div>
     </div>
     <div class="pw-calc-links">
@@ -674,6 +686,9 @@ async function handleSubmit() {
     }
 
     let merged = null;
+    const jobId = crypto.randomUUID();
+    let spentUsd = 0;
+    let spentKrw = 0;
     for (let i = 0; i < chunks.length; i++) {
       setBusy(
         true,
@@ -681,7 +696,10 @@ async function handleSubmit() {
           ? `AI 분석 중... (${i + 1}/${chunks.length}배치 · ${processed.length}페이지)`
           : `${processed.length}페이지 AI 분석 중...`
       );
-      merged = mergeExtractionResults(merged, await extractChunk(chunks[i], i, chunks.length));
+      const chunkResult = await extractChunk(chunks[i], i, chunks.length, jobId, spentUsd);
+      spentUsd = chunkResult.spentUsd;
+      spentKrw = chunkResult.spentKrw;
+      merged = mergeExtractionResults(merged, chunkResult.data);
     }
 
     state.summary = normalizeSummaryIncome({
@@ -689,6 +707,7 @@ async function handleSubmit() {
       extractedAt: new Date().toISOString(),
       uploadedFiles: fileNames,
       status: "success",
+      analysisCostKrw: spentKrw,
       ...merged,
     });
   } catch (error) {

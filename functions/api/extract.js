@@ -1,12 +1,21 @@
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "google/gemma-4-31b-it:free";
+const DEFAULT_MODEL = "qwen/qwen3-vl-235b-a22b-instruct";
 const VISION_MODEL_FALLBACK = [
-  "google/gemma-4-31b-it:free",
-  "google/gemma-4-26b-a4b-it:free",
-  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-  "nvidia/nemotron-nano-12b-v2-vl:free",
-  "openrouter/free",
+  "qwen/qwen3-vl-235b-a22b-instruct",
+  "qwen/qwen3-vl-32b-instruct",
 ];
+const MODEL_PRICING = {
+  "qwen/qwen3-vl-235b-a22b-instruct": { input: 0.2 / 1_000_000, output: 0.88 / 1_000_000 },
+  "qwen/qwen3-vl-32b-instruct": { input: 0.104 / 1_000_000, output: 0.45 / 1_000_000 },
+};
+const DEFAULT_PRICING = { input: 0.3 / 1_000_000, output: 1.0 / 1_000_000 };
+const MAX_OUTPUT_TOKENS = 2000;
+const KRW_PER_USD = 1400;
+const MAX_JOB_KRW_DEFAULT = 70;
+const MAX_CHUNKS_PER_JOB = 4;
+const ESTIMATED_COMPLETION_TOKENS = 1200;
+const ESTIMATED_PROMPT_BASE = 2500;
+const ESTIMATED_TOKENS_PER_IMAGE = 1400;
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
 
@@ -199,11 +208,7 @@ function normalizeExtraction(raw) {
 
 function resolveVisionModels(envModel) {
   const env = String(envModel || "").trim();
-  const candidates = [
-    ...(env.endsWith(":free") ? [env] : []),
-    DEFAULT_MODEL,
-    ...VISION_MODEL_FALLBACK,
-  ].filter(Boolean);
+  const candidates = [env, DEFAULT_MODEL, ...VISION_MODEL_FALLBACK].filter(Boolean);
   const seen = new Set();
   const models = [];
   for (const model of candidates) {
@@ -213,6 +218,45 @@ function resolveVisionModels(envModel) {
     models.push(model);
   }
   return models.length ? models : [DEFAULT_MODEL];
+}
+
+function getMaxJobKrw(env) {
+  const configured = Number(env?.EXTRACT_MAX_JOB_KRW);
+  return Number.isFinite(configured) && configured > 0 ? configured : MAX_JOB_KRW_DEFAULT;
+}
+
+function getMaxJobUsd(env) {
+  return getMaxJobKrw(env) / KRW_PER_USD;
+}
+
+function getChunkBudgetUsd(spentUsdSoFar, chunkIndex, totalChunks, env) {
+  const maxJobUsd = getMaxJobUsd(env);
+  const remaining = Math.max(0, maxJobUsd - Math.max(0, spentUsdSoFar));
+  const chunksLeft = Math.max(1, (totalChunks || 1) - chunkIndex);
+  return remaining / chunksLeft;
+}
+
+function getModelPricing(model) {
+  return MODEL_PRICING[model] || DEFAULT_PRICING;
+}
+
+function estimateRequestCostUsd(model, prompt, imageCount) {
+  const pricing = getModelPricing(model);
+  const promptTokens = ESTIMATED_PROMPT_BASE + Math.ceil(prompt.length / 2);
+  const inputTokens = promptTokens + imageCount * ESTIMATED_TOKENS_PER_IMAGE;
+  return inputTokens * pricing.input + ESTIMATED_COMPLETION_TOKENS * pricing.output;
+}
+
+function actualCostUsd(model, usage) {
+  if (!usage) return 0;
+  const pricing = getModelPricing(model);
+  const prompt = Number(usage.prompt_tokens) || 0;
+  const completion = Number(usage.completion_tokens) || 0;
+  return prompt * pricing.input + completion * pricing.output;
+}
+
+function formatKrwFromUsd(usd) {
+  return Math.round(usd * KRW_PER_USD);
 }
 
 function isRetryableModelError(status, errText) {
@@ -239,11 +283,11 @@ async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageCo
           content: [{ type: "text", text: prompt }, ...imageContents],
         },
       ],
-      max_tokens: 4000,
+      max_tokens: MAX_OUTPUT_TOKENS,
       temperature: 0.1,
       provider: {
-        allow_fallbacks: true,
-        max_price: { prompt: 0, completion: 0, request: 0, image: 0 },
+        allow_fallbacks: false,
+        max_price: { prompt: 0.5, completion: 3, image: 0.02 },
       },
     }),
   });
@@ -320,10 +364,37 @@ export async function onRequestPost(context) {
     }
 
     const files = body?.files;
+    const chunkIndex = Number(body?.chunkIndex) || 0;
+    const totalChunks = Math.max(1, Number(body?.totalChunks) || 1);
+    const spentUsdSoFar = Math.max(0, Number(body?.spentUsdSoFar) || 0);
+    const maxJobKrw = getMaxJobKrw(context.env);
+    const maxJobUsd = maxJobKrw / KRW_PER_USD;
 
     if (!Array.isArray(files) || files.length === 0) {
       return jsonResponse({ success: false, error: "업로드된 파일이 없습니다." }, 400);
     }
+
+    if (chunkIndex >= MAX_CHUNKS_PER_JOB || totalChunks > MAX_CHUNKS_PER_JOB) {
+      return jsonResponse(
+        {
+          success: false,
+          error: `한 번의 분석은 최대 ${MAX_CHUNKS_PER_JOB}회 API 호출(약 15페이지)까지 가능합니다.`,
+        },
+        400
+      );
+    }
+
+    if (spentUsdSoFar >= maxJobUsd) {
+      return jsonResponse(
+        {
+          success: false,
+          error: `이번 분석 비용 한도(${maxJobKrw}원)에 도달했습니다. 페이지 수를 줄이거나 잠시 후 다시 시도해 주세요.`,
+        },
+        429
+      );
+    }
+
+    const chunkBudgetUsd = getChunkBudgetUsd(spentUsdSoFar, chunkIndex, totalChunks, context.env);
 
     if (files.length > MAX_FILES_PER_REQUEST) {
       return jsonResponse(
@@ -347,8 +418,30 @@ export async function onRequestPost(context) {
     let aiRes = null;
     let aiText = "";
     let lastRetryableError = "";
+    let usedModel = visionModels[0];
 
     for (const model of visionModels) {
+      const estimatedCost = estimateRequestCostUsd(model, prompt, imageContents.length);
+      if (spentUsdSoFar + estimatedCost > maxJobUsd + 1e-9) {
+        return jsonResponse(
+          {
+            success: false,
+            error: `예상 비용이 분석 한도(${maxJobKrw}원)를 초과합니다. 업로드 페이지 수를 줄여 주세요.`,
+          },
+          429
+        );
+      }
+      if (estimatedCost > chunkBudgetUsd + 1e-9) {
+        return jsonResponse(
+          {
+            success: false,
+            error: `이번 배치 예상 비용이 한도를 초과합니다. 파일·페이지 수를 줄여 주세요. (배치 ${chunkIndex + 1}/${totalChunks})`,
+          },
+          429
+        );
+      }
+
+      usedModel = model;
       aiRes = await requestVisionExtraction({
         apiKey,
         siteUrl,
@@ -401,8 +494,23 @@ export async function onRequestPost(context) {
 
     const raw = parseExtractionResult(content);
     const data = normalizeExtraction(raw);
+    const costUsd = actualCostUsd(usedModel, aiJson.usage);
+    const spentUsd = spentUsdSoFar + costUsd;
 
-    return jsonResponse({ success: true, data });
+    return jsonResponse({
+      success: true,
+      data,
+      usage: {
+        model: usedModel,
+        promptTokens: aiJson.usage?.prompt_tokens ?? null,
+        completionTokens: aiJson.usage?.completion_tokens ?? null,
+        costUsd,
+        costKrw: formatKrwFromUsd(costUsd),
+        spentUsd,
+        spentKrw: formatKrwFromUsd(spentUsd),
+        budgetKrw: maxJobKrw,
+      },
+    });
   } catch (error) {
     console.error("Extraction error:", error);
     const message = error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.";

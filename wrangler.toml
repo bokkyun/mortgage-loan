@@ -3,4 +3,5 @@ compatibility_date = "2024-09-23"
 pages_build_output_dir = "."
 
 [vars]
-OPENROUTER_MODEL = "google/gemma-4-31b-it:free"
+OPENROUTER_MODEL = "qwen/qwen3-vl-235b-a22b-instruct"
+EXTRACT_MAX_JOB_KRW = "70"
