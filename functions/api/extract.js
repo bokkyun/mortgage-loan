@@ -1,3 +1,5 @@
+import { LOAN_REGULATIONS_EXTRACTION_CONTEXT } from "./loan-regulations-context.js";
+
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_MODEL = "qwen/qwen3-vl-235b-a22b-instruct";
 const VISION_MODEL_FALLBACK = [
@@ -14,7 +16,7 @@ const KRW_PER_USD = 1400;
 const MAX_JOB_KRW_DEFAULT = 70;
 const MAX_CHUNKS_PER_JOB = 4;
 const ESTIMATED_COMPLETION_TOKENS = 1200;
-const ESTIMATED_PROMPT_BASE = 2500;
+const ESTIMATED_PROMPT_BASE = 4500;
 const ESTIMATED_TOKENS_PER_IMAGE = 1400;
 const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
@@ -36,13 +38,22 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 
 ### 소득 정보 (본인·배우자 각각 구분)
 주민등록등본 세대원 이름·관계와 소득 서류의 성명(수급자)을 대조해 본인(self)과 배우자(spouse)를 구분하세요.
+각 사람마다 아래 필드를 채우세요.
 - incomes: 객체
-  - self: 본인 소득
-    - withholdingFinalIncome, withholdingTaxYear (근로소득원천징수영수증)
-    - withholdingTypeAFinalIncome, withholdingTypeATaxYear (갑종근로소득원천징수영수증)
+  - self / spouse 각각:
+    - incomeType: 근로소득|사업소득|연금소득|기타소득|null
+    - employmentStatus: 1년이상재직|1년미만재직|휴직|복직|사업영위|퇴직|null
+    - employmentStartDate: YYYY-MM-DD (재직증명서·건강보험자격득실 등)
+    - monthsWorked: 재직·수령 개월 수 (1년 미만·연환산 시)
+    - withholdingFinalIncome, withholdingTaxYear (근로소득원천징수 — 비과세 제외 총급여/근로소득)
+    - withholdingTypeAFinalIncome, withholdingTypeATaxYear (갑종근로소득원천징수)
     - incomeCertificateAmount, incomeCertificateYear (소득금액증명원)
-  - spouse: 배우자 소득 (동일 필드, 배우자 서류가 없으면 모두 null)
-- combinedIncome: 부부합산 연소득 (본인·배우자 각각의 최신 인정 연소득을 합산, 한 명만 있으면 그 값)
+    - incomeYear2023, incomeYear2024: 원천징수·급여 등에서 확인되는 연도별 근로/사업 소득
+    - receivedIncomeTotal: 부분연도 수령 소득 합계(연환산 전)
+    - recognizedAnnualIncome: 업무처리기준 적용 후 인정 연소득 추정(숫자)
+    - incomeCalculationNote: 적용한 규칙 한 줄(예: "2024년 소득, 변동률 15%")
+    - hasStableIncomeProof: 상시소득 입증 가능 여부(true/false/null)
+- combinedIncome: 부부합산 인정 연소득(각 recognizedAnnualIncome 합, 없으면 최신 소득 합산)
 
 ### 청약저축 정보 (청약저축납입증명서에서)
 - housingSubscriptionPaymentCount: 납입 횟수/회차 합계 (숫자, 예: 120)
@@ -69,6 +80,8 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 6. familyMembers는 주민등록등본의 세대원 전체를 포함하세요.
 7. 본인·배우자 원천징수영수증이 모두 있으면 incomes.self와 incomes.spouse에 각각 넣고 combinedIncome에 합산하세요.
 8. 소득 서류 성명이 등본 관계 '본인'과 일치하면 self, '배우자'·'남편'·'아내'와 일치하면 spouse에 넣으세요.
+9. 근로소득 원천징수는 세액이 아닌 총급여·근로소득이며 비과세 소득은 제외하세요.
+10. 1년 미만 재직이면 monthsWorked와 receivedIncomeTotal을 추출하고 recognizedAnnualIncome에 (합계÷개월)×12을 적용하세요.
 
 ## 응답 형식 (JSON만)
 {
@@ -77,20 +90,40 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
   "familyMembers": null,
   "incomes": {
     "self": {
+      "incomeType": null,
+      "employmentStatus": null,
+      "employmentStartDate": null,
+      "monthsWorked": null,
       "withholdingFinalIncome": null,
       "withholdingTaxYear": null,
       "withholdingTypeAFinalIncome": null,
       "withholdingTypeATaxYear": null,
       "incomeCertificateAmount": null,
-      "incomeCertificateYear": null
+      "incomeCertificateYear": null,
+      "incomeYear2023": null,
+      "incomeYear2024": null,
+      "receivedIncomeTotal": null,
+      "recognizedAnnualIncome": null,
+      "incomeCalculationNote": null,
+      "hasStableIncomeProof": null
     },
     "spouse": {
+      "incomeType": null,
+      "employmentStatus": null,
+      "employmentStartDate": null,
+      "monthsWorked": null,
       "withholdingFinalIncome": null,
       "withholdingTaxYear": null,
       "withholdingTypeAFinalIncome": null,
       "withholdingTypeATaxYear": null,
       "incomeCertificateAmount": null,
-      "incomeCertificateYear": null
+      "incomeCertificateYear": null,
+      "incomeYear2023": null,
+      "incomeYear2024": null,
+      "receivedIncomeTotal": null,
+      "recognizedAnnualIncome": null,
+      "incomeCalculationNote": null,
+      "hasStableIncomeProof": null
     }
   },
   "combinedIncome": null,
@@ -110,6 +143,8 @@ function buildBatchPrompt(files) {
 
   return `${BATCH_EXTRACTION_PROMPT}
 
+${LOAN_REGULATIONS_EXTRACTION_CONTEXT}
+
 ## 첨부된 파일 목록
 ${fileList}
 
@@ -125,31 +160,56 @@ function parseExtractionResult(raw) {
 }
 
 const INCOME_PERSON_KEYS = [
+  "incomeType",
+  "employmentStatus",
+  "employmentStartDate",
+  "monthsWorked",
   "withholdingFinalIncome",
   "withholdingTaxYear",
   "withholdingTypeAFinalIncome",
   "withholdingTypeATaxYear",
   "incomeCertificateAmount",
   "incomeCertificateYear",
+  "incomeYear2023",
+  "incomeYear2024",
+  "receivedIncomeTotal",
+  "recognizedAnnualIncome",
+  "incomeCalculationNote",
+  "hasStableIncomeProof",
 ];
 
 function emptyPersonIncome() {
   return {
+    incomeType: null,
+    employmentStatus: null,
+    employmentStartDate: null,
+    monthsWorked: null,
     withholdingFinalIncome: null,
     withholdingTaxYear: null,
     withholdingTypeAFinalIncome: null,
     withholdingTypeATaxYear: null,
     incomeCertificateAmount: null,
     incomeCertificateYear: null,
+    incomeYear2023: null,
+    incomeYear2024: null,
+    receivedIncomeTotal: null,
+    recognizedAnnualIncome: null,
+    incomeCalculationNote: null,
+    hasStableIncomeProof: null,
   };
 }
 
 function pickRecognizedIncome(person) {
   if (!person) return null;
+  if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
+    return person.recognizedAnnualIncome;
+  }
   const candidates = [
     person.withholdingFinalIncome,
     person.withholdingTypeAFinalIncome,
     person.incomeCertificateAmount,
+    person.incomeYear2024,
+    person.incomeYear2023,
   ].filter((v) => typeof v === "number" && v > 0);
   if (!candidates.length) return null;
   return Math.max(...candidates);
@@ -160,7 +220,16 @@ function mergePersonIncome(base, incoming, legacy = null) {
   const sources = [incoming, legacy].filter(Boolean);
   for (const source of sources) {
     for (const key of INCOME_PERSON_KEYS) {
-      if (source[key] != null && (out[key] == null || out[key] === "")) {
+      if (source[key] == null || source[key] === "") continue;
+      if (out[key] == null || out[key] === "") {
+        out[key] = source[key];
+      } else if (
+        ["withholdingFinalIncome", "incomeCertificateAmount", "recognizedAnnualIncome", "receivedIncomeTotal"].includes(
+          key
+        ) &&
+        typeof source[key] === "number" &&
+        source[key] > out[key]
+      ) {
         out[key] = source[key];
       }
     }

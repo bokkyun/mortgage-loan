@@ -45,10 +45,15 @@
 
   function pickPersonIncome(person) {
     if (!person) return null;
+    if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
+      return person.recognizedAnnualIncome;
+    }
     const candidates = [
       person.withholdingFinalIncome,
       person.withholdingTypeAFinalIncome,
       person.incomeCertificateAmount,
+      person.incomeYear2024,
+      person.incomeYear2023,
     ].filter((v) => typeof v === "number" && v > 0);
     if (!candidates.length) return null;
     return Math.max(...candidates);
@@ -160,34 +165,53 @@
     const self = summary.incomes?.self;
     const spouse = summary.incomes?.spouse;
 
-    if (self) {
-      const selfYear = String(self.withholdingTaxYear || "").trim();
-      if (selfYear === "2024" && setMoneyIfEmpty(document.getElementById("self-a-2024"), self.withholdingFinalIncome)) {
-        applied.push("본인 2024년 근로소득");
+    const mapPersonYears = (person, prefix, label) => {
+      if (!person) return;
+      const y2024 = person.incomeYear2024 ?? (person.withholdingTaxYear === "2024" ? person.withholdingFinalIncome : null);
+      const y2023 = person.incomeYear2023 ?? (person.withholdingTaxYear === "2023" ? person.withholdingFinalIncome : null);
+      const id2024 = prefix === "self" ? "self-a-2024" : "sp-a-2024";
+      const id2023 = prefix === "self" ? "self-a-2023" : "sp-a-2023";
+      if (y2024 && setMoneyIfEmpty(document.getElementById(id2024), y2024)) {
+        applied.push(`${label} 2024년 소득`);
       }
-      if (selfYear === "2023" && setMoneyIfEmpty(document.getElementById("self-a-2023"), self.withholdingFinalIncome)) {
-        applied.push("본인 2023년 근로소득");
+      if (y2023 && setMoneyIfEmpty(document.getElementById(id2023), y2023)) {
+        applied.push(`${label} 2023년 소득`);
       }
-    }
+    };
 
-    if (spouse && hasSpouse(summary)) {
-      const spouseYear = String(spouse.withholdingTaxYear || "").trim();
-      if (spouseYear === "2024" && setMoneyIfEmpty(document.getElementById("sp-a-2024"), spouse.withholdingFinalIncome)) {
-        applied.push("배우자 2024년 근로소득");
-      }
-      if (spouseYear === "2023" && setMoneyIfEmpty(document.getElementById("sp-a-2023"), spouse.withholdingFinalIncome)) {
-        applied.push("배우자 2023년 근로소득");
-      }
-    }
+    mapPersonYears(self, "self", "본인");
+    if (hasSpouse(summary)) mapPersonYears(spouse, "spouse", "배우자");
 
-    const legacyYear = String(summary.withholdingTaxYear || "").trim();
-    const legacyIncome = getSelfIncome(summary);
-    if (!self && legacyYear === "2024" && setMoneyIfEmpty(document.getElementById("self-a-2024"), legacyIncome)) {
-      applied.push("본인 2024년 근로소득");
-    }
-    if (!self && legacyYear === "2023" && setMoneyIfEmpty(document.getElementById("self-a-2023"), legacyIncome)) {
-      applied.push("본인 2023년 근로소득");
-    }
+    const applyEmploymentType = (person, radioName, panelPrefix) => {
+      if (!person?.employmentStatus) return;
+      const map = {
+        "1년이상재직": "A",
+        "1년미만재직": "B",
+        휴직: "C",
+        복직: "D",
+      };
+      const value = map[person.employmentStatus];
+      if (!value) return;
+      const radio = document.querySelector(`input[name="${radioName}"][value="${value}"]`);
+      if (radio) {
+        radio.checked = true;
+        radio.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      if (value === "B" && person.receivedIncomeTotal) {
+        const sumId = panelPrefix === "self" ? "self-b-sum" : "sp-b-sum";
+        const monthsId = panelPrefix === "self" ? "self-b-months" : "sp-b-months";
+        if (setMoneyIfEmpty(document.getElementById(sumId), person.receivedIncomeTotal)) {
+          applied.push(`${panelPrefix === "self" ? "본인" : "배우자"} 수령 소득 합계`);
+        }
+        if (person.monthsWorked && fieldEmpty(document.getElementById(monthsId))) {
+          document.getElementById(monthsId).value = String(person.monthsWorked);
+          applied.push(`${panelPrefix === "self" ? "본인" : "배우자"} 수령 개월 수`);
+        }
+      }
+    };
+
+    applyEmploymentType(self, "emp-self", "self");
+    if (hasSpouse(summary)) applyEmploymentType(spouse, "emp-spouse", "spouse");
   }
 
   function applySpouseIncomePanel(summary, applied) {

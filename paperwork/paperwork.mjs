@@ -31,11 +31,16 @@ const FIELD_GROUPS = [
   {
     title: "소득 정보",
     icon: "💰",
-    source: "각 소득 서류",
+    source: "각 소득 서류 · 업무처리기준 적용",
     fields: [
+      { key: "incomes.self.recognizedAnnualIncome", label: "본인 인정 연소득", type: "currency" },
+      { key: "incomes.spouse.recognizedAnnualIncome", label: "배우자 인정 연소득", type: "currency" },
+      { key: "combinedIncome", label: "부부합산 연소득", type: "currency" },
+      { key: "incomes.self.incomeType", label: "본인 소득종류", type: "text" },
+      { key: "incomes.self.employmentStatus", label: "본인 재직상태", type: "text" },
+      { key: "incomes.self.incomeCalculationNote", label: "본인 소득 산정 근거", type: "text" },
       { key: "incomes.self.withholdingFinalIncome", label: "본인 원천징수 최종소득", type: "currency" },
       { key: "incomes.spouse.withholdingFinalIncome", label: "배우자 원천징수 최종소득", type: "currency" },
-      { key: "combinedIncome", label: "부부합산 연소득", type: "currency" },
       { key: "incomes.self.incomeCertificateAmount", label: "본인 소득금액증명원", type: "currency" },
       { key: "incomes.spouse.incomeCertificateAmount", label: "배우자 소득금액증명원", type: "currency" },
     ],
@@ -148,10 +153,15 @@ function getNestedValue(summary, key) {
 
 function pickRecognizedIncome(person) {
   if (!person) return null;
+  if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
+    return person.recognizedAnnualIncome;
+  }
   const candidates = [
     person.withholdingFinalIncome,
     person.withholdingTypeAFinalIncome,
     person.incomeCertificateAmount,
+    person.incomeYear2024,
+    person.incomeYear2023,
   ].filter((v) => typeof v === "number" && v > 0);
   if (!candidates.length) return null;
   return Math.max(...candidates);
@@ -159,29 +169,58 @@ function pickRecognizedIncome(person) {
 
 function emptyPersonIncome() {
   return {
+    incomeType: null,
+    employmentStatus: null,
+    employmentStartDate: null,
+    monthsWorked: null,
     withholdingFinalIncome: null,
     withholdingTaxYear: null,
     withholdingTypeAFinalIncome: null,
     withholdingTypeATaxYear: null,
     incomeCertificateAmount: null,
     incomeCertificateYear: null,
+    incomeYear2023: null,
+    incomeYear2024: null,
+    receivedIncomeTotal: null,
+    recognizedAnnualIncome: null,
+    incomeCalculationNote: null,
+    hasStableIncomeProof: null,
   };
 }
 
 const INCOME_PERSON_KEYS = [
+  "incomeType",
+  "employmentStatus",
+  "employmentStartDate",
+  "monthsWorked",
   "withholdingFinalIncome",
   "withholdingTaxYear",
   "withholdingTypeAFinalIncome",
   "withholdingTypeATaxYear",
   "incomeCertificateAmount",
   "incomeCertificateYear",
+  "incomeYear2023",
+  "incomeYear2024",
+  "receivedIncomeTotal",
+  "recognizedAnnualIncome",
+  "incomeCalculationNote",
+  "hasStableIncomeProof",
 ];
 
 function mergePersonIncome(base, incoming, legacy = null) {
   const out = { ...emptyPersonIncome(), ...(base || {}) };
   for (const source of [incoming, legacy].filter(Boolean)) {
     for (const key of INCOME_PERSON_KEYS) {
-      if (source[key] != null && (out[key] == null || out[key] === "")) {
+      if (source[key] == null || source[key] === "") continue;
+      if (out[key] == null || out[key] === "") {
+        out[key] = source[key];
+      } else if (
+        ["withholdingFinalIncome", "incomeCertificateAmount", "recognizedAnnualIncome", "receivedIncomeTotal"].includes(
+          key
+        ) &&
+        typeof source[key] === "number" &&
+        source[key] > out[key]
+      ) {
         out[key] = source[key];
       }
     }
