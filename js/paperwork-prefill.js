@@ -1,5 +1,5 @@
 /**
- * 서류 추출(localStorage) → 계산기 입력 자동 채움
+ * 대출 정보 상담(localStorage) → 계산기 입력 자동 채움
  * paperwork/paperwork.mjs 와 동일 키 사용
  */
 (function (global) {
@@ -45,18 +45,30 @@
 
   function pickPersonIncome(person) {
     if (!person) return null;
-    if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
-      return person.recognizedAnnualIncome;
+    const cert =
+      typeof person.incomeCertificateAmount === "number" && person.incomeCertificateAmount > 0
+        ? person.incomeCertificateAmount
+        : null;
+    const recognized =
+      typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0
+        ? person.recognizedAnnualIncome
+        : null;
+    if (cert) {
+      if (recognized && recognized <= cert * 1.03) return recognized;
+      return cert;
     }
-    const candidates = [
+    if (recognized) return recognized;
+    const priority = [
       person.withholdingFinalIncome,
       person.withholdingTypeAFinalIncome,
-      person.incomeCertificateAmount,
+      person.incomeYear2025,
       person.incomeYear2024,
       person.incomeYear2023,
-    ].filter((v) => typeof v === "number" && v > 0);
-    if (!candidates.length) return null;
-    return Math.max(...candidates);
+    ];
+    for (const v of priority) {
+      if (typeof v === "number" && v > 0) return v;
+    }
+    return null;
   }
 
   function getSelfIncome(summary) {
@@ -81,13 +93,15 @@
 
   /** 추출 소득 중 계산기에 넣을 대표 연소득(원) — 하위 호환 */
   function pickPrimaryIncome(summary) {
-    const candidates = [
+    const priority = [
+      summary.incomeCertificateAmount,
       summary.withholdingFinalIncome,
       summary.withholdingTypeAFinalIncome,
-      summary.incomeCertificateAmount,
-    ].filter((v) => typeof v === "number" && v > 0);
-    if (!candidates.length) return null;
-    return Math.max(...candidates);
+    ];
+    for (const v of priority) {
+      if (typeof v === "number" && v > 0) return v;
+    }
+    return null;
   }
 
   function detectedHas(summary, keywords) {
@@ -167,15 +181,42 @@
 
     const mapPersonYears = (person, prefix, label) => {
       if (!person) return;
-      const y2024 = person.incomeYear2024 ?? (person.withholdingTaxYear === "2024" ? person.withholdingFinalIncome : null);
-      const y2023 = person.incomeYear2023 ?? (person.withholdingTaxYear === "2023" ? person.withholdingFinalIncome : null);
-      const id2024 = prefix === "self" ? "self-a-2024" : "sp-a-2024";
-      const id2023 = prefix === "self" ? "self-a-2023" : "sp-a-2023";
-      if (y2024 && setMoneyIfEmpty(document.getElementById(id2024), y2024)) {
-        applied.push(`${label} 2024년 소득`);
+      // 계산기 DOM: self-a-2023=전전연도(older), self-a-2024=전연도(newer)
+      const idOlder = prefix === "self" ? "self-a-2023" : "sp-a-2023";
+      const idNewer = prefix === "self" ? "self-a-2024" : "sp-a-2024";
+
+      const olderAmt =
+        person.incomeYearOlder ??
+        person.incomeYear2024 ??
+        person.incomeByYear?.[person.incomeOlderYear] ??
+        person.incomeByYear?.[2024] ??
+        (person.withholdingTaxYear === "2024" ? person.withholdingFinalIncome : null) ??
+        person.incomeYear2023;
+      const newerAmt =
+        person.incomeYearNewer ??
+        person.incomeYear2025 ??
+        person.incomeByYear?.[person.incomeNewerYear] ??
+        person.incomeByYear?.[2025] ??
+        (person.withholdingTaxYear === "2025" ? person.withholdingFinalIncome : null) ??
+        person.incomeYear2024;
+
+      const olderYear = person.incomeOlderYear || 2024;
+      const newerYear = person.incomeNewerYear || 2025;
+
+      const certYear = Number(person.incomeCertificateYear);
+      const certAmount = person.incomeCertificateAmount;
+      if (Number.isFinite(certYear) && typeof certAmount === "number" && certAmount > 0) {
+        const certTarget = certYear >= newerYear ? idNewer : idOlder;
+        if (setMoneyIfEmpty(document.getElementById(certTarget), certAmount)) {
+          applied.push(`${label} ${certYear}년 소득금액증명(소득금액)`);
+        }
       }
-      if (y2023 && setMoneyIfEmpty(document.getElementById(id2023), y2023)) {
-        applied.push(`${label} 2023년 소득`);
+
+      if (newerAmt && setMoneyIfEmpty(document.getElementById(idNewer), newerAmt)) {
+        applied.push(`${label} ${newerYear}년 소득`);
+      }
+      if (olderAmt && setMoneyIfEmpty(document.getElementById(idOlder), olderAmt)) {
+        applied.push(`${label} ${olderYear}년 소득`);
       }
     };
 
@@ -197,15 +238,55 @@
         radio.checked = true;
         radio.dispatchEvent(new Event("change", { bubbles: true }));
       }
+      const label = panelPrefix === "self" ? "본인" : "배우자";
+      if (person.employmentStartDate) {
+        const startMap = {
+          A: panelPrefix === "self" ? "self-a-start" : "sp-a-start",
+          B: panelPrefix === "self" ? "self-b-start" : "sp-b-start",
+          C: panelPrefix === "self" ? "self-c-start" : "sp-c-start",
+          D: panelPrefix === "self" ? "self-d-start" : "sp-d-start",
+        };
+        const el = document.getElementById(startMap[value]);
+        if (el && fieldEmpty(el)) {
+          el.value = person.employmentStartDate;
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          applied.push(`${label} 입사일`);
+        }
+      }
+      if ((value === "C" || value === "D") && person.leaveStartDate) {
+        const leaveId =
+          panelPrefix === "self"
+            ? value === "C"
+              ? "self-c-leave"
+              : "self-d-leave"
+            : value === "C"
+              ? "sp-c-leave"
+              : "sp-d-leave";
+        const el = document.getElementById(leaveId);
+        if (el && fieldEmpty(el)) {
+          el.value = person.leaveStartDate;
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          applied.push(`${label} 휴직 시작일`);
+        }
+      }
+      if (value === "D" && person.leaveEndDate) {
+        const retId = panelPrefix === "self" ? "self-d-return" : "sp-d-return";
+        const el = document.getElementById(retId);
+        if (el && fieldEmpty(el)) {
+          el.value = person.leaveEndDate;
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          applied.push(`${label} 복직일`);
+        }
+      }
       if (value === "B" && person.receivedIncomeTotal) {
         const sumId = panelPrefix === "self" ? "self-b-sum" : "sp-b-sum";
         const monthsId = panelPrefix === "self" ? "self-b-months" : "sp-b-months";
         if (setMoneyIfEmpty(document.getElementById(sumId), person.receivedIncomeTotal)) {
-          applied.push(`${panelPrefix === "self" ? "본인" : "배우자"} 수령 소득 합계`);
+          applied.push(`${label} 수령 소득 합계`);
         }
         if (person.monthsWorked && fieldEmpty(document.getElementById(monthsId))) {
           document.getElementById(monthsId).value = String(person.monthsWorked);
-          applied.push(`${panelPrefix === "self" ? "본인" : "배우자"} 수령 개월 수`);
+          applied.push(`${label} 수령 개월 수`);
         }
       }
     };
@@ -245,7 +326,7 @@
       }
       mapYearIncomeFields(summary, applied);
 
-      if (detectedHas(summary, ["원천징수", "근로소득"])) {
+      if (detectedHas(summary, ["원천징수", "근로소득", "소득금액증명"])) {
         const radio = document.querySelector('input[name="emp-self"][value="A"]');
         if (radio && fieldEmpty(document.getElementById("self-a-2024")) && fieldEmpty(document.getElementById("self-a-2023"))) {
           radio.checked = true;
@@ -295,7 +376,9 @@
 
     applySpouseIncomePanel(summary, applied);
 
-    const subsidyValue = paymentCountToSubsidyValue(summary.housingSubscriptionPaymentCount);
+    const subsidyValue = paymentCountToSubsidyValue(
+      summary.housingSubscriptionPaymentCount ?? summary.housingSubscriptionInterestDiscountRounds
+    );
     if (subsidyValue) {
       const subsidyIds = ["subsidy", "nb-savings", "fh-subsidy"];
       const filled = subsidyIds.filter((id) => setSelectIfDefault(document.getElementById(id), subsidyValue));
@@ -354,9 +437,9 @@
     box.setAttribute("role", "status");
     box.innerHTML = `
       <div class="paperwork-prefill-banner__inner">
-        <strong>서류 추출 데이터를 ${calculatorLabel}에 반영했습니다.</strong>
+        <strong>상담 입력 데이터를 ${calculatorLabel}에 반영했습니다.</strong>
         <p>채운 항목: ${applied.join(", ")}. 빈 칸만 자동 입력했으니 값을 확인한 뒤 계산해 주세요.</p>
-        <p class="paperwork-prefill-banner__note">디딤돌 금리 탭의 청약저축·소득 등이 자동 입력됩니다. 전세보증금·신규 대출금액은 직접 입력이 필요합니다.</p>
+        <p class="paperwork-prefill-banner__note">청약저축·소득·휴직일 등이 자동 입력됩니다. 전세보증금·신규 대출금액은 직접 입력이 필요할 수 있습니다.</p>
         <button type="button" class="paperwork-prefill-banner__close">닫기</button>
       </div>`;
 

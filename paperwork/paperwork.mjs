@@ -1,523 +1,65 @@
-const STORAGE_KEY = "mortgage-loan-paperwork-summary";
-const MAX_PAGES_PER_PDF = 5;
-const MAX_TOTAL_PAGES = 15;
-const API_CHUNK_SIZE = 4;
-const PDF_RENDER_SCALE = 1.25;
-const JPEG_QUALITY = 0.65;
-const VALID_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "application/pdf",
-]);
+import {
+  DEFAULT_INCOME_YEARS,
+  LOAN_PRODUCTS,
+  checklistProgress,
+  emptySlots,
+  estimateFromSlots,
+  formatDocumentGuideText,
+  getChecklistItems,
+  getIncomeDocumentGuide,
+  getLoanProduct,
+  listMissingRequired,
+  mergeSlots,
+  requiredIncomeYears,
+  slotsReadyForIncome,
+  slotsToSummary,
+} from "../js/loan-estimate.js";
 
-const FIELD_GROUPS = [
-  {
-    title: "기본 정보",
-    icon: "👤",
-    source: "전체 서류",
-    fields: [
-      { key: "name", label: "이름", type: "text" },
-      { key: "residentId", label: "주민등록번호", type: "text" },
-    ],
-  },
-  {
-    title: "가족 정보",
-    icon: "👨‍👩‍👧‍👦",
-    source: "주민등록등본",
-    fields: [{ key: "familyMembers", label: "세대 구성원", type: "family" }],
-  },
-  {
-    title: "소득 정보",
-    icon: "💰",
-    source: "각 소득 서류 · 업무처리기준 적용",
-    fields: [
-      { key: "incomes.self.recognizedAnnualIncome", label: "본인 인정 연소득", type: "currency" },
-      { key: "incomes.spouse.recognizedAnnualIncome", label: "배우자 인정 연소득", type: "currency" },
-      { key: "combinedIncome", label: "부부합산 연소득", type: "currency" },
-      { key: "incomes.self.incomeType", label: "본인 소득종류", type: "text" },
-      { key: "incomes.self.employmentStatus", label: "본인 재직상태", type: "text" },
-      { key: "incomes.self.incomeCalculationNote", label: "본인 소득 산정 근거", type: "text" },
-      { key: "incomes.self.withholdingFinalIncome", label: "본인 원천징수 최종소득", type: "currency" },
-      { key: "incomes.spouse.withholdingFinalIncome", label: "배우자 원천징수 최종소득", type: "currency" },
-      { key: "incomes.self.incomeCertificateAmount", label: "본인 소득금액증명원", type: "currency" },
-      { key: "incomes.spouse.incomeCertificateAmount", label: "배우자 소득금액증명원", type: "currency" },
-    ],
-  },
-  {
-    title: "청약저축",
-    icon: "🏠",
-    source: "청약저축납입증명서",
-    fields: [
-      { key: "housingSubscriptionPaymentCount", label: "납입 횟수(회차)", type: "count" },
-      { key: "housingSubscriptionProductType", label: "저축 종류", type: "text" },
-      { key: "housingSubscriptionDiscountTier", label: "디딤돌 금리 우대 구간", type: "subsidy-tier" },
-    ],
-  },
-  {
-    title: "대출 정보",
-    icon: "🏦",
-    source: "신용정보조회표",
-    fields: [
-      { key: "loans.creditLoanAmount", label: "신용대출 금액", type: "currency" },
-      { key: "loans.collateralLoanAmount", label: "담보대출 금액", type: "currency" },
-      { key: "loans.totalLoanAmount", label: "총 대출잔액", type: "currency" },
-    ],
-  },
-];
+const STORAGE_KEY = "mortgage-loan-paperwork-summary";
+const CHAT_STORAGE_KEY = "mortgage-loan-paperwork-chat";
+
+const Y_OLD = DEFAULT_INCOME_YEARS.older;
+const Y_NEW = DEFAULT_INCOME_YEARS.newer;
+
+const WELCOME = `안녕하세요. 대출 정보 상담입니다.
+
+오른쪽 체크리스트 **상단에서 상품을 먼저 선택**해 주세요.
+· 디딤돌 · 버팀목 · 주택담보대출 · 반환보증보험 · 수수료
+
+선택하신 상품의 **필수 항목**이 빨간 글씨로 표시됩니다. 대화로 말씀하시거나 오른쪽에서 직접 입력하세요.
+
+공통 예시:
+입사일 2020-03-01, 휴직 없음, ${Y_OLD}년 소득 42000000원, ${Y_NEW}년 소득 45000000원, 청약저축 72회, 대출 2억원 30년
+
+휴직이면 휴직 시작일을 알려 주시면 필요 서류 연도를 안내합니다.
+규정 질문도 가능합니다. 예: 「청약 60회면 금리 우대가 얼마인가요?」`;
+
+const FILL_SAMPLES = {
+  bulk: `입사일 2020-03-01, 휴직 없음, ${Y_OLD}년 소득 42000000원, ${Y_NEW}년 소득 45000000원, 청약저축 72회, 대출 2억원 30년`,
+  leave:
+    "입사일 2018-05-10, 휴직시작 2025-02-01, 휴직 중, 2023년 3800만원, 2024년 4000만원, 청약 130회, 대출 1억8천 30년",
+  docs: "휴직시작 2024-06-01인데 소득 서류 몇 년도 준비해야 하나요?",
+  qa: "청약저축 납입 60회·120회·180회일 때 디딤돌 금리 우대는 각각 얼마인가요?",
+  calc: "지금까지 입력한 값으로 인정소득·금리·DTI·DSR 계산해줘",
+};
 
 const state = {
-  files: [],
-  summary: null,
+  messages: [],
+  slots: emptySlots(),
+  estimate: null,
   busy: false,
-  step: "",
-  error: null,
 };
 
 const els = {
-  dropzone: document.getElementById("pw-dropzone"),
-  fileInput: document.getElementById("pw-file-input"),
-  fileList: document.getElementById("pw-file-list"),
-  submitBtn: document.getElementById("pw-submit"),
-  uploadError: document.getElementById("pw-upload-error"),
-  globalError: document.getElementById("pw-global-error"),
-  dropContent: document.getElementById("pw-drop-content"),
-  dropBusy: document.getElementById("pw-drop-busy"),
-  dropStep: document.getElementById("pw-drop-step"),
+  log: document.getElementById("pw-chat-log"),
+  form: document.getElementById("pw-chat-form"),
+  input: document.getElementById("pw-chat-input"),
+  send: document.getElementById("pw-send"),
+  clear: document.getElementById("pw-clear"),
   result: document.getElementById("pw-result"),
-  clearBtn: document.getElementById("pw-clear"),
+  globalError: document.getElementById("pw-global-error"),
+  chips: document.getElementById("pw-quick-chips"),
 };
-
-function getHousingSubscriptionDiscountLabel(count) {
-  const n = Number(count);
-  if (!Number.isFinite(n) || n < 60) return "우대 해당 없음 (60회차 미만)";
-  if (n >= 180) return "15년 (180회차) −0.5%p";
-  if (n >= 120) return "10년 (120회차) −0.4%p";
-  return "5년 (60회차) −0.3%p";
-}
-
-function formatCount(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n <= 0) return "-";
-  return `${n.toLocaleString("ko-KR")}회`;
-}
-
-function formatCurrency(value) {
-  if (value === null || value === undefined || value === "") return "-";
-  const num = typeof value === "string" ? parseInt(String(value).replace(/,/g, ""), 10) : value;
-  if (Number.isNaN(num)) return String(value);
-  return new Intl.NumberFormat("ko-KR").format(num) + "원";
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)}KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
-}
-
-function getYearLabel(summary, key) {
-  if (key === "incomes.self.withholdingFinalIncome" && summary.incomes?.self?.withholdingTaxYear) {
-    return `${summary.incomes.self.withholdingTaxYear}년`;
-  }
-  if (key === "incomes.spouse.withholdingFinalIncome" && summary.incomes?.spouse?.withholdingTaxYear) {
-    return `${summary.incomes.spouse.withholdingTaxYear}년`;
-  }
-  if (key === "incomes.self.incomeCertificateAmount" && summary.incomes?.self?.incomeCertificateYear) {
-    return `${summary.incomes.self.incomeCertificateYear}년`;
-  }
-  if (key === "incomes.spouse.incomeCertificateAmount" && summary.incomes?.spouse?.incomeCertificateYear) {
-    return `${summary.incomes.spouse.incomeCertificateYear}년`;
-  }
-  if (key === "withholdingFinalIncome" && summary.withholdingTaxYear) {
-    return `${summary.withholdingTaxYear}년`;
-  }
-  if (key === "withholdingTypeAFinalIncome" && summary.withholdingTypeATaxYear) {
-    return `${summary.withholdingTypeATaxYear}년`;
-  }
-  if (key === "incomeCertificateAmount" && summary.incomeCertificateYear) {
-    return `${summary.incomeCertificateYear}년`;
-  }
-  return null;
-}
-
-function getNestedValue(summary, key) {
-  if (key === "combinedIncome") return summary.combinedIncome;
-  const parts = key.split(".");
-  let cur = summary;
-  for (const part of parts) {
-    if (cur == null) return null;
-    cur = cur[part];
-  }
-  return cur ?? null;
-}
-
-function pickRecognizedIncome(person) {
-  if (!person) return null;
-  if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
-    return person.recognizedAnnualIncome;
-  }
-  const candidates = [
-    person.withholdingFinalIncome,
-    person.withholdingTypeAFinalIncome,
-    person.incomeCertificateAmount,
-    person.incomeYear2024,
-    person.incomeYear2023,
-  ].filter((v) => typeof v === "number" && v > 0);
-  if (!candidates.length) return null;
-  return Math.max(...candidates);
-}
-
-function emptyPersonIncome() {
-  return {
-    incomeType: null,
-    employmentStatus: null,
-    employmentStartDate: null,
-    monthsWorked: null,
-    withholdingFinalIncome: null,
-    withholdingTaxYear: null,
-    withholdingTypeAFinalIncome: null,
-    withholdingTypeATaxYear: null,
-    incomeCertificateAmount: null,
-    incomeCertificateYear: null,
-    incomeYear2023: null,
-    incomeYear2024: null,
-    receivedIncomeTotal: null,
-    recognizedAnnualIncome: null,
-    incomeCalculationNote: null,
-    hasStableIncomeProof: null,
-  };
-}
-
-const INCOME_PERSON_KEYS = [
-  "incomeType",
-  "employmentStatus",
-  "employmentStartDate",
-  "monthsWorked",
-  "withholdingFinalIncome",
-  "withholdingTaxYear",
-  "withholdingTypeAFinalIncome",
-  "withholdingTypeATaxYear",
-  "incomeCertificateAmount",
-  "incomeCertificateYear",
-  "incomeYear2023",
-  "incomeYear2024",
-  "receivedIncomeTotal",
-  "recognizedAnnualIncome",
-  "incomeCalculationNote",
-  "hasStableIncomeProof",
-];
-
-function mergePersonIncome(base, incoming, legacy = null) {
-  const out = { ...emptyPersonIncome(), ...(base || {}) };
-  for (const source of [incoming, legacy].filter(Boolean)) {
-    for (const key of INCOME_PERSON_KEYS) {
-      if (source[key] == null || source[key] === "") continue;
-      if (out[key] == null || out[key] === "") {
-        out[key] = source[key];
-      } else if (
-        ["withholdingFinalIncome", "incomeCertificateAmount", "recognizedAnnualIncome", "receivedIncomeTotal"].includes(
-          key
-        ) &&
-        typeof source[key] === "number" &&
-        source[key] > out[key]
-      ) {
-        out[key] = source[key];
-      }
-    }
-  }
-  return out;
-}
-
-function normalizeSummaryIncome(summary) {
-  if (!summary) return summary;
-  const legacySelf = {
-    withholdingFinalIncome: summary.withholdingFinalIncome,
-    withholdingTaxYear: summary.withholdingTaxYear,
-    withholdingTypeAFinalIncome: summary.withholdingTypeAFinalIncome,
-    withholdingTypeATaxYear: summary.withholdingTypeATaxYear,
-    incomeCertificateAmount: summary.incomeCertificateAmount,
-    incomeCertificateYear: summary.incomeCertificateYear,
-  };
-  const self = mergePersonIncome(summary.incomes?.self, null, legacySelf);
-  const spouse = mergePersonIncome(summary.incomes?.spouse, null, null);
-  const selfIncome = pickRecognizedIncome(self);
-  const spouseIncome = pickRecognizedIncome(spouse);
-  let combinedIncome =
-    typeof summary.combinedIncome === "number" && summary.combinedIncome > 0 ? summary.combinedIncome : null;
-  if (!combinedIncome) {
-    if (selfIncome && spouseIncome) combinedIncome = selfIncome + spouseIncome;
-    else combinedIncome = selfIncome || spouseIncome || null;
-  }
-  return {
-    ...summary,
-    incomes: { self, spouse },
-    combinedIncome,
-    withholdingFinalIncome: self.withholdingFinalIncome ?? summary.withholdingFinalIncome ?? null,
-    withholdingTaxYear: self.withholdingTaxYear ?? summary.withholdingTaxYear ?? null,
-    withholdingTypeAFinalIncome: self.withholdingTypeAFinalIncome ?? summary.withholdingTypeAFinalIncome ?? null,
-    withholdingTypeATaxYear: self.withholdingTypeATaxYear ?? summary.withholdingTypeATaxYear ?? null,
-    incomeCertificateAmount: self.incomeCertificateAmount ?? summary.incomeCertificateAmount ?? null,
-    incomeCertificateYear: self.incomeCertificateYear ?? summary.incomeCertificateYear ?? null,
-  };
-}
-
-function getLoanValue(summary, key) {
-  if (!summary.loans) return null;
-  if (key === "loans.creditLoanAmount") return summary.loans.creditLoanAmount;
-  if (key === "loans.collateralLoanAmount") return summary.loans.collateralLoanAmount;
-  if (key === "loans.totalLoanAmount") return summary.loans.totalLoanAmount;
-  return null;
-}
-
-function loadSummary() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveSummary(summary) {
-  try {
-    if (summary) localStorage.setItem(STORAGE_KEY, JSON.stringify(summary));
-    else localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    /* ignore quota */
-  }
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1]);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function pdfToImages(file) {
-  const pdfjs = await import(
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs"
-  );
-  pdfjs.GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
-
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-  const pageCount = Math.min(pdf.numPages, MAX_PAGES_PER_PDF);
-  const pages = [];
-
-  for (let i = 1; i <= pageCount; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
-    const canvas = document.createElement("canvas");
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const context = canvas.getContext("2d");
-    if (!context) continue;
-
-    await page.render({ canvasContext: context, viewport }).promise;
-    const dataUrl = canvas.toDataURL("image/jpeg", JPEG_QUALITY);
-    pages.push({
-      fileName: file.name,
-      fileBase64: dataUrl.split(",")[1],
-      mimeType: "image/jpeg",
-      pageNumber: i,
-    });
-  }
-
-  return pages;
-}
-
-async function processFilesForUpload(files) {
-  const result = [];
-  for (const file of files) {
-    if (file.type === "application/pdf") {
-      result.push(...(await pdfToImages(file)));
-    } else {
-      result.push({
-        fileName: file.name,
-        fileBase64: await fileToBase64(file),
-        mimeType: file.type,
-      });
-    }
-    if (result.length >= MAX_TOTAL_PAGES) break;
-  }
-  return result.slice(0, MAX_TOTAL_PAGES);
-}
-
-async function parseApiResponse(response) {
-  const text = await response.text();
-  if (!text.trim()) {
-    if (response.status === 405) {
-      throw new Error(
-        "분석 API가 POST를 처리하지 못합니다. Cloudflare Pages Functions가 배포되지 않았을 수 있습니다. 잠시 후 다시 시도하거나 관리자에게 문의해 주세요."
-      );
-    }
-    if (response.status === 404) {
-      throw new Error(
-        "분석 API(/api/extract)를 찾을 수 없습니다. Cloudflare Pages에 배포되어 있는지 확인해 주세요."
-      );
-    }
-    if (response.status === 413) {
-      throw new Error("요청 용량이 너무 큽니다. 파일 수를 줄이거나 다시 시도해 주세요.");
-    }
-    if (response.status >= 502) {
-      throw new Error(
-        `서버 오류 또는 시간 초과 (HTTP ${response.status}). 잠시 후 다시 시도해 주세요.`
-      );
-    }
-    throw new Error(`서버 응답이 비었습니다 (HTTP ${response.status}).`);
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(`서버 응답 형식 오류 (HTTP ${response.status}): ${text.slice(0, 300)}`);
-  }
-}
-
-function mergeExtractionResults(target, source) {
-  if (!source) return target;
-  const out = target ? { ...target } : {};
-
-  const scalarKeys = [
-    "name",
-    "residentId",
-    "housingSubscriptionProductType",
-  ];
-
-  for (const key of scalarKeys) {
-    if ((out[key] === null || out[key] === undefined) && source[key] != null) {
-      out[key] = source[key];
-    }
-  }
-
-  const legacySelf = {
-    withholdingFinalIncome: source.withholdingFinalIncome,
-    withholdingTaxYear: source.withholdingTaxYear,
-    withholdingTypeAFinalIncome: source.withholdingTypeAFinalIncome,
-    withholdingTypeATaxYear: source.withholdingTypeATaxYear,
-    incomeCertificateAmount: source.incomeCertificateAmount,
-    incomeCertificateYear: source.incomeCertificateYear,
-  };
-  out.incomes = {
-    self: mergePersonIncome(out.incomes?.self, source.incomes?.self, legacySelf),
-    spouse: mergePersonIncome(out.incomes?.spouse, source.incomes?.spouse, null),
-  };
-
-  const srcCount = Number(source.housingSubscriptionPaymentCount);
-  const outCount = Number(out.housingSubscriptionPaymentCount);
-  if (Number.isFinite(srcCount) && srcCount > 0 && (!Number.isFinite(outCount) || srcCount > outCount)) {
-    out.housingSubscriptionPaymentCount = srcCount;
-  }
-
-  if ((source.familyMembers?.length || 0) > (out.familyMembers?.length || 0)) {
-    out.familyMembers = source.familyMembers;
-  }
-
-  if (source.loans) {
-    out.loans = out.loans || {};
-    for (const key of ["creditLoanAmount", "collateralLoanAmount", "totalLoanAmount"]) {
-      const current = out.loans[key];
-      const incoming = source.loans[key];
-      if (incoming != null && (current == null || incoming > current)) {
-        out.loans[key] = incoming;
-      }
-    }
-    const details = [...(out.loans.loanDetails || []), ...(source.loans.loanDetails || [])];
-    if (details.length) out.loans.loanDetails = [...new Set(details)];
-  }
-
-  out.detectedDocuments = [...(out.detectedDocuments || []), ...(source.detectedDocuments || [])];
-  return normalizeSummaryIncome(out);
-}
-
-async function extractChunk(files, chunkIndex, totalChunks, jobId, spentUsdSoFar) {
-  const response = await fetch("/api/extract", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      files,
-      jobId,
-      chunkIndex,
-      totalChunks,
-      spentUsdSoFar,
-    }),
-  });
-  const result = await parseApiResponse(response);
-  if (!result.success || !result.data) {
-    throw new Error(result.error || `분석 실패 (${chunkIndex + 1}/${totalChunks}배치)`);
-  }
-  return {
-    data: result.data,
-    spentUsd: Number(result.usage?.spentUsd) || spentUsdSoFar,
-    spentKrw: Number(result.usage?.spentKrw) || 0,
-  };
-}
-
-function setBusy(busy, step = "") {
-  state.busy = busy;
-  state.step = step;
-  els.dropzone.classList.toggle("is-busy", busy);
-  els.dropContent.hidden = busy;
-  els.dropBusy.hidden = !busy;
-  els.dropStep.textContent = step || "AI가 서류를 분석하고 있습니다...";
-  els.submitBtn.disabled = busy || state.files.length === 0;
-}
-
-function renderFileList() {
-  if (state.files.length === 0) {
-    els.fileList.hidden = true;
-    els.submitBtn.hidden = true;
-    return;
-  }
-
-  els.fileList.hidden = false;
-  els.submitBtn.hidden = state.busy;
-  els.submitBtn.textContent = `${state.files.length}개 서류 분석 시작`;
-
-  els.fileList.innerHTML = `
-    <div class="pw-file-list__head">선택된 파일 ${state.files.length}개</div>
-    ${state.files
-      .map(
-        (file, i) => `
-      <div class="pw-file-row">
-        <span>${file.type === "application/pdf" ? "📄" : "🖼️"}</span>
-        <span class="pw-file-row__name">${escapeHtml(file.name)}</span>
-        <span class="pw-file-row__meta">${formatSize(file.size)}</span>
-        ${
-          state.busy
-            ? ""
-            : `<button type="button" data-remove="${i}" aria-label="제거">제거</button>`
-        }
-      </div>`
-      )
-      .join("")}
-  `;
-
-  els.fileList.querySelectorAll("[data-remove]").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const idx = Number(btn.getAttribute("data-remove"));
-      state.files = state.files.filter((_, i) => i !== idx);
-      state.error = null;
-      renderFileList();
-      renderUploadError();
-    });
-  });
-}
-
-function renderUploadError() {
-  if (!state.error) {
-    els.uploadError.hidden = true;
-    els.uploadError.textContent = "";
-    return;
-  }
-  els.uploadError.hidden = false;
-  els.uploadError.textContent = state.error;
-}
 
 function escapeHtml(text) {
   return String(text)
@@ -527,298 +69,805 @@ function escapeHtml(text) {
     .replace(/"/g, "&quot;");
 }
 
-function renderFamilyTable(members) {
-  return `
-    <table class="pw-family-table">
-      <thead>
-        <tr><th>관계</th><th>성명</th><th>주민등록번호</th></tr>
-      </thead>
-      <tbody>
-        ${members
-          .map(
-            (m) => `
-          <tr>
-            <td>${escapeHtml(m.relation || "-")}</td>
-            <td>${escapeHtml(m.name || "-")}</td>
-            <td>${escapeHtml(m.residentId || "-")}</td>
-          </tr>`
-          )
-          .join("")}
-      </tbody>
-    </table>`;
+function formatCurrency(value) {
+  if (value == null || value === "" || !Number.isFinite(Number(value))) return "-";
+  return new Intl.NumberFormat("ko-KR").format(Math.round(Number(value))) + "원";
 }
 
-function renderSummary() {
-  const summary = state.summary;
-  if (!summary) {
-    els.result.innerHTML = `
-      <div class="pw-empty">
-        <div class="pw-empty__icon">📋</div>
-        <p><strong>아직 분석된 결과가 없습니다</strong></p>
-        <p>서류를 업로드하면 핵심 정보만 한눈에 정리해 드립니다.</p>
-      </div>`;
-    els.clearBtn.hidden = true;
-    return;
+function formatPct(value) {
+  if (value == null || !Number.isFinite(Number(value))) return "-";
+  return `${Number(value).toFixed(2)}%`;
+}
+
+function loadChatState() {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
   }
+}
 
-  els.clearBtn.hidden = false;
-
-  if (summary.status === "error") {
-    els.result.innerHTML = `
-      <div class="pw-error">${escapeHtml(summary.errorMessage || "분석에 실패했습니다.")}</div>`;
-    return;
-  }
-
-  const groupsHtml = FIELD_GROUPS.map((group) => {
-    const fieldsHtml = group.fields
-      .map((field) => {
-        if (field.type === "family") {
-          const members = summary.familyMembers;
-          return `
-            <div class="pw-field" style="display:block">
-              <p class="pw-field__label">${escapeHtml(field.label)}</p>
-              ${
-                members && members.length
-                  ? renderFamilyTable(members)
-                  : '<p style="margin:0.35rem 0 0;color:var(--muted)">-</p>'
-              }
-            </div>`;
-        }
-
-        let value = null;
-        if (field.key.startsWith("loans.")) {
-          value = getLoanValue(summary, field.key);
-        } else if (field.type === "subsidy-tier") {
-          value = getHousingSubscriptionDiscountLabel(summary.housingSubscriptionPaymentCount);
-        } else if (field.key.startsWith("incomes.") || field.key === "combinedIncome") {
-          value = getNestedValue(summary, field.key);
-        } else {
-          value = summary[field.key];
-        }
-        const yearLabel = getYearLabel(summary, field.key);
-        const display =
-          field.type === "currency"
-            ? formatCurrency(value)
-            : field.type === "count"
-              ? formatCount(value)
-              : value != null && value !== ""
-                ? String(value)
-                : "-";
-
-        return `
-          <div class="pw-field">
-            <div>
-              <p class="pw-field__label">${escapeHtml(field.label)}</p>
-              ${yearLabel ? `<p class="pw-field__year">${escapeHtml(yearLabel)}</p>` : ""}
-            </div>
-            <p class="pw-field__value">${escapeHtml(display)}</p>
-          </div>`;
+function saveChatState() {
+  try {
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({
+        messages: state.messages.slice(-40),
+        slots: state.slots,
       })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
+function saveSummary(summary) {
+  try {
+    if (summary) localStorage.setItem(STORAGE_KEY, JSON.stringify(summary));
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function refreshEstimate() {
+  const guide = getIncomeDocumentGuide(state.slots);
+  const product = state.slots.loanProduct || "didimdol";
+  const incomeProducts = ["didimdol", "beotimmok", "mortgage"];
+
+  if (incomeProducts.includes(product) && !slotsReadyForIncome(state.slots)) {
+    state.estimate = { ok: false, guide, missing: listMissingRequired(state.slots) };
+    saveSummary(null);
+    return;
+  }
+
+  if (product === "didimdol" || product === "beotimmok") {
+    const estimate = estimateFromSlots(state.slots);
+    state.estimate = estimate;
+    if (estimate.ok) saveSummary(slotsToSummary(state.slots, estimate));
+    else saveSummary(null);
+    return;
+  }
+
+  if (product === "mortgage" && slotsReadyForIncome(state.slots)) {
+    const estimate = estimateFromSlots(state.slots);
+    state.estimate = estimate;
+    if (estimate.ok) saveSummary(slotsToSummary(state.slots, estimate));
+    else saveSummary(null);
+    return;
+  }
+
+  state.estimate = { ok: false, guide, missing: listMissingRequired(state.slots) };
+  saveSummary(null);
+}
+
+/** 클라이언트 휴리스틱 — AI 없이도 한 방 입력 파싱 */
+function parseLocalSlots(text) {
+  const t = String(text || "");
+  const slots = {};
+
+  if (/디딤돌/.test(t)) slots.loanProduct = "didimdol";
+  else if (/버팀목/.test(t)) slots.loanProduct = "beotimmok";
+  else if (/주택담보|주담대|DSR/i.test(t)) slots.loanProduct = "mortgage";
+  else if (/반환보증|보증보험/.test(t)) slots.loanProduct = "returnGuarantee";
+  else if (/수수료|보증료/.test(t) && !/반환보증/.test(t)) slots.loanProduct = "fee";
+
+  const normalizeDate = (raw) => {
+    const s = String(raw).trim();
+    let m = s.replace(/[./]/g, "-").match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (!m) {
+      m = s.match(/^(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일?$/);
+    }
+    if (!m) return null;
+    return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  };
+
+  const dateNear = (labelRe) => {
+    const patterns = [
+      new RegExp(
+        labelRe.source + "[\\s:]*([0-9]{4}[./-][0-9]{1,2}[./-][0-9]{1,2})",
+        "i"
+      ),
+      new RegExp(
+        labelRe.source + "[\\s:]*([0-9]{4}\\s*년\\s*[0-9]{1,2}\\s*월\\s*[0-9]{1,2}\\s*일?)",
+        "i"
+      ),
+    ];
+    for (const re of patterns) {
+      const m = t.match(re);
+      if (m) {
+        const d = normalizeDate(m[1]);
+        if (d) return d;
+      }
+    }
+    return null;
+  };
+
+  const emp = dateNear(/입사(?:일)?|재직\s*시작/);
+  if (emp) slots.employmentStartDate = emp;
+
+  const leaveStart = dateNear(/휴직\s*시작(?:일)?|휴직일/);
+  if (leaveStart) slots.leaveStartDate = leaveStart;
+
+  const leaveEnd = dateNear(/휴직\s*종료(?:일)?|복직(?:일)?/);
+  if (leaveEnd) slots.leaveEndDate = leaveEnd;
+
+  if (slots.leaveStartDate && slots.leaveEndDate) {
+    slots.employmentStatus = "복직";
+  } else if (slots.leaveStartDate) {
+    slots.employmentStatus = "휴직";
+  }
+
+  if (/휴직\s*없|휴직\s*안\s*함|휴직\s*미해당/.test(t)) {
+    slots.leaveStartDate = null;
+    slots.leaveEndDate = null;
+    slots.employmentStatus = "1년이상재직";
+  }
+
+  const moneyForYear = (year) => {
+    const patterns = [
+      new RegExp(`${year}\\s*년[^0-9]{0,12}([0-9][0-9,]{2,})\\s*원`),
+      new RegExp(`${year}\\s*년[^0-9]{0,12}([0-9]+(?:\\.[0-9]+)?)\\s*만\\s*원`),
+      new RegExp(`([0-9][0-9,]{2,})\\s*원[^0-9]{0,8}${year}`),
+      new RegExp(`([0-9]+(?:\\.[0-9]+)?)\\s*만\\s*원[^0-9]{0,8}${year}`),
+    ];
+    for (const re of patterns) {
+      const m = t.match(re);
+      if (!m) continue;
+      const raw = m[1].replace(/,/g, "");
+      if (/만/.test(re.source) || /만\s*원/.test(m[0])) {
+        return Math.round(parseFloat(raw) * 10000);
+      }
+      return Math.round(parseFloat(raw));
+    }
+    return null;
+  };
+
+  const incomeByYear = {};
+  for (const year of [2022, 2023, 2024, 2025, 2026]) {
+    const amt = moneyForYear(year);
+    if (amt) {
+      incomeByYear[year] = amt;
+      slots[`incomeYear${year}`] = amt;
+    }
+  }
+  if (Object.keys(incomeByYear).length) slots.incomeByYear = incomeByYear;
+
+  const sub = t.match(
+    /(?:청약|청약저축|납입(?:회차)?|인정회차)[^\d]{0,10}(\d{1,3})\s*회?/
+  );
+  if (sub) slots.housingSubscriptionPaymentCount = Number(sub[1]);
+
+  const parseMoneyNear = (labelRe) => {
+    const patterns = [
+      new RegExp(labelRe.source + "[^0-9]{0,10}([0-9]+(?:\\.[0-9]+)?)\\s*억", "i"),
+      new RegExp(labelRe.source + "[^0-9]{0,10}([0-9][0-9,]{2,})\\s*원", "i"),
+      new RegExp(labelRe.source + "[^0-9]{0,10}([0-9]+(?:\\.[0-9]+)?)\\s*만\\s*원", "i"),
+    ];
+    for (const re of patterns) {
+      const m = t.match(re);
+      if (!m) continue;
+      const raw = m[1].replace(/,/g, "");
+      if (/억/.test(m[0])) return Math.round(parseFloat(raw) * 100000000);
+      if (/만/.test(m[0])) return Math.round(parseFloat(raw) * 10000);
+      return Math.round(parseFloat(raw));
+    }
+    return null;
+  };
+
+  const loanMan = t.match(/대출[^\d]{0,8}([0-9]+(?:\.[0-9]+)?)\s*억/);
+  if (loanMan) {
+    slots.loanAmount = Math.round(parseFloat(loanMan[1]) * 100000000);
+  } else {
+    const loanWon = t.match(/대출[^\d]{0,8}([0-9][0-9,]{4,})\s*원/);
+    if (loanWon) slots.loanAmount = Number(loanWon[1].replace(/,/g, ""));
+    else {
+      const loanManwon = t.match(/대출[^\d]{0,8}([0-9]+)\s*만\s*원/);
+      if (loanManwon) slots.loanAmount = Number(loanManwon[1]) * 10000;
+    }
+  }
+
+  const housePrice = parseMoneyNear(/주택가격|주택가|시세|A값?/);
+  if (housePrice) slots.housePrice = housePrice;
+  const lease = parseMoneyNear(/전세보증금|보증금|B값?/);
+  if (lease) slots.leaseDeposit = lease;
+  const senior = parseMoneyNear(/선순위채권|선순위\s*저당|C값?/);
+  if (senior) slots.seniorLien = senior;
+  const area = t.match(/(?:전용면적|면적)[^\d]{0,8}([0-9]+(?:\.[0-9]+)?)\s*㎡?/);
+  if (area) slots.exclusiveArea = Number(area[1]);
+  const rate = t.match(/(?:금리|이율)[^\d]{0,8}([0-9]+(?:\.[0-9]+)?)\s*%?/);
+  if (rate) slots.loanRatePct = Number(rate[1]);
+
+  const term = t.match(/(\d{2})\s*년/);
+  if (term && [10, 15, 20, 30].includes(Number(term[1]))) {
+    slots.loanTermYears = Number(term[1]);
+  }
+
+  if (/복직/.test(t) && slots.leaveEndDate) slots.employmentStatus = "복직";
+  else if (/휴직/.test(t) && slots.leaveStartDate && !slots.leaveEndDate) {
+    slots.employmentStatus = "휴직";
+  }
+
+  return slots;
+}
+
+function appendMessage(role, content) {
+  state.messages.push({ role, content });
+  saveChatState();
+  renderChat();
+}
+
+function renderChat() {
+  els.log.innerHTML = state.messages
+    .map((m) => {
+      const cls = m.role === "user" ? "pw-msg pw-msg--user" : "pw-msg pw-msg--bot";
+      return `<div class="${cls}"><div class="pw-msg__bubble">${escapeHtml(m.content).replace(
+        /\n/g,
+        "<br>"
+      )}</div></div>`;
+    })
+    .join("");
+  els.log.scrollTop = els.log.scrollHeight;
+}
+
+function renderDocGuide(guide) {
+  if (!guide) return "";
+  const years = guide.years || [];
+  const yearChips = years
+    .map((y, idx) => {
+      const ok = guide.filled?.[y];
+      const role = idx === 0 ? "전전년" : "전년";
+      return `<span class="pw-year-chip ${ok ? "pw-year-chip--ok" : "pw-year-chip--need"}">${role} ${y}년 · ${
+        ok ? "입력됨" : "필요"
+      }</span>`;
+    })
+    .join("");
+
+  const docs = (guide.documents || [])
+    .map((d) => `<li>${escapeHtml(d)}</li>`)
+    .join("");
+  const notes = (guide.notes || [])
+    .map((n) => `<li>${escapeHtml(n)}</li>`)
+    .join("");
+
+  return `
+    <div class="pw-group pw-group--docs">
+      <div class="pw-group__head">
+        <h3>📋 ${escapeHtml(guide.title)}</h3>
+        <p>${escapeHtml(guide.summary)}</p>
+      </div>
+      ${yearChips ? `<div class="pw-year-chips">${yearChips}</div>` : ""}
+      <div class="pw-docs-body">
+        <p class="pw-docs-label">준비 서류</p>
+        <ul class="pw-docs-list">${docs}</ul>
+        ${
+          notes
+            ? `<p class="pw-docs-label">참고</p><ul class="pw-docs-notes">${notes}</ul>`
+            : ""
+        }
+        ${
+          guide.nextHint
+            ? `<p class="pw-docs-next">${escapeHtml(guide.nextHint)}</p>`
+            : ""
+        }
+      </div>
+    </div>`;
+}
+
+function formatInputDisplay(item) {
+  if (item.value === "" || item.value == null) return "";
+  if (item.inputType === "money") {
+    const n = Number(item.value);
+    return Number.isFinite(n) ? n.toLocaleString("ko-KR") : String(item.value);
+  }
+  return String(item.value);
+}
+
+function renderChecklistInput(item) {
+  const missing = item.required && !item.filled;
+  const val = formatInputDisplay(item);
+  const reqMark = item.required
+    ? `<span class="pw-req ${missing ? "pw-req--missing" : "pw-req--ok"}">${
+        missing ? "필수·미입력" : "필수"
+      }</span>`
+    : `<span class="pw-req pw-req--opt">선택</span>`;
+
+  let control = "";
+  if (item.inputType === "select") {
+    const opts = (item.options || [])
+      .map(
+        (o) =>
+          `<option value="${escapeHtml(String(o.value))}" ${
+            String(o.value) === String(item.value) ? "selected" : ""
+          }>${escapeHtml(o.label)}</option>`
+      )
       .join("");
+    control = `<select class="pw-check-input" data-slot="${escapeHtml(item.key)}" data-type="select">${opts}</select>`;
+  } else if (item.inputType === "date") {
+    control = `<input class="pw-check-input" type="date" data-slot="${escapeHtml(
+      item.key
+    )}" data-type="date" value="${escapeHtml(String(item.value || ""))}" />`;
+  } else if (item.inputType === "money") {
+    control = `<input class="pw-check-input" type="text" inputmode="numeric" data-slot="${escapeHtml(
+      item.key
+    )}" data-type="money" data-year="${item.year || ""}" placeholder="${escapeHtml(
+      item.placeholder || "금액(원)"
+    )}" value="${escapeHtml(val)}" />`;
+  } else {
+    control = `<input class="pw-check-input" type="number" data-slot="${escapeHtml(
+      item.key
+    )}" data-type="number" step="${item.step || "1"}" placeholder="${escapeHtml(
+      item.placeholder || ""
+    )}" value="${escapeHtml(String(item.value ?? ""))}" />`;
+  }
 
-    return `
-      <div class="pw-group">
+  return `
+    <div class="pw-check-row ${missing ? "pw-check-row--missing" : item.filled ? "pw-check-row--ok" : ""}">
+      <div class="pw-check-row__meta">
+        <span class="pw-check-mark" aria-hidden="true">${item.filled ? "✓" : item.required ? "!" : "·"}</span>
+        <div>
+          <p class="pw-check-row__label ${missing ? "pw-check-row__label--missing" : ""}">${escapeHtml(
+            item.label
+          )}</p>
+          ${item.hint ? `<p class="pw-check-row__hint">${escapeHtml(item.hint)}</p>` : ""}
+          ${reqMark}
+        </div>
+      </div>
+      <div class="pw-check-row__control">${control}</div>
+    </div>`;
+}
+
+function renderProductSelector() {
+  const current = state.slots.loanProduct || "didimdol";
+  const buttons = LOAN_PRODUCTS.map(
+    (p) =>
+      `<button type="button" class="pw-product-btn ${
+        p.id === current ? "pw-product-btn--active" : ""
+      }" data-product="${p.id}">${escapeHtml(p.label)}</button>`
+  ).join("");
+  return `
+    <div class="pw-group pw-group--product">
+      <div class="pw-group__head">
+        <h3>상담 상품</h3>
+        <p>먼저 상품을 고르면 아래 필수 항목이 맞춰집니다</p>
+      </div>
+      <div class="pw-product-grid" role="group" aria-label="대출 상품 선택">${buttons}</div>
+    </div>`;
+}
+
+function renderChecklist() {
+  const items = getChecklistItems(state.slots);
+  const progress = checklistProgress(state.slots);
+  const missing = listMissingRequired(state.slots);
+  const product = getLoanProduct(state.slots.loanProduct);
+
+  const missingBanner = missing.length
+    ? `<p class="pw-missing pw-missing--alert">필수 미입력: ${escapeHtml(missing.join(", "))}</p>`
+    : `<p class="pw-missing pw-missing--ok">${escapeHtml(
+        product.label
+      )} 필수 항목이 모두 입력되었습니다.</p>`;
+
+  const rows = items.map(renderChecklistInput).join("");
+
+  return `
+    <div class="pw-group pw-group--checklist">
+      <div class="pw-group__head">
+        <h3>필수 체크리스트</h3>
+        <p>${escapeHtml(product.label)} · ${progress.filled}/${progress.total} 완료</p>
+      </div>
+      <div class="pw-checklist-progress" aria-hidden="true">
+        <div class="pw-checklist-progress__bar" style="width:${
+          progress.total ? Math.round((progress.filled / progress.total) * 100) : 0
+        }%"></div>
+      </div>
+      ${missingBanner}
+      <div class="pw-checklist-body">${rows}</div>
+    </div>`;
+}
+
+function renderCalcLinks() {
+  const product = getLoanProduct(state.slots.loanProduct);
+  const primary = `<a class="hub-btn-primary" href="${product.calcHref}">${escapeHtml(
+    product.label
+  )} 계산기로</a>`;
+  const extras = LOAN_PRODUCTS.filter((p) => p.id !== product.id)
+    .slice(0, 3)
+    .map((p) => `<a class="hub-btn-secondary" href="${p.calcHref}">${escapeHtml(p.short)}</a>`)
+    .join("");
+  return `
+    <div class="pw-calc-links">
+      <p class="pw-calc-links__title">상세 계산기로 보내기</p>
+      <div class="pw-calc-links__actions">${primary}${extras}</div>
+      <p class="pw-calc-links__hint">입력한 값이 가능한 범위에서 자동 반영됩니다.</p>
+    </div>`;
+}
+
+function renderResult() {
+  const guide = getIncomeDocumentGuide(state.slots);
+  if (state.estimate) state.estimate.guide = guide;
+  const product = state.slots.loanProduct || "didimdol";
+  const estimate = state.estimate;
+  const showIncomeGuide = ["didimdol", "beotimmok", "mortgage"].includes(product);
+
+  let estimateHtml = "";
+  if ((product === "didimdol" || product === "beotimmok" || product === "mortgage") && estimate?.ok) {
+    const dtiJudge =
+      estimate.dti == null
+        ? ""
+        : estimate.dti <= 60
+          ? '<span class="pw-badge pw-badge--ok">DTI 60% 이내 (참고)</span>'
+          : '<span class="pw-badge pw-badge--warn">DTI 60% 초과 (참고)</span>';
+    estimateHtml = `
+      <div class="pw-group pw-group--estimate">
         <div class="pw-group__head">
-          <h3>${group.icon} ${escapeHtml(group.title)}</h3>
-          <p>출처: ${escapeHtml(group.source)}</p>
+          <h3>참고 산출 결과</h3>
+          <p>${escapeHtml(estimate.incomeReason || "")}</p>
         </div>
-        ${fieldsHtml}
+        <div class="pw-field">
+          <p class="pw-field__label">인정 연소득</p>
+          <p class="pw-field__value">${escapeHtml(formatCurrency(estimate.income))}</p>
+        </div>
+        <div class="pw-field">
+          <p class="pw-field__label">디딤돌 기본금리</p>
+          <p class="pw-field__value">${escapeHtml(formatPct(estimate.rate.base))} (${estimate.rate.term}년)</p>
+        </div>
+        <div class="pw-field">
+          <p class="pw-field__label">청약 우대</p>
+          <p class="pw-field__value">${escapeHtml(estimate.rate.savingsLabel)}</p>
+        </div>
+        <div class="pw-field">
+          <p class="pw-field__label">예상 적용금리</p>
+          <p class="pw-field__value">${escapeHtml(formatPct(estimate.rate.finalRate))}</p>
+        </div>
+        <div class="pw-field">
+          <p class="pw-field__label">DTI</p>
+          <p class="pw-field__value">${
+            estimate.dti == null ? "대출금액 입력 시 산출" : escapeHtml(formatPct(estimate.dti))
+          }</p>
+        </div>
+        <div class="pw-field">
+          <p class="pw-field__label">DSR (참고)</p>
+          <p class="pw-field__value">${
+            estimate.dsr?.dsr == null
+              ? "대출금액 입력 시 산출"
+              : escapeHtml(formatPct(estimate.dsr.dsr))
+          }</p>
+        </div>
+        ${dtiJudge ? `<div class="pw-estimate-judge">${dtiJudge}</div>` : ""}
       </div>`;
-  }).join("");
-
-  const loanDetails =
-    summary.loans?.loanDetails?.length > 0
-      ? `
-      <div class="pw-group">
-        <div class="pw-group__head"><h3>대출 상세 내역</h3></div>
-        <ul class="pw-loan-list">
-          ${summary.loans.loanDetails.map((d) => `<li>${escapeHtml(d)}</li>`).join("")}
-        </ul>
-      </div>`
-      : "";
-
-  const detected =
-    summary.detectedDocuments?.length > 0
-      ? `
-      <div class="pw-group">
-        <div class="pw-group__head"><h3>인식된 서류</h3></div>
-        <div class="pw-chips">
-          ${summary.detectedDocuments
-            .map((d) => `<span class="pw-chip">${escapeHtml(d.documentType || "기타")}</span>`)
-            .join("")}
-        </div>
-      </div>`
-      : "";
+  } else if (estimate?.error && showIncomeGuide) {
+    estimateHtml = `<div class="pw-error">${escapeHtml(estimate.error)}</div>`;
+  }
 
   els.result.innerHTML = `
     <div class="pw-result-head">
       <div>
-        <h2>통합 추출 결과</h2>
-        <p>${summary.uploadedFiles.length}개 파일 · ${new Date(summary.extractedAt).toLocaleString("ko-KR")}${
-          summary.analysisCostKrw ? ` · AI 분석 약 ${summary.analysisCostKrw.toLocaleString("ko-KR")}원` : ""
-        }</p>
+        <h2>수집·서류 안내</h2>
+        <p>상품별 필수 항목을 확인하고 입력하세요</p>
       </div>
     </div>
-    <div class="pw-calc-links">
-      <p class="pw-calc-links__title">계산기로 보내기 — 소득·대출 잔액 등을 자동 입력합니다</p>
-      <div class="pw-calc-links__actions">
-        <a class="hub-btn-primary" href="../beotimmok/?from=paperwork">버팀목 전세자금 금리</a>
-        <a class="hub-btn-secondary" href="../didimdol/?from=paperwork">디딤돌 DTI·금리</a>
-        <a class="hub-btn-secondary" href="../dsr/?from=paperwork">DSR 계산</a>
-      </div>
-      <p class="pw-calc-links__hint">디딤돌 금리 탭: 청약저축 납입 회차·소득 자동 입력. 전세보증금·신규 대출금액은 직접 입력해 주세요.</p>
-    </div>
-    ${groupsHtml}
-    ${loanDetails}
-    ${detected}`;
+    ${renderProductSelector()}
+    ${renderChecklist()}
+    ${showIncomeGuide ? renderDocGuide(guide) : ""}
+    ${estimateHtml}
+    ${renderCalcLinks()}`;
 }
 
-function addFiles(fileList) {
-  state.error = null;
-  const incoming = Array.from(fileList);
-  const invalid = incoming.filter((f) => !VALID_TYPES.has(f.type));
-  if (invalid.length) {
-    state.error = "JPG, PNG, WEBP, PDF 파일만 업로드 가능합니다.";
-    renderUploadError();
-    return;
+function parseFieldValue(type, raw) {
+  if (raw == null || String(raw).trim() === "") return null;
+  if (type === "money") {
+    const n = Number(String(raw).replace(/,/g, "").replace(/\s/g, ""));
+    return Number.isFinite(n) && n >= 0 ? n : null;
   }
-  const tooLarge = incoming.filter((f) => f.size > 20 * 1024 * 1024);
-  if (tooLarge.length) {
-    state.error = "파일 크기는 개당 20MB 이하여야 합니다.";
-    renderUploadError();
-    return;
+  if (type === "number") {
+    const n = Number(String(raw).replace(/,/g, ""));
+    return Number.isFinite(n) ? n : null;
+  }
+  if (type === "date" || type === "select") {
+    const s = String(raw).trim();
+    return s || null;
+  }
+  return String(raw).trim() || null;
+}
+
+function applyChecklistField(el, { focusSlot = null } = {}) {
+  const key = el.getAttribute("data-slot");
+  const type = el.getAttribute("data-type") || "text";
+  const year = el.getAttribute("data-year");
+  const value = parseFieldValue(type, el.value);
+
+  const patch = {};
+  if (key === "incomeCombined" || (year && /^incomeYear\d{4}$/.test(key))) {
+    const y = Number(year) || requiredIncomeYears(state.slots).newer;
+    if (value != null) {
+      patch[`incomeYear${y}`] = value;
+      patch.incomeByYear = { [y]: value };
+    } else {
+      patch[`incomeYear${y}`] = null;
+    }
+  } else {
+    patch[key] = value;
   }
 
-  const names = new Set(state.files.map((f) => f.name));
-  for (const file of incoming) {
-    if (!names.has(file.name)) {
-      state.files.push(file);
-      names.add(file.name);
+  if (value == null && key) {
+    if (key.startsWith("incomeYear") || key === "incomeCombined") {
+      const y = Number(year) || Number(String(key).replace("incomeYear", "")) || requiredIncomeYears(state.slots).newer;
+      if (Number.isFinite(y) && state.slots.incomeByYear) {
+        delete state.slots.incomeByYear[y];
+        state.slots[`incomeYear${y}`] = null;
+      }
+    } else if (key in state.slots) {
+      state.slots[key] = null;
     }
   }
-  renderFileList();
-  renderUploadError();
-  els.submitBtn.disabled = state.busy || state.files.length === 0;
+
+  state.slots = mergeSlots(state.slots, patch);
+  if (key === "leaveStartDate" || key === "leaveEndDate") {
+    if (state.slots.leaveStartDate && state.slots.leaveEndDate) {
+      state.slots.employmentStatus = "복직";
+    } else if (state.slots.leaveStartDate) {
+      state.slots.employmentStatus = "휴직";
+    } else if (
+      state.slots.employmentStatus === "휴직" ||
+      state.slots.employmentStatus === "복직"
+    ) {
+      state.slots.employmentStatus = "1년이상재직";
+    }
+  }
+  refreshEstimate();
+  saveChatState();
+  renderResult();
+  if (focusSlot) {
+    const next = els.result.querySelector(`.pw-check-input[data-slot="${CSS.escape(focusSlot)}"]`);
+    if (next) {
+      next.focus();
+      if (typeof next.select === "function" && next.type !== "date") {
+        try {
+          next.select();
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }
 }
 
-async function handleSubmit() {
-  if (state.files.length === 0) {
-    state.error = "최소 1개 이상의 파일을 선택해주세요.";
-    renderUploadError();
-    return;
+function setBusy(busy) {
+  state.busy = busy;
+  els.send.disabled = busy;
+  els.input.disabled = busy;
+  els.send.textContent = busy ? "응답 중…" : "보내기";
+}
+
+async function callChatApi(userText) {
+  const history = state.messages
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .slice(-20)
+    .map((m) => ({ role: m.role, content: m.content }));
+
+  if (!history.length || history[history.length - 1].content !== userText) {
+    history.push({ role: "user", content: userText });
   }
 
-  const id = crypto.randomUUID();
-  const fileNames = state.files.map((f) => f.name);
-  els.globalError.hidden = true;
-  setBusy(true, "PDF 변환 중...");
+  const guide = getIncomeDocumentGuide(state.slots);
 
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messages: history,
+      slots: state.slots,
+      documentGuide: guide,
+    }),
+  });
+
+  let data;
   try {
-    const processed = await processFilesForUpload(state.files);
-    if (processed.length === 0) {
-      throw new Error("파일을 읽을 수 없습니다. PDF 또는 이미지 형식을 확인해 주세요.");
+    data = await res.json();
+  } catch {
+    throw new Error("서버 응답을 해석하지 못했습니다.");
+  }
+  if (!res.ok || !data.success) {
+    throw new Error(data.error || `요청 실패 (${res.status})`);
+  }
+  return data;
+}
+
+function applySlots(incoming) {
+  const cleaned = { ...incoming };
+  if ("leaveStartDate" in incoming && incoming.leaveStartDate == null) {
+    state.slots.leaveStartDate = null;
+  }
+  if ("leaveEndDate" in incoming && incoming.leaveEndDate == null) {
+    state.slots.leaveEndDate = null;
+  }
+  state.slots = mergeSlots(state.slots, cleaned);
+  if (state.slots.leaveStartDate && state.slots.leaveEndDate) {
+    state.slots.employmentStatus = "복직";
+  } else if (state.slots.leaveStartDate) {
+    state.slots.employmentStatus = "휴직";
+  }
+  refreshEstimate();
+  saveChatState();
+  renderResult();
+}
+
+function wantsDocGuide(text) {
+  return /서류|몇\s*년|몇년도|준비|무엇을|어떤\s*연|소득\s*증명|원천징수/.test(text);
+}
+
+async function handleSend(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text || state.busy) return;
+
+  els.globalError.hidden = true;
+  appendMessage("user", text);
+  els.input.value = "";
+
+  const local = parseLocalSlots(text);
+  if (Object.keys(local).length) applySlots(local);
+
+  setBusy(true);
+  try {
+    const data = await callChatApi(text);
+    if (data.slots && Object.keys(data.slots).length) {
+      applySlots(data.slots);
+    } else {
+      refreshEstimate();
+      renderResult();
     }
 
-    const chunks = [];
-    for (let i = 0; i < processed.length; i += API_CHUNK_SIZE) {
-      chunks.push(processed.slice(i, i + API_CHUNK_SIZE));
+    let reply = data.reply || "확인했습니다.";
+    const guide = getIncomeDocumentGuide(state.slots);
+    const missing = listMissingRequired(state.slots);
+    if (missing.length && data.intent === "collect") {
+      reply += `\n\n아직 필수 미입력: ${missing.join(", ")}`;
     }
 
-    let merged = null;
-    const jobId = crypto.randomUUID();
-    let spentUsd = 0;
-    let spentKrw = 0;
-    for (let i = 0; i < chunks.length; i++) {
-      setBusy(
-        true,
-        chunks.length > 1
-          ? `AI 분석 중... (${i + 1}/${chunks.length}배치 · ${processed.length}페이지)`
-          : `${processed.length}페이지 AI 분석 중...`
+    if (
+      wantsDocGuide(text) ||
+      data.intent === "docs" ||
+      state.slots.leaveStartDate ||
+      local.leaveStartDate
+    ) {
+      const guideText = formatDocumentGuideText(guide);
+      if (state.slots.leaveStartDate && /일반 재직/.test(reply)) {
+        reply = reply.replace(/\[?일반 재직[\s\S]*$/m, "").trim();
+        reply += `\n\n${guideText}`;
+      } else if (!/준비 서류|휴직 직전|전전년/.test(reply)) {
+        reply += `\n\n${guideText}`;
+      }
+    }
+
+    if (data.intent === "calculate" || /계산/.test(text)) {
+      if (state.estimate?.ok) {
+        const e = state.estimate;
+        reply += `\n\n[참고 산출]\n· 인정 연소득: ${formatCurrency(e.income)}\n· 예상 금리: ${formatPct(
+          e.rate.finalRate
+        )}\n· DTI: ${e.dti == null ? "대출금액 필요" : formatPct(e.dti)}\n· DSR: ${
+          e.dsr?.dsr == null ? "대출금액 필요" : formatPct(e.dsr.dsr)
+        }`;
+      } else if (state.estimate?.error) {
+        reply += `\n\n계산 불가: ${state.estimate.error}`;
+      } else if (missing.length) {
+        reply += `\n\n계산 전 필수 항목을 채워 주세요: ${missing.join(", ")}`;
+      }
+    }
+
+    appendMessage("assistant", reply);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "오류가 발생했습니다.";
+    const guide = getIncomeDocumentGuide(state.slots);
+
+    if (wantsDocGuide(text) || local.leaveStartDate || slotsReadyForIncome(state.slots)) {
+      refreshEstimate();
+      renderResult();
+      appendMessage(
+        "assistant",
+        `${
+          slotsReadyForIncome(state.slots)
+            ? `AI 응답에 실패했지만(${message}), 입력값·서류 안내는 반영했습니다.`
+            : `AI 응답에 실패했습니다(${message}). 휴직일·연도만으로도 서류 안내는 가능합니다.`
+        }\n\n${formatDocumentGuideText(guide)}`
       );
-      const chunkResult = await extractChunk(chunks[i], i, chunks.length, jobId, spentUsd);
-      spentUsd = chunkResult.spentUsd;
-      spentKrw = chunkResult.spentKrw;
-      merged = mergeExtractionResults(merged, chunkResult.data);
+    } else {
+      els.globalError.hidden = false;
+      els.globalError.textContent = message;
+      appendMessage(
+        "assistant",
+        `죄송해요. AI 응답에 실패했습니다: ${message}\n입사일·소득·청약회차를 「2020-03-01, ${Y_OLD}년 4200만원…」처럼 적어 주시거나, 오른쪽 체크리스트에서 직접 입력해 보세요.`
+      );
     }
-
-    state.summary = normalizeSummaryIncome({
-      id,
-      extractedAt: new Date().toISOString(),
-      uploadedFiles: fileNames,
-      status: "success",
-      analysisCostKrw: spentKrw,
-      ...merged,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "업로드 중 오류가 발생했습니다.";
-    els.globalError.hidden = false;
-    els.globalError.textContent = message;
-    state.summary = {
-      id,
-      extractedAt: new Date().toISOString(),
-      uploadedFiles: fileNames,
-      status: "error",
-      errorMessage: message,
-    };
   } finally {
     setBusy(false);
-    saveSummary(state.summary);
-    renderSummary();
-    renderFileList();
   }
+}
+
+function resetAll() {
+  if (!confirm("대화와 입력값을 모두 초기화할까요?")) return;
+  state.messages = [{ role: "assistant", content: WELCOME }];
+  state.slots = emptySlots();
+  state.estimate = null;
+  saveChatState();
+  saveSummary(null);
+  els.globalError.hidden = true;
+  refreshEstimate();
+  renderChat();
+  renderResult();
 }
 
 function bindEvents() {
-  els.dropzone.addEventListener("click", () => {
-    if (!state.busy) els.fileInput.click();
+  els.form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleSend(els.input.value);
   });
 
-  els.fileInput.addEventListener("change", (e) => {
-    if (e.target.files?.length) addFiles(e.target.files);
-    e.target.value = "";
-  });
-
-  ["dragenter", "dragover"].forEach((type) => {
-    els.dropzone.addEventListener(type, (e) => {
+  els.input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      els.dropzone.classList.add("is-dragover");
-    });
+      handleSend(els.input.value);
+    }
   });
 
-  ["dragleave", "drop"].forEach((type) => {
-    els.dropzone.addEventListener(type, (e) => {
-      e.preventDefault();
-      els.dropzone.classList.remove("is-dragover");
-      if (type === "drop" && e.dataTransfer?.files?.length) {
-        addFiles(e.dataTransfer.files);
-      }
-    });
+  els.clear.addEventListener("click", resetAll);
+
+  els.chips?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-fill]");
+    if (!btn) return;
+    const key = btn.getAttribute("data-fill");
+    const sample = FILL_SAMPLES[key];
+    if (!sample) return;
+    els.input.value = sample;
+    els.input.focus();
   });
 
-  els.submitBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    handleSubmit();
+  els.result.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-product]");
+    if (!btn) return;
+    const id = btn.getAttribute("data-product");
+    if (!LOAN_PRODUCTS.some((p) => p.id === id)) return;
+    state.slots = mergeSlots(state.slots, { loanProduct: id });
+    refreshEstimate();
+    saveChatState();
+    renderResult();
   });
 
-  els.clearBtn.addEventListener("click", () => {
-    if (!confirm("분석 결과를 초기화하시겠습니까?")) return;
-    state.summary = null;
-    saveSummary(null);
-    renderSummary();
+  els.result.addEventListener("change", (e) => {
+    const el = e.target.closest(".pw-check-input");
+    if (!el) return;
+    applyChecklistField(el);
   });
+
+  els.result.addEventListener(
+    "focusout",
+    (e) => {
+      const el = e.target.closest?.(".pw-check-input");
+      if (!el || el.tagName === "SELECT" || el.type === "date") return;
+      const related = e.relatedTarget;
+      const focusSlot = related?.classList?.contains("pw-check-input")
+        ? related.getAttribute("data-slot")
+        : null;
+      applyChecklistField(el, { focusSlot });
+    },
+    true
+  );
 }
 
 function init() {
-  state.summary = loadSummary();
-  if (state.summary?.status === "success") {
-    const normalized = normalizeSummaryIncome(state.summary);
-    state.summary = normalized;
-    saveSummary(normalized);
+  const saved = loadChatState();
+  if (saved?.messages?.length) {
+    state.messages = saved.messages;
+    state.slots = mergeSlots(emptySlots(), saved.slots || {});
+  } else {
+    state.messages = [{ role: "assistant", content: WELCOME }];
+    state.slots = emptySlots();
   }
+  refreshEstimate();
   bindEvents();
-  renderFileList();
-  renderSummary();
-  els.globalError.hidden = true;
+  renderChat();
+  renderResult();
 }
 
 init();

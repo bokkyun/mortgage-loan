@@ -1,16 +1,21 @@
 import { LOAN_REGULATIONS_EXTRACTION_CONTEXT } from "./loan-regulations-context.js";
+import { normalizeExtractionData } from "../../js/extraction-normalize.js";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "qwen/qwen3-vl-235b-a22b-instruct";
+/** OCR·문서 인식 무료 모델 (OpenRouter :free). 1순위: Nemotron OCR 특화 */
+const DEFAULT_MODEL = "nvidia/nemotron-nano-12b-v2-vl:free";
 const VISION_MODEL_FALLBACK = [
-  "qwen/qwen3-vl-235b-a22b-instruct",
-  "qwen/qwen3-vl-32b-instruct",
+  "nvidia/nemotron-nano-12b-v2-vl:free",
+  "qwen/qwen3-vl-8b-instruct:free",
+  "google/gemma-3-27b-it:free",
 ];
+const FREE_MODEL_PRICING = { input: 0, output: 0 };
 const MODEL_PRICING = {
-  "qwen/qwen3-vl-235b-a22b-instruct": { input: 0.2 / 1_000_000, output: 0.88 / 1_000_000 },
-  "qwen/qwen3-vl-32b-instruct": { input: 0.104 / 1_000_000, output: 0.45 / 1_000_000 },
+  "nvidia/nemotron-nano-12b-v2-vl:free": FREE_MODEL_PRICING,
+  "qwen/qwen3-vl-8b-instruct:free": FREE_MODEL_PRICING,
+  "google/gemma-3-27b-it:free": FREE_MODEL_PRICING,
 };
-const DEFAULT_PRICING = { input: 0.3 / 1_000_000, output: 1.0 / 1_000_000 };
+const DEFAULT_PRICING = FREE_MODEL_PRICING;
 const MAX_OUTPUT_TOKENS = 2000;
 const KRW_PER_USD = 1400;
 const MAX_JOB_KRW_DEFAULT = 70;
@@ -22,7 +27,7 @@ const DEFAULT_SITE_URL = "https://mortgage-loan.uk";
 const MAX_FILES_PER_REQUEST = 8;
 
 const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 전문가입니다.
-첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
+첨부된 여러 서류(재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서, 주택청약(종합)저축 거래 확인서 등)를 모두 읽고, 아래 항목만 추출하여 하나의 JSON으로 통합해주세요.
 
 ## 추출 항목
 
@@ -47,7 +52,8 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
     - monthsWorked: 재직·수령 개월 수 (1년 미만·연환산 시)
     - withholdingFinalIncome, withholdingTaxYear (근로소득원천징수 — 비과세 제외 총급여/근로소득)
     - withholdingTypeAFinalIncome, withholdingTypeATaxYear (갑종근로소득원천징수)
-    - incomeCertificateAmount, incomeCertificateYear (소득금액증명원)
+    - incomeCertificateGrossPay: 소득금액증명원 **「지급받은 총액」** (참고용, 인정소득에 사용 금지)
+    - incomeCertificateAmount, incomeCertificateYear: 소득금액증명원 **「소득금액」** 칸 + 귀속연도
     - incomeYear2023, incomeYear2024: 원천징수·급여 등에서 확인되는 연도별 근로/사업 소득
     - receivedIncomeTotal: 부분연도 수령 소득 합계(연환산 전)
     - recognizedAnnualIncome: 업무처리기준 적용 후 인정 연소득 추정(숫자)
@@ -55,9 +61,12 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
     - hasStableIncomeProof: 상시소득 입증 가능 여부(true/false/null)
 - combinedIncome: 부부합산 인정 연소득(각 recognizedAnnualIncome 합, 없으면 최신 소득 합산)
 
-### 청약저축 정보 (청약저축납입증명서에서)
-- housingSubscriptionPaymentCount: 납입 횟수/회차 합계 (숫자, 예: 120)
-- housingSubscriptionProductType: 저축 종류 (청약저축, 청약종합저축, 청약부금, 청년우대형청약종합저축 등)
+### 청약저축 정보 (청약저축납입증명서 · 주택청약(종합)저축 거래 확인서 등)
+- housingSubscriptionPaymentCount: **필수** — 납입/인정 회차 (정수). 아래 중 해당 값:
+  - 「금리우대 인정회차」(디딤돌 금리우대용 **거래 확인서**) ← 이 서류가 있으면 반드시 추출
+  - 「납입회차」·「납입 횟수」(청약저축납입증명서)
+- housingSubscriptionInterestDiscountRounds: 거래 확인서 **금리우대 인정회차**와 동일 숫자 (있으면 housingSubscriptionPaymentCount에도 복사)
+- housingSubscriptionProductType: 저축 종류 (청약저축, 청약종합저축, 주택청약종합저축, 청약부금 등)
 
 ### 대출 정보 (신용정보조회표에서)
 - loans: 대출 정보 객체
@@ -69,7 +78,7 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 ### 참고 정보
 - detectedDocuments: 인식된 서류 목록 배열
   - fileName: 파일명 (첨부된 이미지에 표시된 파일명 참고)
-  - documentType: 서류 종류 (재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서, 기타)
+  - documentType: 서류 종류 (재직증명서, 사업자등록증, 근로소득원천징수영수증, 갑종근로소득원천징수영수증, 소득금액증명원, 주민등록등본, 신용정보조회표, 청약저축납입증명서, 주택청약종합저축거래확인서, 기타)
 
 ## 규칙
 1. 반드시 JSON 형식으로만 응답하세요.
@@ -81,7 +90,22 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
 7. 본인·배우자 원천징수영수증이 모두 있으면 incomes.self와 incomes.spouse에 각각 넣고 combinedIncome에 합산하세요.
 8. 소득 서류 성명이 등본 관계 '본인'과 일치하면 self, '배우자'·'남편'·'아내'와 일치하면 spouse에 넣으세요.
 9. 근로소득 원천징수는 세액이 아닌 총급여·근로소득이며 비과세 소득은 제외하세요.
-10. 1년 미만 재직이면 monthsWorked와 receivedIncomeTotal을 추출하고 recognizedAnnualIncome에 (합계÷개월)×12을 적용하세요.
+10. **소득금액증명원(중요)**:
+    - incomeCertificateGrossPay = 「지급받은 총액」 (예: 74890667)
+    - incomeCertificateAmount = 「소득금액」 칸만 (예: 61396134) — **인정소득은 반드시 이 값**
+    - incomeCertificateYear = 귀속연도 (예: 2025)
+    - recognizedAnnualIncome = incomeCertificateAmount 와 동일하게 기재 (지급받은 총액 사용 금지)
+11. 소득금액증명이 있으면 withholdingFinalIncome·combinedIncome에 지급받은 총액을 넣지 마세요.
+12. 1년 미만 재직이면 monthsWorked와 receivedIncomeTotal을 추출하고 recognizedAnnualIncome에 (합계÷개월)×12을 적용하세요.
+13. **주택청약(종합)저축 거래 확인서**가 있으면 표에서 **금리우대 인정회차** 숫자(예: 61)를 housingSubscriptionPaymentCount와 housingSubscriptionInterestDiscountRounds 모두에 넣으세요.
+
+## 추출 예시 (참고)
+소득금액증명 + 거래 확인서가 함께 있을 때:
+- incomes.self.incomeCertificateGrossPay: 74890667
+- incomes.self.incomeCertificateAmount: 61396134
+- incomes.self.recognizedAnnualIncome: 61396134
+- housingSubscriptionPaymentCount: 61
+- housingSubscriptionInterestDiscountRounds: 61
 
 ## 응답 형식 (JSON만)
 {
@@ -98,6 +122,7 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
       "withholdingTaxYear": null,
       "withholdingTypeAFinalIncome": null,
       "withholdingTypeATaxYear": null,
+      "incomeCertificateGrossPay": null,
       "incomeCertificateAmount": null,
       "incomeCertificateYear": null,
       "incomeYear2023": null,
@@ -116,6 +141,7 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
       "withholdingTaxYear": null,
       "withholdingTypeAFinalIncome": null,
       "withholdingTypeATaxYear": null,
+      "incomeCertificateGrossPay": null,
       "incomeCertificateAmount": null,
       "incomeCertificateYear": null,
       "incomeYear2023": null,
@@ -128,6 +154,7 @@ const BATCH_EXTRACTION_PROMPT = `당신은 한국 공식 서류를 분석하는 
   },
   "combinedIncome": null,
   "housingSubscriptionPaymentCount": null,
+  "housingSubscriptionInterestDiscountRounds": null,
   "housingSubscriptionProductType": null,
   "loans": null,
   "detectedDocuments": []
@@ -159,119 +186,20 @@ function parseExtractionResult(raw) {
   return JSON.parse(jsonMatch[0]);
 }
 
-const INCOME_PERSON_KEYS = [
-  "incomeType",
-  "employmentStatus",
-  "employmentStartDate",
-  "monthsWorked",
-  "withholdingFinalIncome",
-  "withholdingTaxYear",
-  "withholdingTypeAFinalIncome",
-  "withholdingTypeATaxYear",
-  "incomeCertificateAmount",
-  "incomeCertificateYear",
-  "incomeYear2023",
-  "incomeYear2024",
-  "receivedIncomeTotal",
-  "recognizedAnnualIncome",
-  "incomeCalculationNote",
-  "hasStableIncomeProof",
-];
+function isFreeModel(model) {
+  return /:free$/i.test(String(model || "")) || String(model || "") === "openrouter/free";
+}
 
-function emptyPersonIncome() {
+function getProviderOptions(model) {
+  if (isFreeModel(model)) {
+    return {
+      allow_fallbacks: false,
+      max_price: { prompt: 0, completion: 0, image: 0 },
+    };
+  }
   return {
-    incomeType: null,
-    employmentStatus: null,
-    employmentStartDate: null,
-    monthsWorked: null,
-    withholdingFinalIncome: null,
-    withholdingTaxYear: null,
-    withholdingTypeAFinalIncome: null,
-    withholdingTypeATaxYear: null,
-    incomeCertificateAmount: null,
-    incomeCertificateYear: null,
-    incomeYear2023: null,
-    incomeYear2024: null,
-    receivedIncomeTotal: null,
-    recognizedAnnualIncome: null,
-    incomeCalculationNote: null,
-    hasStableIncomeProof: null,
-  };
-}
-
-function pickRecognizedIncome(person) {
-  if (!person) return null;
-  if (typeof person.recognizedAnnualIncome === "number" && person.recognizedAnnualIncome > 0) {
-    return person.recognizedAnnualIncome;
-  }
-  const candidates = [
-    person.withholdingFinalIncome,
-    person.withholdingTypeAFinalIncome,
-    person.incomeCertificateAmount,
-    person.incomeYear2024,
-    person.incomeYear2023,
-  ].filter((v) => typeof v === "number" && v > 0);
-  if (!candidates.length) return null;
-  return Math.max(...candidates);
-}
-
-function mergePersonIncome(base, incoming, legacy = null) {
-  const out = { ...emptyPersonIncome(), ...(base || {}) };
-  const sources = [incoming, legacy].filter(Boolean);
-  for (const source of sources) {
-    for (const key of INCOME_PERSON_KEYS) {
-      if (source[key] == null || source[key] === "") continue;
-      if (out[key] == null || out[key] === "") {
-        out[key] = source[key];
-      } else if (
-        ["withholdingFinalIncome", "incomeCertificateAmount", "recognizedAnnualIncome", "receivedIncomeTotal"].includes(
-          key
-        ) &&
-        typeof source[key] === "number" &&
-        source[key] > out[key]
-      ) {
-        out[key] = source[key];
-      }
-    }
-  }
-  return out;
-}
-
-function normalizeExtraction(raw) {
-  const legacySelf = {
-    withholdingFinalIncome: raw.withholdingFinalIncome,
-    withholdingTaxYear: raw.withholdingTaxYear,
-    withholdingTypeAFinalIncome: raw.withholdingTypeAFinalIncome,
-    withholdingTypeATaxYear: raw.withholdingTypeATaxYear,
-    incomeCertificateAmount: raw.incomeCertificateAmount,
-    incomeCertificateYear: raw.incomeCertificateYear,
-  };
-  const self = mergePersonIncome(raw.incomes?.self, null, legacySelf);
-  const spouse = mergePersonIncome(raw.incomes?.spouse, null, null);
-  const selfIncome = pickRecognizedIncome(self);
-  const spouseIncome = pickRecognizedIncome(spouse);
-  let combinedIncome = typeof raw.combinedIncome === "number" && raw.combinedIncome > 0 ? raw.combinedIncome : null;
-  if (!combinedIncome) {
-    if (selfIncome && spouseIncome) combinedIncome = selfIncome + spouseIncome;
-    else combinedIncome = selfIncome || spouseIncome || null;
-  }
-
-  return {
-    name: raw.name ?? null,
-    residentId: raw.residentId ?? null,
-    familyMembers: raw.familyMembers ?? null,
-    incomes: { self, spouse },
-    combinedIncome,
-    withholdingFinalIncome: self.withholdingFinalIncome ?? null,
-    withholdingTaxYear: self.withholdingTaxYear ?? null,
-    withholdingTypeAFinalIncome: self.withholdingTypeAFinalIncome ?? null,
-    withholdingTypeATaxYear: self.withholdingTypeATaxYear ?? null,
-    incomeCertificateAmount: self.incomeCertificateAmount ?? null,
-    incomeCertificateYear: self.incomeCertificateYear ?? null,
-    housingSubscriptionPaymentCount: raw.housingSubscriptionPaymentCount ?? null,
-    housingSubscriptionProductType: raw.housingSubscriptionProductType ?? null,
-    loans: raw.loans ?? null,
-    detectedDocuments: raw.detectedDocuments ?? [],
+    allow_fallbacks: false,
+    max_price: { prompt: 0.5, completion: 3, image: 0.02 },
   };
 }
 
@@ -282,6 +210,7 @@ function resolveVisionModels(envModel) {
   const models = [];
   for (const model of candidates) {
     if (/^openai\//i.test(model)) continue;
+    if (!isFreeModel(model)) continue;
     if (seen.has(model)) continue;
     seen.add(model);
     models.push(model);
@@ -317,6 +246,7 @@ function estimateRequestCostUsd(model, prompt, imageCount) {
 }
 
 function actualCostUsd(model, usage) {
+  if (isFreeModel(model)) return 0;
   if (!usage) return 0;
   const pricing = getModelPricing(model);
   const prompt = Number(usage.prompt_tokens) || 0;
@@ -332,10 +262,28 @@ function isRetryableModelError(status, errText) {
   if (status === 403 && /not available in your region/i.test(errText)) return true;
   if (status === 404 && /no endpoints found/i.test(errText)) return true;
   if (status === 429) return true;
+  if (status === 402) return true;
+  if (/response_format|json_object|structured output/i.test(errText)) return true;
   return false;
 }
 
 async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageContents }) {
+  const body = {
+    model,
+    messages: [
+      {
+        role: "user",
+        content: [{ type: "text", text: prompt }, ...imageContents],
+      },
+    ],
+    max_tokens: MAX_OUTPUT_TOKENS,
+    temperature: 0.1,
+    provider: getProviderOptions(model),
+  };
+  if (!isFreeModel(model)) {
+    body.response_format = { type: "json_object" };
+  }
+
   return fetch(OPENROUTER_API_URL, {
     method: "POST",
     headers: {
@@ -344,21 +292,7 @@ async function requestVisionExtraction({ apiKey, siteUrl, model, prompt, imageCo
       "HTTP-Referer": siteUrl,
       "X-Title": "Mortgage Loan Lab",
     },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: "user",
-          content: [{ type: "text", text: prompt }, ...imageContents],
-        },
-      ],
-      max_tokens: MAX_OUTPUT_TOKENS,
-      temperature: 0.1,
-      provider: {
-        allow_fallbacks: false,
-        max_price: { prompt: 0.5, completion: 3, image: 0.02 },
-      },
-    }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -480,7 +414,7 @@ export async function onRequestPost(context) {
       type: "image_url",
       image_url: {
         url: `data:${file.mimeType};base64,${file.fileBase64}`,
-        detail: "low",
+        detail: "auto",
       },
     }));
 
@@ -562,7 +496,7 @@ export async function onRequestPost(context) {
     }
 
     const raw = parseExtractionResult(content);
-    const data = normalizeExtraction(raw);
+    const data = normalizeExtractionData(raw);
     const costUsd = actualCostUsd(usedModel, aiJson.usage);
     const spentUsd = spentUsdSoFar + costUsd;
 
