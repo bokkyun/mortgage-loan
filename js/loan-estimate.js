@@ -11,18 +11,6 @@ export const LOAN_PRODUCTS = [
   { id: "didimdol", label: "디딤돌", short: "디딤돌", calcHref: "../didimdol/?from=paperwork" },
   { id: "beotimmok", label: "버팀목", short: "버팀목", calcHref: "../beotimmok/?from=paperwork" },
   { id: "mortgage", label: "주택담보대출", short: "주담대", calcHref: "../dsr/?from=paperwork" },
-  {
-    id: "returnGuarantee",
-    label: "반환보증보험",
-    short: "반환보증",
-    calcHref: "../return-guarantee/",
-  },
-  {
-    id: "fee",
-    label: "수수료",
-    short: "수수료",
-    calcHref: "../return-guarantee/",
-  },
 ];
 
 /** 디딤돌 하위 상품 */
@@ -460,8 +448,34 @@ function calcDidimdolRate(income, slots) {
   if (slots.localHome) base -= 0.2;
 
   const subsidy = paymentCountToSubsidy(slots.housingSubscriptionPaymentCount);
-  const discountRaw = subsidy.discount;
-  const cap = slots.hasChild ? 0.7 : 0.5;
+  const childDiscount = Number(slots.childTierDiscount) || 0;
+  let discountRaw = subsidy.discount + childDiscount;
+  const prefLabels = [];
+  if (slots.localHome) prefLabels.push("지방 소재 주택 −0.2%p(기본금리)");
+  if (subsidy.discount > 0) prefLabels.push(subsidy.label);
+  if (childDiscount > 0) {
+    const childLabel =
+      childDiscount >= 0.7 ? "다자녀 3자녀 이상 −0.7%p" : childDiscount >= 0.5 ? "다자녀 2자녀 −0.5%p" : "다자녀 1자녀 −0.3%p";
+    prefLabels.push(childLabel);
+  }
+
+  const checkboxPrefs = [
+    ["singleParent", 0.5, "한부모가구 −0.5%p"],
+    ["specialHousehold", 0.2, "장애인·다문화·생애최초·신혼 −0.2%p"],
+    ["electronicContract", 0.1, "전자계약 −0.1%p"],
+    ["under30Loan", 0.1, "산정금액 30% 이내 −0.1%p"],
+    ["prepay40", 0.2, "원금 40% 중도상환 −0.2%p"],
+    ["localUnsold", 0.2, "지방 준공후 미분양 −0.2%p"],
+  ];
+  for (const [key, pct, label] of checkboxPrefs) {
+    if (slots[key]) {
+      discountRaw += pct;
+      prefLabels.push(label);
+    }
+  }
+
+  const hasChild = childDiscount > 0 || !!slots.hasChild;
+  const cap = hasChild ? 0.7 : 0.5;
   const applied = Math.min(discountRaw, cap);
   const finalRate = Math.max(1.5, base - applied);
   return {
@@ -469,9 +483,92 @@ function calcDidimdolRate(income, slots) {
     term,
     savingsDiscount: subsidy.discount,
     savingsLabel: subsidy.label,
+    childDiscount,
+    discountRaw,
     discountApplied: applied,
+    discountCap: cap,
+    prefLabels,
     finalRate,
   };
+}
+
+/** 일반 디딤돌 금리우대 체크리스트 항목 (선택) */
+function didimdolRatePrefItems(s) {
+  return [
+    {
+      key: "localHome",
+      label: "지방 소재 주택 (−0.2%p)",
+      required: false,
+      filled: !!s.localHome,
+      value: !!s.localHome,
+      inputType: "checkbox",
+      hint: "기본금리에서 차감",
+    },
+    {
+      key: "singleParent",
+      label: "한부모가구 (−0.5%p)",
+      required: false,
+      filled: !!s.singleParent,
+      value: !!s.singleParent,
+      inputType: "checkbox",
+      hint: "연소득 6천만원 이하",
+    },
+    {
+      key: "specialHousehold",
+      label: "장애인·다문화·생애최초·신혼 (−0.2%p)",
+      required: false,
+      filled: !!s.specialHousehold,
+      value: !!s.specialHousehold,
+      inputType: "checkbox",
+    },
+    {
+      key: "electronicContract",
+      label: "전자계약 시스템 이용 (−0.1%p)",
+      required: false,
+      filled: !!s.electronicContract,
+      value: !!s.electronicContract,
+      inputType: "checkbox",
+    },
+    {
+      key: "under30Loan",
+      label: "산정 대출금액 30% 이내 (−0.1%p)",
+      required: false,
+      filled: !!s.under30Loan,
+      value: !!s.under30Loan,
+      inputType: "checkbox",
+    },
+    {
+      key: "prepay40",
+      label: "1년 후 원금 40% 이상 중도상환 (−0.2%p)",
+      required: false,
+      filled: !!s.prepay40,
+      value: !!s.prepay40,
+      inputType: "checkbox",
+    },
+    {
+      key: "localUnsold",
+      label: "지방 준공후 미분양주택 (−0.2%p)",
+      required: false,
+      filled: !!s.localUnsold,
+      value: !!s.localUnsold,
+      inputType: "checkbox",
+    },
+    {
+      key: "childTierDiscount",
+      label: "다자녀 우대",
+      required: false,
+      filled: Number(s.childTierDiscount) > 0,
+      value: s.childTierDiscount ?? 0,
+      inputType: "select",
+      options: [
+        { value: "0", label: "해당 없음" },
+        { value: "0.3", label: "1자녀 −0.3%p" },
+        { value: "0.5", label: "2자녀 −0.5%p" },
+        { value: "0.7", label: "3자녀 이상 −0.7%p" },
+      ],
+      hint: "다자녀면 우대 상한 0.7%p",
+    },
+  ];
 }
 
 function monthlyPayment(principal, annualRatePct, termYears) {
@@ -519,6 +616,13 @@ export function emptySlots() {
     creditLoanAmount: null,
     localHome: false,
     hasChild: false,
+    singleParent: false,
+    specialHousehold: false,
+    electronicContract: false,
+    under30Loan: false,
+    prepay40: false,
+    localUnsold: false,
+    childTierDiscount: 0,
     newbornChildDiscount: null,
     minorChildDiscount: null,
     firsthomeKind: null,
@@ -536,6 +640,11 @@ export function emptySlots() {
 export function mergeSlots(base, incoming) {
   const out = { ...emptySlots(), ...(base || {}) };
   out.incomeByYear = normalizeIncomeByYear(out);
+
+  // 현재 UI에서 숨긴 상품은 디딤돌로 되돌림
+  if (out.loanProduct === "returnGuarantee" || out.loanProduct === "fee") {
+    out.loanProduct = "didimdol";
+  }
 
   if (!incoming || typeof incoming !== "object") return out;
 
@@ -564,6 +673,7 @@ export function mergeSlots(base, incoming) {
     if (k === "loanProduct") {
       const ok = LOAN_PRODUCTS.some((p) => p.id === v);
       if (ok) out.loanProduct = v;
+      else if (v === "returnGuarantee" || v === "fee") out.loanProduct = "didimdol";
       continue;
     }
     if (k === "didimdolVariant") {
@@ -574,6 +684,28 @@ export function mergeSlots(base, incoming) {
     if (k === "firsthomeKind") {
       const allowed = ["생애최초", "신혼", "생애최초·신혼"];
       if (allowed.includes(v)) out.firsthomeKind = v;
+      continue;
+    }
+    if (k === "childTierDiscount") {
+      const n = Number(v);
+      out.childTierDiscount = Number.isFinite(n) ? n : 0;
+      if (out.childTierDiscount > 0) out.hasChild = true;
+      continue;
+    }
+    if (
+      [
+        "localHome",
+        "hasChild",
+        "singleParent",
+        "specialHousehold",
+        "electronicContract",
+        "under30Loan",
+        "prepay40",
+        "localUnsold",
+        "hasStableIncomeProof",
+      ].includes(k)
+    ) {
+      out[k] = !!v;
       continue;
     }
     if (!(k in out) && k !== "employmentStatus") continue;
@@ -759,6 +891,10 @@ export function getChecklistItems(slots = {}) {
           { value: "생애최초·신혼", label: "생애최초·신혼" },
         ],
       });
+    }
+
+    if (variant === "general" || variant === "firsthome") {
+      items.push(...didimdolRatePrefItems(s));
     }
 
     items.push(
@@ -1149,6 +1285,16 @@ export function slotsToSummary(slots, estimate) {
     newbornChildDiscount: slots.newbornChildDiscount ?? null,
     minorChildDiscount: slots.minorChildDiscount ?? null,
     firsthomeKind: slots.firsthomeKind || null,
+    ratePrefs: {
+      localHome: !!slots.localHome,
+      singleParent: !!slots.singleParent,
+      specialHousehold: !!slots.specialHousehold,
+      electronicContract: !!slots.electronicContract,
+      under30Loan: !!slots.under30Loan,
+      prepay40: !!slots.prepay40,
+      localUnsold: !!slots.localUnsold,
+      childTierDiscount: Number(slots.childTierDiscount) || 0,
+    },
     loans: {
       creditLoanAmount: slots.creditLoanAmount || null,
       collateralLoanAmount: null,

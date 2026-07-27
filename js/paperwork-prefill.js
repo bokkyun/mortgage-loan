@@ -432,6 +432,35 @@
       }
     }
 
+    const prefs = summary.ratePrefs || summary.chatSlots || {};
+    const boolMap = [
+      ["localHome", "did-local-home", "지방 소재 주택"],
+      ["singleParent", "did-single-parent", "한부모가구"],
+      ["specialHousehold", "did-special", "장애인·다문화·생애최초·신혼"],
+      ["electronicContract", "did-electronic", "전자계약"],
+      ["under30Loan", "did-under30", "산정금액 30% 이내"],
+      ["prepay40", "did-prepay40", "원금 40% 중도상환"],
+      ["localUnsold", "did-local-unsold", "지방 미분양"],
+    ];
+    for (const [slotKey, elId, label] of boolMap) {
+      const on = !!(prefs[slotKey] ?? summary.chatSlots?.[slotKey] ?? summary[slotKey]);
+      if (on && setCheckboxIfUnchecked(document.getElementById(elId), true)) {
+        applied.push(label);
+      }
+    }
+    const childTier =
+      prefs.childTierDiscount ??
+      summary.chatSlots?.childTierDiscount ??
+      summary.childTierDiscount;
+    if (childTier != null && Number(childTier) > 0) {
+      if (setSelectIfDefault(document.getElementById("did-child-tier"), childTier)) {
+        applied.push("다자녀 우대");
+      }
+      if (setSelectIfDefault(document.getElementById("fh-child-tier"), childTier)) {
+        /* firsthome tab mirror */
+      }
+    }
+
     return { applied };
   }
 

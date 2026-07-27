@@ -503,8 +503,37 @@
   color: var(--muted);
 }
 
-.pw-check-row__control {
-  min-width: 0;
+.pw-check-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.pw-check-toggle input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #1a6b54;
+}
+
+.pw-check-row--ok .pw-check-toggle {
+  color: #114533;
+}
+
+.pw-field--block {
+  display: block;
+}
+
+.pw-pref-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #114533;
+  line-height: 1.45;
 }
 
 .pw-check-input {

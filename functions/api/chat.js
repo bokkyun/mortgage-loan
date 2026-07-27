@@ -36,6 +36,13 @@ const SLOT_KEYS = [
   "creditLoanAmount",
   "localHome",
   "hasChild",
+  "singleParent",
+  "specialHousehold",
+  "electronicContract",
+  "under30Loan",
+  "prepay40",
+  "localUnsold",
+  "childTierDiscount",
   "newbornChildDiscount",
   "minorChildDiscount",
   "firsthomeKind",
@@ -48,17 +55,27 @@ const SLOT_KEYS = [
   "guaranteeAmount",
 ];
 
-const SYSTEM_PROMPT = `당신은 한국 주택자금(디딤돌·버팀목·주담대·반환보증·수수료) 상담 도우미입니다.
+const SYSTEM_PROMPT = `당신은 한국 주택자금(디딤돌·버팀목·주담대) 상담 도우미입니다.
 사용자와 대화하며 아래 항목을 수집하고, 규정·서류 연도 질문에 답합니다.
 
 ## 상품 선택 (먼저)
-- loanProduct: didimdol|beotimmok|mortgage|returnGuarantee|fee
-  (디딤돌|버팀목|주택담보대출|반환보증보험|수수료)
+- loanProduct: didimdol|beotimmok|mortgage
+  (디딤돌|버팀목|주택담보대출)
 - didimdolVariant: general|newborn|firsthome
   (일반 디딤돌|신생아 디딤돌|생애최초·신혼) — loanProduct=didimdol일 때
 - firsthomeKind: 생애최초|신혼|생애최초·신혼 — didimdolVariant=firsthome일 때
 - newbornChildDiscount: 0|0.2|0.4|0.6 — 신생아 자녀수 우대(%p)
 - minorChildDiscount: 0|0.1|0.2|0.3 — 신생아 외 미성년 자녀 우대
+- **금리우대(일반 디딤돌, boolean 또는 childTierDiscount)**
+  - localHome: 지방 소재 주택 (−0.2%p, 기본금리 인하)
+  - singleParent: 한부모가구 (−0.5%p)
+  - specialHousehold: 장애인·다문화·생애최초·신혼가구 (−0.2%p)
+  - electronicContract: 전자계약 (−0.1%p)
+  - under30Loan: 산정 대출금액 30% 이내 (−0.1%p)
+  - prepay40: 1년 후 원금 40% 이상 중도상환 (−0.2%p)
+  - localUnsold: 지방 준공후 미분양 (−0.2%p)
+  - childTierDiscount: 0|0.3|0.5|0.7 (다자녀 1·2·3자녀 이상)
+- 사용자가 「지방 주택」「한부모」「전자계약」「다자녀」 등을 말하면 위 슬롯을 true/값으로 채우세요.
 - 사용자가 상품을 말하면 loanProduct·didimdolVariant를 설정하세요.
 
 ## 소득 서류 연도 규칙 (중요)
@@ -203,11 +220,11 @@ function normalizeSlotValue(key, value) {
     }
     return Object.keys(map).length ? map : null;
   }
-  if (["hasStableIncomeProof", "localHome", "hasChild"].includes(key)) {
+  if (["hasStableIncomeProof", "localHome", "hasChild", "singleParent", "specialHousehold", "electronicContract", "under30Loan", "prepay40", "localUnsold"].includes(key)) {
     if (typeof value === "boolean") return value;
     const s = String(value).toLowerCase();
-    if (["true", "1", "yes", "y", "예", "있음"].includes(s)) return true;
-    if (["false", "0", "no", "n", "아니오", "없음"].includes(s)) return false;
+    if (["true", "1", "yes", "y", "예", "있음", "해당", "적용"].includes(s)) return true;
+    if (["false", "0", "no", "n", "아니오", "없음", "미해당", "해당없음"].includes(s)) return false;
     return null;
   }
   if (key === "loanProduct") {
@@ -220,12 +237,12 @@ function normalizeSlotValue(key, value) {
       mortgage: "mortgage",
       주택담보대출: "mortgage",
       주담대: "mortgage",
-      returnGuarantee: "returnGuarantee",
-      반환보증: "returnGuarantee",
-      반환보증보험: "returnGuarantee",
-      fee: "fee",
-      수수료: "fee",
-      보증료: "fee",
+      returnGuarantee: "didimdol",
+      반환보증: "didimdol",
+      반환보증보험: "didimdol",
+      fee: "didimdol",
+      수수료: "didimdol",
+      보증료: "didimdol",
     };
     return map[s] || null;
   }
@@ -254,7 +271,7 @@ function normalizeSlotValue(key, value) {
     if (/생애최초/.test(s)) return "생애최초";
     return null;
   }
-  if (["newbornChildDiscount", "minorChildDiscount"].includes(key)) {
+  if (["newbornChildDiscount", "minorChildDiscount", "childTierDiscount"].includes(key)) {
     const n = Number(String(value).replace(/,/g, ""));
     return Number.isFinite(n) ? n : null;
   }

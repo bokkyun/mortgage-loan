@@ -27,9 +27,9 @@ const Y_NEW = DEFAULT_INCOME_YEARS.newer;
 const WELCOME = `안녕하세요. 대출 정보 상담입니다.
 
 오른쪽 체크리스트 **상단에서 상품을 먼저 선택**해 주세요.
-· 디딤돌(일반·신생아·생애최초·신혼) · 버팀목 · 주택담보대출 · 반환보증보험 · 수수료
+· 디딤돌(일반·신생아·생애최초·신혼) · 버팀목 · 주택담보대출
 
-선택하신 상품의 **필수 항목**이 빨간 글씨로 표시됩니다. 대화로 말씀하시거나 오른쪽에서 직접 입력하세요.
+선택하신 상품의 **필수 항목**이 빨간 글씨로 표시됩니다. 금리우대(지방주택·한부모·전자계약·다자녀 등)도 말씀해 주시거나 오른쪽에서 체크하세요.
 
 공통 예시:
 입사일 2020-03-01, 휴직 없음, ${Y_OLD}년 소득 42000000원, ${Y_NEW}년 소득 45000000원, 청약저축 72회, 대출 2억원 30년
@@ -166,8 +166,6 @@ function parseLocalSlots(text) {
   } else if (/디딤돌/.test(t)) slots.loanProduct = "didimdol";
   else if (/버팀목/.test(t)) slots.loanProduct = "beotimmok";
   else if (/주택담보|주담대|DSR/i.test(t)) slots.loanProduct = "mortgage";
-  else if (/반환보증|보증보험/.test(t)) slots.loanProduct = "returnGuarantee";
-  else if (/수수료|보증료/.test(t) && !/반환보증/.test(t)) slots.loanProduct = "fee";
 
   const normalizeDate = (raw) => {
     const s = String(raw).trim();
@@ -295,6 +293,27 @@ function parseLocalSlots(text) {
   const rate = t.match(/(?:금리|이율)[^\d]{0,8}([0-9]+(?:\.[0-9]+)?)\s*%?/);
   if (rate) slots.loanRatePct = Number(rate[1]);
 
+  // 금리우대 (일반 디딤돌)
+  if (/지방\s*소재|지방\s*주택/.test(t)) slots.localHome = true;
+  if (/한부모/.test(t)) slots.singleParent = true;
+  if (/장애인|다문화|생애최초|신혼\s*가구|신혼부부/.test(t) && !/신생아/.test(t)) {
+    slots.specialHousehold = true;
+  }
+  if (/전자\s*계약/.test(t)) slots.electronicContract = true;
+  if (/30%\s*이내|산정\s*대출금액의\s*30/.test(t)) slots.under30Loan = true;
+  if (/40%\s*이상\s*중도상환|원금\s*40%/.test(t)) slots.prepay40 = true;
+  if (/준공\s*후\s*미분양|미분양\s*주택/.test(t)) slots.localUnsold = true;
+  if (/다자녀|3\s*자녀\s*이상/.test(t)) {
+    slots.childTierDiscount = 0.7;
+    slots.hasChild = true;
+  } else if (/2\s*자녀/.test(t) && !/신생아/.test(t)) {
+    slots.childTierDiscount = 0.5;
+    slots.hasChild = true;
+  } else if (/1\s*자녀/.test(t) && !/신생아/.test(t)) {
+    slots.childTierDiscount = 0.3;
+    slots.hasChild = true;
+  }
+
   const term = t.match(/(\d{2})\s*년/);
   if (term && [10, 15, 20, 30].includes(Number(term[1]))) {
     slots.loanTermYears = Number(term[1]);
@@ -400,6 +419,12 @@ function renderChecklistInput(item) {
       )
       .join("");
     control = `<select class="pw-check-input" data-slot="${escapeHtml(item.key)}" data-type="select">${opts}</select>`;
+  } else if (item.inputType === "checkbox") {
+    control = `<label class="pw-check-toggle"><input class="pw-check-input" type="checkbox" data-slot="${escapeHtml(
+      item.key
+    )}" data-type="checkbox" ${item.value ? "checked" : ""} /><span>${
+      item.value ? "적용" : "미적용"
+    }</span></label>`;
   } else if (item.inputType === "date") {
     control = `<input class="pw-check-input" type="date" data-slot="${escapeHtml(
       item.key
@@ -550,6 +575,24 @@ function renderResult() {
           <p class="pw-field__label">청약 우대</p>
           <p class="pw-field__value">${escapeHtml(estimate.rate.savingsLabel)}</p>
         </div>
+        ${
+          estimate.rate.prefLabels?.length
+            ? `<div class="pw-field pw-field--block">
+          <p class="pw-field__label">적용 금리우대</p>
+          <ul class="pw-pref-list">${estimate.rate.prefLabels
+            .map((l) => `<li>${escapeHtml(l)}</li>`)
+            .join("")}</ul>
+        </div>`
+            : ""
+        }
+        <div class="pw-field">
+          <p class="pw-field__label">우대 합계(적용)</p>
+          <p class="pw-field__value">${
+            estimate.rate.discountApplied != null
+              ? `−${Number(estimate.rate.discountApplied).toFixed(2)}%p`
+              : "-"
+          }</p>
+        </div>
         <div class="pw-field">
           <p class="pw-field__label">예상 적용금리</p>
           <p class="pw-field__value">${escapeHtml(formatPct(estimate.rate.finalRate))}</p>
@@ -588,7 +631,8 @@ function renderResult() {
     ${renderCalcLinks()}`;
 }
 
-function parseFieldValue(type, raw) {
+function parseFieldValue(type, raw, el) {
+  if (type === "checkbox") return !!(el && el.checked);
   if (raw == null || String(raw).trim() === "") return null;
   if (type === "money") {
     const n = Number(String(raw).replace(/,/g, "").replace(/\s/g, ""));
@@ -609,7 +653,7 @@ function applyChecklistField(el, { focusSlot = null } = {}) {
   const key = el.getAttribute("data-slot");
   const type = el.getAttribute("data-type") || "text";
   const year = el.getAttribute("data-year");
-  const value = parseFieldValue(type, el.value);
+  const value = parseFieldValue(type, el.value, el);
 
   const patch = {};
   if (key === "incomeCombined" || (year && /^incomeYear\d{4}$/.test(key))) {
@@ -620,11 +664,13 @@ function applyChecklistField(el, { focusSlot = null } = {}) {
     } else {
       patch[`incomeYear${y}`] = null;
     }
+  } else if (type === "checkbox") {
+    patch[key] = !!value;
   } else {
     patch[key] = value;
   }
 
-  if (value == null && key) {
+  if (value == null && key && type !== "checkbox") {
     if (key.startsWith("incomeYear") || key === "incomeCombined") {
       const y = Number(year) || Number(String(key).replace("incomeYear", "")) || requiredIncomeYears(state.slots).newer;
       if (Number.isFinite(y) && state.slots.incomeByYear) {
@@ -637,6 +683,9 @@ function applyChecklistField(el, { focusSlot = null } = {}) {
   }
 
   state.slots = mergeSlots(state.slots, patch);
+  if (key === "childTierDiscount") {
+    state.slots.hasChild = Number(state.slots.childTierDiscount) > 0;
+  }
   if (key === "leaveStartDate" || key === "leaveEndDate") {
     if (state.slots.leaveStartDate && state.slots.leaveEndDate) {
       state.slots.employmentStatus = "복직";
@@ -656,7 +705,7 @@ function applyChecklistField(el, { focusSlot = null } = {}) {
     const next = els.result.querySelector(`.pw-check-input[data-slot="${CSS.escape(focusSlot)}"]`);
     if (next) {
       next.focus();
-      if (typeof next.select === "function" && next.type !== "date") {
+      if (typeof next.select === "function" && next.type !== "date" && next.type !== "checkbox") {
         try {
           next.select();
         } catch {
@@ -895,7 +944,7 @@ function bindEvents() {
     "focusout",
     (e) => {
       const el = e.target.closest?.(".pw-check-input");
-      if (!el || el.tagName === "SELECT" || el.type === "date") return;
+      if (!el || el.tagName === "SELECT" || el.type === "date" || el.type === "checkbox") return;
       const related = e.relatedTarget;
       const focusSlot = related?.classList?.contains("pw-check-input")
         ? related.getAttribute("data-slot")
