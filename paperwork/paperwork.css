@@ -329,6 +329,24 @@
   padding: 0.75rem 0.85rem;
 }
 
+.pw-product-sub {
+  padding: 0 0.85rem 0.85rem;
+  border-top: 1px dashed var(--border);
+}
+
+.pw-product-sub__label {
+  margin: 0.65rem 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.pw-product-sub__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .pw-product-btn {
   appearance: none;
   border: 1px solid var(--border);
@@ -350,6 +368,28 @@
 .pw-product-btn--active {
   background: #1a6b54;
   border-color: #1a6b54;
+  color: #fff;
+}
+
+.pw-product-subbtn {
+  appearance: none;
+  border: 1px solid rgba(26, 107, 84, 0.35);
+  background: rgba(29, 158, 117, 0.06);
+  color: #114533;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.65rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.pw-product-subbtn:hover {
+  background: rgba(29, 158, 117, 0.14);
+}
+
+.pw-product-subbtn--active {
+  background: #114533;
+  border-color: #114533;
   color: #fff;
 }
 

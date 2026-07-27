@@ -1,5 +1,6 @@
 import {
   DEFAULT_INCOME_YEARS,
+  DIDIMDOL_VARIANTS,
   LOAN_PRODUCTS,
   checklistProgress,
   emptySlots,
@@ -8,6 +9,8 @@ import {
   getChecklistItems,
   getIncomeDocumentGuide,
   getLoanProduct,
+  getProductCalcHref,
+  getProductDisplayLabel,
   listMissingRequired,
   mergeSlots,
   requiredIncomeYears,
@@ -24,7 +27,7 @@ const Y_NEW = DEFAULT_INCOME_YEARS.newer;
 const WELCOME = `안녕하세요. 대출 정보 상담입니다.
 
 오른쪽 체크리스트 **상단에서 상품을 먼저 선택**해 주세요.
-· 디딤돌 · 버팀목 · 주택담보대출 · 반환보증보험 · 수수료
+· 디딤돌(일반·신생아·생애최초·신혼) · 버팀목 · 주택담보대출 · 반환보증보험 · 수수료
 
 선택하신 상품의 **필수 항목**이 빨간 글씨로 표시됩니다. 대화로 말씀하시거나 오른쪽에서 직접 입력하세요.
 
@@ -148,7 +151,19 @@ function parseLocalSlots(text) {
   const t = String(text || "");
   const slots = {};
 
-  if (/디딤돌/.test(t)) slots.loanProduct = "didimdol";
+  if (/신생아\s*디딤돌|디딤돌\s*신생아|신생아\s*특례/.test(t)) {
+    slots.loanProduct = "didimdol";
+    slots.didimdolVariant = "newborn";
+  } else if (/생애최초|신혼\s*가구|신혼부부|디딤돌\s*신혼/.test(t)) {
+    slots.loanProduct = "didimdol";
+    slots.didimdolVariant = "firsthome";
+    if (/생애최초/.test(t) && /신혼/.test(t)) slots.firsthomeKind = "생애최초·신혼";
+    else if (/신혼/.test(t)) slots.firsthomeKind = "신혼";
+    else slots.firsthomeKind = "생애최초";
+  } else if (/일반\s*디딤돌/.test(t)) {
+    slots.loanProduct = "didimdol";
+    slots.didimdolVariant = "general";
+  } else if (/디딤돌/.test(t)) slots.loanProduct = "didimdol";
   else if (/버팀목/.test(t)) slots.loanProduct = "beotimmok";
   else if (/주택담보|주담대|DSR/i.test(t)) slots.loanProduct = "mortgage";
   else if (/반환보증|보증보험/.test(t)) slots.loanProduct = "returnGuarantee";
@@ -421,12 +436,29 @@ function renderChecklistInput(item) {
 
 function renderProductSelector() {
   const current = state.slots.loanProduct || "didimdol";
+  const variant = state.slots.didimdolVariant || "general";
   const buttons = LOAN_PRODUCTS.map(
     (p) =>
       `<button type="button" class="pw-product-btn ${
         p.id === current ? "pw-product-btn--active" : ""
       }" data-product="${p.id}">${escapeHtml(p.label)}</button>`
   ).join("");
+
+  let subHtml = "";
+  if (current === "didimdol") {
+    const subButtons = DIDIMDOL_VARIANTS.map(
+      (v) =>
+        `<button type="button" class="pw-product-subbtn ${
+          v.id === variant ? "pw-product-subbtn--active" : ""
+        }" data-didimdol-variant="${v.id}">${escapeHtml(v.label)}</button>`
+    ).join("");
+    subHtml = `
+      <div class="pw-product-sub" role="group" aria-label="디딤돌 하위 상품">
+        <p class="pw-product-sub__label">디딤돌 유형</p>
+        <div class="pw-product-sub__grid">${subButtons}</div>
+      </div>`;
+  }
+
   return `
     <div class="pw-group pw-group--product">
       <div class="pw-group__head">
@@ -434,6 +466,7 @@ function renderProductSelector() {
         <p>먼저 상품을 고르면 아래 필수 항목이 맞춰집니다</p>
       </div>
       <div class="pw-product-grid" role="group" aria-label="대출 상품 선택">${buttons}</div>
+      ${subHtml}
     </div>`;
 }
 
@@ -441,12 +474,12 @@ function renderChecklist() {
   const items = getChecklistItems(state.slots);
   const progress = checklistProgress(state.slots);
   const missing = listMissingRequired(state.slots);
-  const product = getLoanProduct(state.slots.loanProduct);
+  const displayLabel = getProductDisplayLabel(state.slots);
 
   const missingBanner = missing.length
     ? `<p class="pw-missing pw-missing--alert">필수 미입력: ${escapeHtml(missing.join(", "))}</p>`
     : `<p class="pw-missing pw-missing--ok">${escapeHtml(
-        product.label
+        displayLabel
       )} 필수 항목이 모두 입력되었습니다.</p>`;
 
   const rows = items.map(renderChecklistInput).join("");
@@ -455,7 +488,7 @@ function renderChecklist() {
     <div class="pw-group pw-group--checklist">
       <div class="pw-group__head">
         <h3>필수 체크리스트</h3>
-        <p>${escapeHtml(product.label)} · ${progress.filled}/${progress.total} 완료</p>
+        <p>${escapeHtml(displayLabel)} · ${progress.filled}/${progress.total} 완료</p>
       </div>
       <div class="pw-checklist-progress" aria-hidden="true">
         <div class="pw-checklist-progress__bar" style="width:${
@@ -469,9 +502,9 @@ function renderChecklist() {
 
 function renderCalcLinks() {
   const product = getLoanProduct(state.slots.loanProduct);
-  const primary = `<a class="hub-btn-primary" href="${product.calcHref}">${escapeHtml(
-    product.label
-  )} 계산기로</a>`;
+  const href = getProductCalcHref(state.slots);
+  const label = getProductDisplayLabel(state.slots);
+  const primary = `<a class="hub-btn-primary" href="${href}">${escapeHtml(label)} 계산기로</a>`;
   const extras = LOAN_PRODUCTS.filter((p) => p.id !== product.id)
     .slice(0, 3)
     .map((p) => `<a class="hub-btn-secondary" href="${p.calcHref}">${escapeHtml(p.short)}</a>`)
@@ -824,11 +857,29 @@ function bindEvents() {
   });
 
   els.result.addEventListener("click", (e) => {
+    const variantBtn = e.target.closest("[data-didimdol-variant]");
+    if (variantBtn) {
+      const id = variantBtn.getAttribute("data-didimdol-variant");
+      if (!DIDIMDOL_VARIANTS.some((v) => v.id === id)) return;
+      state.slots = mergeSlots(state.slots, {
+        loanProduct: "didimdol",
+        didimdolVariant: id,
+      });
+      refreshEstimate();
+      saveChatState();
+      renderResult();
+      return;
+    }
+
     const btn = e.target.closest("[data-product]");
     if (!btn) return;
     const id = btn.getAttribute("data-product");
     if (!LOAN_PRODUCTS.some((p) => p.id === id)) return;
-    state.slots = mergeSlots(state.slots, { loanProduct: id });
+    const patch = { loanProduct: id };
+    if (id === "didimdol" && !state.slots.didimdolVariant) {
+      patch.didimdolVariant = "general";
+    }
+    state.slots = mergeSlots(state.slots, patch);
     refreshEstimate();
     saveChatState();
     renderResult();

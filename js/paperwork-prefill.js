@@ -353,11 +353,40 @@
     return { applied };
   }
 
+  function switchDidimdolRateTab(variant) {
+    const map = {
+      general: "rate-tab-btn-didimdol",
+      didimdol: "rate-tab-btn-didimdol",
+      newborn: "rate-tab-btn-newborn",
+      firsthome: "rate-tab-btn-firsthome",
+    };
+    const btnId = map[variant] || map.general;
+    document.getElementById(btnId)?.click();
+  }
+
   function applyDidimdol() {
     const summary = loadSummary();
     if (!summary) return { applied: [] };
     const applied = [];
     const combined = getCombinedIncome(summary);
+
+    const variant =
+      summary.didimdolVariant ||
+      summary.chatSlots?.didimdolVariant ||
+      new URLSearchParams(global.location.search).get("tab") ||
+      "general";
+    const normalized =
+      variant === "newborn" || variant === "firsthome" || variant === "didimdol"
+        ? variant === "didimdol"
+          ? "general"
+          : variant
+        : "general";
+    switchDidimdolRateTab(normalized);
+    if (normalized !== "general") {
+      applied.push(
+        normalized === "newborn" ? "신생아 디딤돌 탭" : "생애최초·신혼 탭"
+      );
+    }
 
     if (combined) {
       syncDidimdolRateTabs(combined);
@@ -385,6 +414,21 @@
       if (filled.length) {
         const tier = getHousingSubscriptionDiscountLabel(summary.housingSubscriptionPaymentCount);
         applied.push(`청약저축 우대 ${tier}`);
+      }
+    }
+
+    const nbDiscount =
+      summary.newbornChildDiscount ?? summary.chatSlots?.newbornChildDiscount;
+    if (nbDiscount != null && nbDiscount !== "") {
+      if (setSelectIfDefault(document.getElementById("nb-child-newborn"), nbDiscount)) {
+        applied.push("신생아 자녀수 우대");
+      }
+    }
+    const minorDiscount =
+      summary.minorChildDiscount ?? summary.chatSlots?.minorChildDiscount;
+    if (minorDiscount != null && minorDiscount !== "") {
+      if (setSelectIfDefault(document.getElementById("nb-child-minor"), minorDiscount)) {
+        applied.push("미성년 자녀 우대");
       }
     }
 

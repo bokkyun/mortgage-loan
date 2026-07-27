@@ -16,6 +16,7 @@ const MAX_MESSAGE_CHARS = 4000;
 
 const SLOT_KEYS = [
   "loanProduct",
+  "didimdolVariant",
   "employmentStartDate",
   "leaveStartDate",
   "leaveEndDate",
@@ -35,6 +36,9 @@ const SLOT_KEYS = [
   "creditLoanAmount",
   "localHome",
   "hasChild",
+  "newbornChildDiscount",
+  "minorChildDiscount",
+  "firsthomeKind",
   "housePrice",
   "leaseDeposit",
   "seniorLien",
@@ -50,7 +54,12 @@ const SYSTEM_PROMPT = `당신은 한국 주택자금(디딤돌·버팀목·주�
 ## 상품 선택 (먼저)
 - loanProduct: didimdol|beotimmok|mortgage|returnGuarantee|fee
   (디딤돌|버팀목|주택담보대출|반환보증보험|수수료)
-- 사용자가 상품을 말하면 loanProduct를 설정하세요.
+- didimdolVariant: general|newborn|firsthome
+  (일반 디딤돌|신생아 디딤돌|생애최초·신혼) — loanProduct=didimdol일 때
+- firsthomeKind: 생애최초|신혼|생애최초·신혼 — didimdolVariant=firsthome일 때
+- newbornChildDiscount: 0|0.2|0.4|0.6 — 신생아 자녀수 우대(%p)
+- minorChildDiscount: 0|0.1|0.2|0.3 — 신생아 외 미성년 자녀 우대
+- 사용자가 상품을 말하면 loanProduct·didimdolVariant를 설정하세요.
 
 ## 소득 서류 연도 규칙 (중요)
 - **일반 재직(휴직 없음)**: 지금 접수 기준 **2024년·2025년** 소득 서류 2개년 필요.
@@ -219,6 +228,35 @@ function normalizeSlotValue(key, value) {
       보증료: "fee",
     };
     return map[s] || null;
+  }
+  if (key === "didimdolVariant") {
+    const s = String(value).trim();
+    const map = {
+      general: "general",
+      일반: "general",
+      "일반 디딤돌": "general",
+      newborn: "newborn",
+      신생아: "newborn",
+      "신생아 디딤돌": "newborn",
+      firsthome: "firsthome",
+      생애최초: "firsthome",
+      신혼: "firsthome",
+      "생애최초·신혼": "firsthome",
+      "생애최초신혼": "firsthome",
+    };
+    return map[s] || null;
+  }
+  if (key === "firsthomeKind") {
+    const s = String(value).trim();
+    if (["생애최초", "신혼", "생애최초·신혼"].includes(s)) return s;
+    if (/생애최초/.test(s) && /신혼/.test(s)) return "생애최초·신혼";
+    if (/신혼/.test(s)) return "신혼";
+    if (/생애최초/.test(s)) return "생애최초";
+    return null;
+  }
+  if (["newbornChildDiscount", "minorChildDiscount"].includes(key)) {
+    const n = Number(String(value).replace(/,/g, ""));
+    return Number.isFinite(n) ? n : null;
   }
   if (
     /^incomeYear\d{4}$/.test(key) ||

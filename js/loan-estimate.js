@@ -25,8 +25,35 @@ export const LOAN_PRODUCTS = [
   },
 ];
 
+/** 디딤돌 하위 상품 */
+export const DIDIMDOL_VARIANTS = [
+  { id: "general", label: "일반 디딤돌", short: "일반", tab: "didimdol" },
+  { id: "newborn", label: "신생아 디딤돌", short: "신생아", tab: "newborn" },
+  { id: "firsthome", label: "생애최초·신혼", short: "생애최초·신혼", tab: "firsthome" },
+];
+
 export function getLoanProduct(id) {
   return LOAN_PRODUCTS.find((p) => p.id === id) || LOAN_PRODUCTS[0];
+}
+
+export function getDidimdolVariant(id) {
+  return DIDIMDOL_VARIANTS.find((v) => v.id === id) || DIDIMDOL_VARIANTS[0];
+}
+
+/** 선택 상품·디딤돌 하위 탭 기준 계산기 URL */
+export function getProductCalcHref(slots = {}) {
+  const product = getLoanProduct(slots.loanProduct);
+  if (product.id !== "didimdol") return product.calcHref;
+  const variant = getDidimdolVariant(slots.didimdolVariant);
+  const tab = variant.tab || "didimdol";
+  return `../didimdol/?from=paperwork&tab=${encodeURIComponent(tab)}`;
+}
+
+/** 체크리스트 헤더용 표시명 */
+export function getProductDisplayLabel(slots = {}) {
+  const product = getLoanProduct(slots.loanProduct);
+  if (product.id !== "didimdol") return product.label;
+  return getDidimdolVariant(slots.didimdolVariant).label;
 }
 
 function parseDate(str) {
@@ -474,6 +501,7 @@ function calcDsr(income, opts) {
 export function emptySlots() {
   return {
     loanProduct: "didimdol",
+    didimdolVariant: "general",
     employmentStartDate: null,
     leaveStartDate: null,
     leaveEndDate: null,
@@ -491,6 +519,9 @@ export function emptySlots() {
     creditLoanAmount: null,
     localHome: false,
     hasChild: false,
+    newbornChildDiscount: null,
+    minorChildDiscount: null,
+    firsthomeKind: null,
     // 반환보증·수수료
     housePrice: null,
     leaseDeposit: null,
@@ -512,7 +543,8 @@ export function mergeSlots(base, incoming) {
     if (v === undefined) continue;
     if (v === null || v === "") {
       // 명시적 비우기 (휴직일 삭제·필드 클리어)
-      if (k in out && k !== "loanProduct" && k !== "loanTermYears") out[k] = null;
+      if (k in out && k !== "loanProduct" && k !== "loanTermYears" && k !== "didimdolVariant")
+        out[k] = null;
       continue;
     }
     if (k === "incomeByYear" && typeof v === "object") {
@@ -532,6 +564,16 @@ export function mergeSlots(base, incoming) {
     if (k === "loanProduct") {
       const ok = LOAN_PRODUCTS.some((p) => p.id === v);
       if (ok) out.loanProduct = v;
+      continue;
+    }
+    if (k === "didimdolVariant") {
+      const ok = DIDIMDOL_VARIANTS.some((p) => p.id === v);
+      if (ok) out.didimdolVariant = v;
+      continue;
+    }
+    if (k === "firsthomeKind") {
+      const allowed = ["생애최초", "신혼", "생애최초·신혼"];
+      if (allowed.includes(v)) out.firsthomeKind = v;
       continue;
     }
     if (!(k in out) && k !== "employmentStatus") continue;
@@ -653,7 +695,8 @@ export function getChecklistItems(slots = {}) {
   };
 
   if (product === "didimdol") {
-    return [
+    const variant = s.didimdolVariant || "general";
+    const items = [
       ...commonIncome(),
       {
         key: "housingSubscriptionPaymentCount",
@@ -664,6 +707,61 @@ export function getChecklistItems(slots = {}) {
         inputType: "number",
         placeholder: "예: 72",
       },
+    ];
+
+    if (variant === "newborn") {
+      items.push(
+        {
+          key: "newbornChildDiscount",
+          label: "신생아 출생자녀 수 우대",
+          required: true,
+          filled: s.newbornChildDiscount != null && s.newbornChildDiscount !== "",
+          value: s.newbornChildDiscount ?? "",
+          inputType: "select",
+          options: [
+            { value: "", label: "선택" },
+            { value: "0", label: "해당 없음(1자녀)" },
+            { value: "0.2", label: "2자녀 (−0.2%p)" },
+            { value: "0.4", label: "3자녀 (−0.4%p)" },
+            { value: "0.6", label: "4자녀 이상 (−0.6%p)" },
+          ],
+        },
+        {
+          key: "minorChildDiscount",
+          label: "신생아 외 미성년 자녀 우대",
+          required: false,
+          filled: s.minorChildDiscount != null && s.minorChildDiscount !== "",
+          value: s.minorChildDiscount ?? "",
+          inputType: "select",
+          options: [
+            { value: "", label: "해당 없음" },
+            { value: "0", label: "해당 없음" },
+            { value: "0.1", label: "1명 (−0.1%p)" },
+            { value: "0.2", label: "2명 (−0.2%p)" },
+            { value: "0.3", label: "3명 이상 (−0.3%p)" },
+          ],
+        }
+      );
+    }
+
+    if (variant === "firsthome") {
+      items.push({
+        key: "firsthomeKind",
+        label: "생애최초·신혼 구분",
+        required: true,
+        filled: !!(s.firsthomeKind && String(s.firsthomeKind).trim()),
+        value: s.firsthomeKind || "",
+        inputType: "select",
+        options: [
+          { value: "", label: "선택" },
+          { value: "생애최초", label: "생애최초" },
+          { value: "신혼", label: "신혼" },
+          { value: "생애최초·신혼", label: "생애최초·신혼" },
+        ],
+      });
+    }
+
+    items.push(
       {
         key: "loanAmount",
         label: "희망 대출금액",
@@ -686,8 +784,9 @@ export function getChecklistItems(slots = {}) {
           { value: 20, label: "20년" },
           { value: 30, label: "30년" },
         ],
-      },
-    ];
+      }
+    );
+    return items;
   }
 
   if (product === "beotimmok") {
@@ -1046,6 +1145,10 @@ export function slotsToSummary(slots, estimate) {
     incomeCertificateAmount: null,
     housingSubscriptionPaymentCount: slots.housingSubscriptionPaymentCount || null,
     housingSubscriptionProductType: null,
+    didimdolVariant: slots.didimdolVariant || "general",
+    newbornChildDiscount: slots.newbornChildDiscount ?? null,
+    minorChildDiscount: slots.minorChildDiscount ?? null,
+    firsthomeKind: slots.firsthomeKind || null,
     loans: {
       creditLoanAmount: slots.creditLoanAmount || null,
       collateralLoanAmount: null,

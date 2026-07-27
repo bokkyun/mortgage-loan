@@ -935,6 +935,14 @@
     $("did-docs-results")?.classList.add("hidden");
   });
 
+  // 상담 체크리스트 → 디딤돌 하위 탭 (?tab=newborn|firsthome|didimdol)
+  const rateTabParam = new URLSearchParams(location.search).get("tab");
+  if (rateTabParam === "newborn") $("rate-tab-btn-newborn")?.click();
+  else if (rateTabParam === "firsthome") $("rate-tab-btn-firsthome")?.click();
+  else if (rateTabParam === "didimdol" || rateTabParam === "general") {
+    $("rate-tab-btn-didimdol")?.click();
+  }
+
   function genScheduleEqualInstallment(principal, annualRatePct, totalMonths, graceMonths) {
     const r = annualRatePct / 100 / 12;
     const repayMonths = totalMonths - graceMonths;
